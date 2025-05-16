@@ -6,7 +6,7 @@ build: result
 check: .make/nix-flake-check
 
 result: flake.nix ${SYSTEM_CONFIG}
-	nix build .#
+	nix build .#nixosConfigurations.hades.config.system.build.toplevel
 
 flake.lock: flake.nix ${SYSTEM_CONFIG}
 	nix flake update
