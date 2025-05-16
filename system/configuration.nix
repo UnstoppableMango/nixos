@@ -7,7 +7,7 @@
     ];
 
   # Enable nix flakes
-  nix.package = pkgs.nixFlakes;
+  nix.package = pkgs.nixVersions.stable;
   nix.extraOptions = ''
     experimental-features = nix-command flakes
   '';
@@ -38,7 +38,7 @@
   # Enable touchpad support
   # services.xserver.libinput.enable = true;
 
-  uesrs.users.erik = {
+  users.users.erik = {
     isNormalUser = true;
     extraGroups = [ "wheel" ];
   };
