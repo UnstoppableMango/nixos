@@ -8,6 +8,9 @@ check: .make/nix-flake-check
 result: flake.nix ${SYSTEM_CONFIG}
 	nix build .#nixosConfigurations.hades.config.system.build.toplevel
 
+iso: flake.nix ${SYSTEM_CONFIG}
+	nix build .#hades-iso
+
 flake.lock: flake.nix ${SYSTEM_CONFIG}
 	nix flake update
 

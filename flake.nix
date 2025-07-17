@@ -3,9 +3,13 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs?shallow=1&ref=nixos-24.11";
+    nixos-generators = {
+      url = "github:nix-community/nixos-generators";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = { nixpkgs, ... }:
+  outputs = { nixpkgs, nixos-generators, ... }:
   let
     system = "x86_64-linux";
 
@@ -17,17 +21,18 @@
     lib = nixpkgs.lib;
 
   in {
+    packages.x86_64-linux = {
+      hades-iso = nixos-generators.nixosGenerate {
+        inherit system;
+        format = "iso";
+      };
+    };
     nixosConfigurations = {
       hades = lib.nixosSystem {
         inherit system;
 
         modules = [
           ./system/configuration.nix
-
-          ({ pkgs, modulesPath, ... }: {
-            imports = [ (modulesPath + "/installer/cd-dvd/installation-cd-minimal.nix") ];
-            environment.systemPackages = [ pkgs.neovim ];
-          })
         ];
       };
     };
