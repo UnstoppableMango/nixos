@@ -2,3 +2,5 @@
 .vscode/*
 !.vscode/extensions.json
 result
+node_modules/
+bin/

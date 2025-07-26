@@ -1,0 +1,12 @@
+{
+  "name": "nixos",
+  "main": "index.ts",
+  "dependencies": {
+    "@pulumi/libvirt": "file:sdks/libvirt",
+    "@pulumi/pulumi": "^3.186.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22",
+    "typescript": "^5.8.3"
+  }
+}

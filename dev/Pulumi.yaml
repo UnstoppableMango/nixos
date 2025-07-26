@@ -1,0 +1,17 @@
+name: nixos
+description: ISO testing
+runtime:
+  name: nodejs
+  options:
+    packagemanager: yarn
+config:
+  pulumi:tags:
+    value:
+      pulumi:template: typescript
+  libvirt:uri: qemu:///session
+packages:
+  libvirt:
+    source: terraform-provider
+    version: 0.11.0
+    parameters:
+      - dmacvicar/libvirt
