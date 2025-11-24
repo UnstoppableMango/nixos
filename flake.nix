@@ -53,20 +53,9 @@
         inputs.home-manager.flakeModules.home-manager
       ];
       perSystem =
-        { pkgs, ... }:
+        { inputs', pkgs, ... }:
         {
-          devShells.default = pkgs.mkShell {
-            nativeBuildInputs = with pkgs; [
-              direnv
-              dprint
-              git
-              gnumake
-              neovim
-              nil
-              nixd
-              nixfmt-rfc-style
-            ];
-          };
+          devShells.default = inputs'.dotfiles.devShells.default;
 
           treefmt = {
             programs.nixfmt.enable = true;
