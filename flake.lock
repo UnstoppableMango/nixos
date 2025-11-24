@@ -17,11 +17,11 @@
         "treefmt-nix": "treefmt-nix_2"
       },
       "locked": {
-        "lastModified": 1763947692,
-        "narHash": "sha256-tL1G51GSYCIaItr8VplfzKhG7MDggSfUbgRk7k7th0g=",
+        "lastModified": 1763952644,
+        "narHash": "sha256-RWirGr7Pl79rCMmYDgCTt7UuDEhbDPEbaPx5ZVWDuCE=",
         "owner": "unstoppablemango",
         "repo": "dotfiles",
-        "rev": "8c7dd43183ea243289ce96825d099ef891e5de71",
+        "rev": "5fd5f7429b7420b63475988ad9ff3dceff6e84fe",
         "type": "github"
       },
       "original": {
