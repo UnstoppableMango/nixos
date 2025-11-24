@@ -13,6 +13,10 @@
     ];
   };
 
+  imports = [
+    ../../shells/ssh.nix
+  ];
+
   fileSystems = {
     "/".options = [ "compress=zstd" ];
     "/home".options = [ "compress=zstd" ];
