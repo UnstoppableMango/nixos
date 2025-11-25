@@ -17,11 +17,11 @@
         "ux": "ux"
       },
       "locked": {
-        "lastModified": 1764037405,
-        "narHash": "sha256-Whxg39WnVCDvtIQpCrP0DGAhbk2UrgQHIOcoYs+70Ko=",
+        "lastModified": 1764038122,
+        "narHash": "sha256-SQ1rb0pBabc6p96CL2uQbf4Wn72vd+OZ7uvRYgElzWo=",
         "owner": "unstoppablemango",
         "repo": "dotfiles",
-        "rev": "878f4c0940f13fb475d1744ec92fd9dbdad16600",
+        "rev": "a687d7f61f5e68b24116922736ee30ac36dac6ec",
         "type": "github"
       },
       "original": {
