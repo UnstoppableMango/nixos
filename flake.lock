@@ -8,6 +8,7 @@
         "home-manager": [
           "home-manager"
         ],
+        "nix-vscode-extensions": "nix-vscode-extensions",
         "nixd": "nixd",
         "nixpkgs": [
           "nixpkgs"
@@ -17,11 +18,11 @@
         "ux": "ux"
       },
       "locked": {
-        "lastModified": 1764038122,
-        "narHash": "sha256-SQ1rb0pBabc6p96CL2uQbf4Wn72vd+OZ7uvRYgElzWo=",
+        "lastModified": 1764040294,
+        "narHash": "sha256-wbbvlerFPi4S1AV15OYg4+l2hLNZG/+rU9aSvnuZaOk=",
         "owner": "unstoppablemango",
         "repo": "dotfiles",
-        "rev": "a687d7f61f5e68b24116922736ee30ac36dac6ec",
+        "rev": "966fa5e90b76d35b865b47d6ca8e68af8be84e3d",
         "type": "github"
       },
       "original": {
@@ -209,6 +210,27 @@
         "owner": "NuschtOS",
         "ref": "v0.1.1",
         "repo": "ixx",
+        "type": "github"
+      }
+    },
+    "nix-vscode-extensions": {
+      "inputs": {
+        "nixpkgs": [
+          "dotfiles",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1764035918,
+        "narHash": "sha256-oqgJf3AiFQOJnIZPasynVAnul1E8tioWnAo9iFEjRKI=",
+        "owner": "nix-community",
+        "repo": "nix-vscode-extensions",
+        "rev": "3c62392b5583a9eb399e53291dc2659d5ae14e9f",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-community",
+        "repo": "nix-vscode-extensions",
         "type": "github"
       }
     },
