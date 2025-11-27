@@ -44,8 +44,11 @@
               home-manager.useGlobalPkgs = true;
               home-manager.useUserPackages = true;
               home-manager.backupFileExtension = "bak";
-              home-manager.users = {
-                inherit (inputs.dotfiles.homeModules) erik;
+              home-manager.users.erik = {
+                imports = with inputs.dotfiles.homeModules; [
+                  erik
+                  dconf
+                ];
               };
             }
           ];
