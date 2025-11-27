@@ -18,11 +18,11 @@
         "ux": "ux"
       },
       "locked": {
-        "lastModified": 1764205737,
-        "narHash": "sha256-Vo1DE+o0Osl/fTn4wVkzEczkryil3mZs0640kyENlPA=",
+        "lastModified": 1764213729,
+        "narHash": "sha256-891PDFk/f3gnmCDzsUS6dl1OIIetsooSulvR34VBI4s=",
         "owner": "unstoppablemango",
         "repo": "dotfiles",
-        "rev": "5c2ba04398eeee3620db1d94d075e0b9186324e9",
+        "rev": "e54bcbae7921d67ebf5fd9d4a52e72670c473536",
         "type": "github"
       },
       "original": {
@@ -317,11 +317,11 @@
     },
     "nixpkgs_2": {
       "locked": {
-        "lastModified": 1764198180,
-        "narHash": "sha256-j0Z9sB3n69m9TuwgfMcX0fk4+vbmAedhJtigGbPmPRU=",
+        "lastModified": 1764210866,
+        "narHash": "sha256-0EfgWtBCGF8mijLikqT7vZ9ShvgVezhyXIilx7uG4fM=",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "d8c4c665ff12d3014284e2428c919ecc2f448f4d",
+        "rev": "d4ab9e921067f0953e9107d31ad589f2ae2d16ec",
         "type": "github"
       },
       "original": {
