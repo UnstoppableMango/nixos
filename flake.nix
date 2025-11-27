@@ -22,7 +22,7 @@
   };
 
   outputs =
-    inputs@{ flake-parts, ... }:
+    inputs@{ self, flake-parts, ... }:
     flake-parts.lib.mkFlake { inherit inputs; } {
       imports = [
         inputs.treefmt-nix.flakeModule
@@ -30,14 +30,15 @@
       ];
 
       flake = {
-        nixosModules.hades = ./hosts/hades/configuration.nix;
+        nixosModules = {
+          hades = ./hosts/hades/configuration.nix;
+        };
 
         nixosConfigurations.hades = inputs.nixpkgs.lib.nixosSystem {
           modules = [
             inputs.nixos-hardware.nixosModules.asus-rog-strix-x570e
             inputs.nixos-hardware.nixosModules.common-pc-ssd
-            ./hosts/hades/hardware-configuration.nix
-            ./hosts/hades/configuration.nix
+            self.nixosModules.hades
             inputs.home-manager.nixosModules.home-manager
             {
               home-manager.useGlobalPkgs = true;
