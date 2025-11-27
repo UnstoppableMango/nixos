@@ -24,6 +24,11 @@
   outputs =
     inputs@{ flake-parts, ... }:
     flake-parts.lib.mkFlake { inherit inputs; } {
+      imports = [
+        inputs.treefmt-nix.flakeModule
+        inputs.home-manager.flakeModules.home-manager
+      ];
+
       flake = {
         nixosModules.hades = ./hosts/hades/configuration.nix;
 
@@ -49,10 +54,6 @@
       systems = [
         "x86_64-linux"
         "aarch64-linux"
-      ];
-      imports = [
-        inputs.treefmt-nix.flakeModule
-        inputs.home-manager.flakeModules.home-manager
       ];
       perSystem =
         { inputs', pkgs, ... }:
