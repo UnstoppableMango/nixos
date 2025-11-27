@@ -2,11 +2,11 @@
   description = "UnstoppableMango's NixOS configuration";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
+    nixpkgs.url = "github:nixos/nixpkgs?ref=release-25.11";
     nixos-hardware.url = "github:nixos/nixos-hardware/master";
     flake-parts.url = "github:hercules-ci/flake-parts";
     home-manager = {
-      url = "github:nix-community/home-manager";
+      url = "github:nix-community/home-manager?ref=release-25.11";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     dotfiles = {
@@ -38,7 +38,9 @@
               home-manager.useGlobalPkgs = true;
               home-manager.useUserPackages = true;
               home-manager.backupFileExtension = "bak";
-              home-manager.users.erik = inputs.dotfiles.homeModules.erik;
+              home-manager.users = {
+                inherit (inputs.dotfiles.homeModules) erik;
+              };
             }
           ];
         };
