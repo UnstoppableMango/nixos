@@ -18,11 +18,11 @@
         "ux": "ux"
       },
       "locked": {
-        "lastModified": 1764203894,
-        "narHash": "sha256-zvOgPIpL170OjtZI3JeBTj5hH63rHeC2mHVJwKpNn3Y=",
+        "lastModified": 1764213729,
+        "narHash": "sha256-891PDFk/f3gnmCDzsUS6dl1OIIetsooSulvR34VBI4s=",
         "owner": "unstoppablemango",
         "repo": "dotfiles",
-        "rev": "226de7c6e65ce8c84355c5323bd984c749b8e314",
+        "rev": "e54bcbae7921d67ebf5fd9d4a52e72670c473536",
         "type": "github"
       },
       "original": {
@@ -317,27 +317,11 @@
     },
     "nixpkgs_2": {
       "locked": {
-        "lastModified": 1763618868,
-        "narHash": "sha256-v5afmLjn/uyD9EQuPBn7nZuaZVV9r+JerayK/4wvdWA=",
-        "owner": "NixOS",
-        "repo": "nixpkgs",
-        "rev": "a8d610af3f1a5fb71e23e08434d8d61a466fc942",
-        "type": "github"
-      },
-      "original": {
-        "owner": "NixOS",
-        "ref": "nixpkgs-unstable",
-        "repo": "nixpkgs",
-        "type": "github"
-      }
-    },
-    "nixpkgs_3": {
-      "locked": {
-        "lastModified": 1764198180,
-        "narHash": "sha256-j0Z9sB3n69m9TuwgfMcX0fk4+vbmAedhJtigGbPmPRU=",
+        "lastModified": 1764210866,
+        "narHash": "sha256-0EfgWtBCGF8mijLikqT7vZ9ShvgVezhyXIilx7uG4fM=",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "d8c4c665ff12d3014284e2428c919ecc2f448f4d",
+        "rev": "d4ab9e921067f0953e9107d31ad589f2ae2d16ec",
         "type": "github"
       },
       "original": {
@@ -350,7 +334,10 @@
     "nixvim": {
       "inputs": {
         "flake-parts": "flake-parts_2",
-        "nixpkgs": "nixpkgs_2",
+        "nixpkgs": [
+          "dotfiles",
+          "nixpkgs"
+        ],
         "nuschtosSearch": "nuschtosSearch",
         "systems": "systems_2"
       },
@@ -398,7 +385,7 @@
         "flake-parts": "flake-parts_3",
         "home-manager": "home-manager",
         "nixos-hardware": "nixos-hardware",
-        "nixpkgs": "nixpkgs_3",
+        "nixpkgs": "nixpkgs_2",
         "treefmt-nix": "treefmt-nix_4"
       }
     },
