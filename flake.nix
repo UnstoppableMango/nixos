@@ -5,16 +5,26 @@
     nixpkgs.url = "github:nixos/nixpkgs?ref=release-25.11";
     nixos-hardware.url = "github:nixos/nixos-hardware/master";
     flake-parts.url = "github:hercules-ci/flake-parts";
+
     home-manager = {
       url = "github:nix-community/home-manager?ref=release-25.11";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
     dotfiles = {
       url = "github:unstoppablemango/dotfiles";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.flake-parts.follows = "flake-parts";
       inputs.home-manager.follows = "home-manager";
+      inputs.nixvim.follows = "nixvim";
     };
+
+    nixvim = {
+      url = "github:nix-community/nixvim";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.flake-parts.follows = "flake-parts";
+    };
+
     treefmt-nix = {
       url = "github:numtide/treefmt-nix";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -46,8 +56,10 @@
               home-manager.backupFileExtension = "bak";
               home-manager.users.erik = {
                 imports = with inputs.dotfiles.homeModules; [
+                  inputs.nixvim.homeModules.nixvim
                   erik
                   dconf
+                  vscode
                 ];
               };
             }
