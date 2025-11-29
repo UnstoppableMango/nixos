@@ -16,6 +16,13 @@
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.flake-parts.follows = "flake-parts";
       inputs.home-manager.follows = "home-manager";
+      inputs.nixvim.follows = "nixvim";
+    };
+
+    nixvim = {
+      url = "github:nix-community/nixvim";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.flake-parts.follows = "flake-parts";
     };
 
     treefmt-nix = {
@@ -49,6 +56,7 @@
               home-manager.backupFileExtension = "bak";
               home-manager.users.erik = {
                 imports = with inputs.dotfiles.homeModules; [
+                  inputs.nixvim.homeModules.nixvim
                   erik
                   dconf
                   vscode
