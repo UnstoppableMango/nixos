@@ -36,11 +36,11 @@
         "zed": "zed"
       },
       "locked": {
-        "lastModified": 1764457182,
-        "narHash": "sha256-AOUG3CrtLlKtFU9xYYhVmtM8961tE5/424ZWG+Ou6es=",
+        "lastModified": 1764463052,
+        "narHash": "sha256-nQR7QFEmIL2PG3vY3xaf5/URf2QEy8FXwxrYG25Uimc=",
         "owner": "unstoppablemango",
         "repo": "dotfiles",
-        "rev": "526c5c130814b5b2fdf20e0329f1dfa0d2ab52fa",
+        "rev": "216016d732890333b85324d8257527d08e745d52",
         "type": "github"
       },
       "original": {
@@ -326,11 +326,11 @@
     },
     "nixpkgs_2": {
       "locked": {
-        "lastModified": 1764459421,
-        "narHash": "sha256-m4kJQ8pFL73/R1QY/sc7Hcen9KnTPdQnxdRFFUD8fM0=",
+        "lastModified": 1764460253,
+        "narHash": "sha256-r2r+icrwQq9hJeEvR/hlJ9P56gVxO4HNWI80KMTwtBg=",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "44398774bf790959546417e6f940acdba0cc1f78",
+        "rev": "fb7b12a1911820d1716e59a97a1559673da52eae",
         "type": "github"
       },
       "original": {
@@ -589,11 +589,11 @@
         "rust-overlay": "rust-overlay"
       },
       "locked": {
-        "lastModified": 1764429765,
-        "narHash": "sha256-gkDVdULa5Z/dDIPbj1QzDFaXKGfEm5yQ2RkrsJyz8RE=",
+        "lastModified": 1764453844,
+        "narHash": "sha256-pmtUvbyOK5uwpeOYE8aKwNzw6t8XtD+CBwrYbn1DPdY=",
         "owner": "zed-industries",
         "repo": "zed",
-        "rev": "dd9cc90de9d338779e7fec9d338dfa227c6fac38",
+        "rev": "450cd3d42ba90f8658f260560b69cdc8a52f061b",
         "type": "github"
       },
       "original": {
