@@ -58,8 +58,9 @@
                 imports = with inputs.dotfiles.homeModules; [
                   inputs.nixvim.homeModules.nixvim
                   erik
-                  dconf
+                  gnome
                   vscode
+                  ./toolchain/git/home.nix
                 ];
               };
             }
