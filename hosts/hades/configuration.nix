@@ -18,6 +18,7 @@
   imports = [
     ./hardware-configuration.nix
     ../../shells/ssh.nix
+    ../../users/erik
   ];
 
   fileSystems = {
@@ -29,6 +30,7 @@
     ];
   };
 
+  # This continues to randomly stall and fail
   boot.initrd.kernelModules = [ "amdgpu" ];
 
   # Bootloader.
@@ -162,13 +164,6 @@
       gnumake
       dprint
       buf
-      (
-        with dotnetCorePackages;
-        combinePackages [
-          sdk_9_0
-          sdk_10_0
-        ]
-      )
 
       # Lofty goals lie below
       # jetbrains.webstorm
@@ -245,18 +240,6 @@
   nixpkgs.config.allowUnfree = true;
 
   hardware.openrazer.enable = true;
-
-  # hardware.nvidia = {
-  #   # Open drivers (NVreg_OpenRmEnableUnsupportedGpus=1)
-  #   open = true;
-
-  #   # nvidia-drm.modeset=1
-  #   modesetting.enable = true;
-
-  #   # Preserve video memory after suspend
-  #   # NVreg_PreserveVideoMemoryAllocations=1
-  #   powerManagement.enable = true;
-  # };
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget

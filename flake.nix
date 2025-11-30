@@ -45,25 +45,13 @@
         };
 
         nixosConfigurations.hades = inputs.nixpkgs.lib.nixosSystem {
+          specialArgs = { inherit inputs; };
+
           modules = [
             inputs.nixos-hardware.nixosModules.asus-rog-strix-x570e
             inputs.nixos-hardware.nixosModules.common-pc-ssd
             self.nixosModules.hades
             inputs.home-manager.nixosModules.home-manager
-            {
-              home-manager.useGlobalPkgs = true;
-              home-manager.useUserPackages = true;
-              home-manager.backupFileExtension = "bak";
-              home-manager.users.erik = {
-                imports = with inputs.dotfiles.homeModules; [
-                  inputs.nixvim.homeModules.nixvim
-                  erik
-                  gnome
-                  vscode
-                  ./toolchain/git/home.nix
-                ];
-              };
-            }
           ];
         };
       };
