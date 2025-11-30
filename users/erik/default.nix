@@ -9,6 +9,7 @@
       erik
       gnome
       vscode
+      ./home.nix
     ];
   };
 }
