@@ -267,6 +267,7 @@
     bat
     rsync
     tmux
+    ldns
 
     jetbrains-mono
     openrazer-daemon
