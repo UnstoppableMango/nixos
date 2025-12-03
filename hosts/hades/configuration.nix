@@ -164,6 +164,7 @@
       "networkmanager"
       "wheel"
       "openrazer"
+      "libvirt" # crc wants `libvirt` not `libvirtd`
     ];
     packages = with pkgs; [
       vim
