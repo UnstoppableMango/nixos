@@ -76,7 +76,6 @@
   };
 
   # Enable KVM virtualization support
-  boot.kernelModules = [ "kvm-amd" ];
   programs.virt-manager.enable = true;
   users.groups.libvirtd.members = [ "erik" ];
   virtualisation.libvirtd.enable = true;
@@ -164,6 +163,7 @@
       "networkmanager"
       "wheel"
       "openrazer"
+      "libvirt" # crc wants `libvirt` not `libvirtd`
     ];
     packages = with pkgs; [
       vim
