@@ -195,6 +195,7 @@
       slack
       signal-desktop
       claude-monitor
+      omnissa-horizon-client
 
       (wineWowPackages.full.override {
         wineRelease = "staging";
