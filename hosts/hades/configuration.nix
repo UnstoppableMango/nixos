@@ -75,6 +75,13 @@
     };
   };
 
+  # Enable KVM virtualization support
+  boot.kernelModules = [ "kvm-amd" ];
+  programs.virt-manager.enable = true;
+  users.groups.libvirtd.members = [ "erik" ];
+  virtualisation.libvirtd.enable = true;
+  virtualisation.spiceUSBRedirection.enable = true;
+
   # Enable the X11 windowing system.
   services.xserver.enable = true;
   services.xserver.videoDrivers = [ "amdgpu" ];
