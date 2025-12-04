@@ -78,6 +78,7 @@
   # Enable KVM virtualization support
   programs.virt-manager.enable = true;
   users.groups.libvirtd.members = [ "erik" ];
+  users.groups.libvirt.members = [ "erik" ];
   virtualisation.libvirtd.enable = true;
   virtualisation.spiceUSBRedirection.enable = true;
 
