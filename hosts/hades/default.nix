@@ -9,8 +9,12 @@
         inputs.nixos-hardware.nixosModules.asus-rog-strix-x570e
         inputs.nixos-hardware.nixosModules.common-pc-ssd
         inputs.home-manager.nixosModules.home-manager
-        self.nixosModules.hades
-      ];
+      ]
+      ++ (with self.modules.nixos; [
+        erik
+        hades
+        ssh
+      ]);
     };
   };
 }

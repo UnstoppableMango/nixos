@@ -13,10 +13,13 @@
 
     dotfiles = {
       url = "github:unstoppablemango/dotfiles";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.flake-parts.follows = "flake-parts";
-      inputs.home-manager.follows = "home-manager";
-      inputs.nixvim.follows = "nixvim";
+
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+        flake-parts.follows = "flake-parts";
+        home-manager.follows = "home-manager";
+        nixvim.follows = "nixvim";
+      };
     };
 
     nixvim = {
