@@ -17,8 +17,6 @@
 
   imports = [
     ./hardware-configuration.nix
-    ../../shells/ssh.nix
-    ../../users/erik
   ];
 
   fileSystems = {

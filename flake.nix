@@ -13,10 +13,13 @@
 
     dotfiles = {
       url = "github:unstoppablemango/dotfiles";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.flake-parts.follows = "flake-parts";
-      inputs.home-manager.follows = "home-manager";
-      inputs.nixvim.follows = "nixvim";
+
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+        flake-parts.follows = "flake-parts";
+        home-manager.follows = "home-manager";
+        nixvim.follows = "nixvim";
+      };
     };
 
     nixvim = {
@@ -32,34 +35,29 @@
   };
 
   outputs =
-    inputs@{ self, flake-parts, ... }:
+    inputs@{ flake-parts, ... }:
     flake-parts.lib.mkFlake { inherit inputs; } {
-      imports = [
-        inputs.treefmt-nix.flakeModule
-        inputs.home-manager.flakeModules.home-manager
-      ];
-
-      flake = {
-        nixosModules = {
-          hades = ./hosts/hades/configuration.nix;
-        };
-
-        nixosConfigurations.hades = inputs.nixpkgs.lib.nixosSystem {
-          specialArgs = { inherit inputs; };
-
-          modules = [
-            inputs.nixos-hardware.nixosModules.asus-rog-strix-x570e
-            inputs.nixos-hardware.nixosModules.common-pc-ssd
-            self.nixosModules.hades
-            inputs.home-manager.nixosModules.home-manager
-          ];
-        };
-      };
-
       systems = [
         "x86_64-linux"
         "aarch64-linux"
       ];
+
+      imports =
+        with inputs;
+        [
+          flake-parts.flakeModules.modules
+          treefmt-nix.flakeModule
+          home-manager.flakeModules.home-manager
+
+          ./hardware
+          ./hosts
+          ./shells
+          ./users
+        ]
+        ++ (with dotfiles.modules.flake; [
+          erik
+        ]);
+
       perSystem =
         { inputs', pkgs, ... }:
         {
