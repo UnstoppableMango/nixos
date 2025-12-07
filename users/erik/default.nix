@@ -1,6 +1,6 @@
 { inputs, self, ... }:
 {
-  flake.homeModules = self.modules.homeManager.erik;
+  flake.homeModules.erik = self.modules.homeManager.erik;
   flake.modules.homeManager.erik =
     { pkgs, ... }:
     {
