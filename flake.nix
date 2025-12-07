@@ -44,24 +44,12 @@
         inputs.treefmt-nix.flakeModule
         inputs.home-manager.flakeModules.home-manager
         inputs.dotfiles.modules.flake.erik
+
+        ./hardware
+        ./hosts
+        ./shells
+        ./users
       ];
-
-      flake = {
-        nixosModules = {
-          hades = ./hosts/hades/configuration.nix;
-        };
-
-        nixosConfigurations.hades = inputs.nixpkgs.lib.nixosSystem {
-          specialArgs = { inherit inputs; };
-
-          modules = [
-            inputs.nixos-hardware.nixosModules.asus-rog-strix-x570e
-            inputs.nixos-hardware.nixosModules.common-pc-ssd
-            inputs.home-manager.nixosModules.home-manager
-            self.nixosModules.hades
-          ];
-        };
-      };
 
       perSystem =
         { inputs', pkgs, ... }:
