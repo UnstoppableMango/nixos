@@ -32,24 +32,28 @@
   };
 
   outputs =
-    inputs@{ flake-parts, self, ... }:
+    inputs@{ flake-parts, ... }:
     flake-parts.lib.mkFlake { inherit inputs; } {
       systems = [
         "x86_64-linux"
         "aarch64-linux"
       ];
 
-      imports = [
-        inputs.flake-parts.flakeModules.modules
-        inputs.treefmt-nix.flakeModule
-        inputs.home-manager.flakeModules.home-manager
-        inputs.dotfiles.modules.flake.erik
+      imports =
+        with inputs;
+        [
+          flake-parts.flakeModules.modules
+          treefmt-nix.flakeModule
+          home-manager.flakeModules.home-manager
 
-        ./hardware
-        ./hosts
-        ./shells
-        ./users
-      ];
+          ./hardware
+          ./hosts
+          ./shells
+          ./users
+        ]
+        ++ (with dotfiles.modules.flake; [
+          erik
+        ]);
 
       perSystem =
         { inputs', pkgs, ... }:
