@@ -42,21 +42,16 @@
         "aarch64-linux"
       ];
 
-      imports =
-        with inputs;
-        [
-          flake-parts.flakeModules.modules
-          treefmt-nix.flakeModule
-          home-manager.flakeModules.home-manager
+      imports = with inputs; [
+        flake-parts.flakeModules.modules
+        treefmt-nix.flakeModule
+        home-manager.flakeModules.home-manager
 
-          ./hardware
-          ./hosts
-          ./shells
-          ./users
-        ]
-        ++ (with dotfiles.modules.flake; [
-          erik
-        ]);
+        ./hardware
+        ./hosts
+        ./shells
+        ./users
+      ];
 
       perSystem =
         { inputs', pkgs, ... }:
