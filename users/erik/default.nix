@@ -1,5 +1,6 @@
 { inputs, self, ... }:
 {
+  flake.homeModules.erik = self.modules.homeManager.erik;
   flake.modules.homeManager.erik =
     { pkgs, ... }:
     {
@@ -28,6 +29,7 @@
       };
     };
 
+  flake.nixosModules.erik = self.modules.nixos.erik;
   flake.modules.nixos.erik = {
     home-manager = {
       useGlobalPkgs = true;
