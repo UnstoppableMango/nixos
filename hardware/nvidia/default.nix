@@ -1,5 +1,5 @@
 {
-  hardware.nvidia = {
+  flake.modules.nixos.hardware.nvidia = {
     # Open drivers (NVreg_OpenRmEnableUnsupportedGpus=1)
     open = true;
 

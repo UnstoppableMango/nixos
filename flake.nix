@@ -32,11 +32,18 @@
   };
 
   outputs =
-    inputs@{ self, flake-parts, ... }:
+    inputs@{ flake-parts, self, ... }:
     flake-parts.lib.mkFlake { inherit inputs; } {
+      systems = [
+        "x86_64-linux"
+        "aarch64-linux"
+      ];
+
       imports = [
+        inputs.flake-parts.flakeModules.modules
         inputs.treefmt-nix.flakeModule
         inputs.home-manager.flakeModules.home-manager
+        inputs.dotfiles.modules.flake.erik
       ];
 
       flake = {
@@ -50,16 +57,12 @@
           modules = [
             inputs.nixos-hardware.nixosModules.asus-rog-strix-x570e
             inputs.nixos-hardware.nixosModules.common-pc-ssd
-            self.nixosModules.hades
             inputs.home-manager.nixosModules.home-manager
+            self.nixosModules.hades
           ];
         };
       };
 
-      systems = [
-        "x86_64-linux"
-        "aarch64-linux"
-      ];
       perSystem =
         { inputs', pkgs, ... }:
         {
