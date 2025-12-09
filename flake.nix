@@ -11,17 +11,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    dotfiles = {
-      url = "github:unstoppablemango/dotfiles";
-
-      inputs = {
-        nixpkgs.follows = "nixpkgs";
-        flake-parts.follows = "flake-parts";
-        home-manager.follows = "home-manager";
-        nixvim.follows = "nixvim";
-      };
-    };
-
     nixvim = {
       url = "github:nix-community/nixvim?ref=nixos-25.11";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -31,6 +20,18 @@
     treefmt-nix = {
       url = "github:numtide/treefmt-nix";
       inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    dotfiles = {
+      url = "github:unstoppablemango/dotfiles";
+
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+        flake-parts.follows = "flake-parts";
+        home-manager.follows = "home-manager";
+        nixvim.follows = "nixvim";
+        treefmt-nix.follows = "treefmt-nix";
+      };
     };
   };
 
