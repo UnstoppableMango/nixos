@@ -31,6 +31,8 @@
 
   flake.nixosModules.erik = self.modules.nixos.erik;
   flake.modules.nixos.erik = {
+    nixpkgs.overlays = [ inputs.dotfiles.overlays.default ];
+
     home-manager = {
       useGlobalPkgs = true;
       useUserPackages = true;
