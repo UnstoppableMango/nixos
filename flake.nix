@@ -55,7 +55,11 @@
       ];
 
       perSystem =
-        { inputs', pkgs, ... }:
+        {
+          inputs',
+          pkgs,
+          ...
+        }:
         {
           devShells.default = inputs'.dotfiles.devShells.default;
 
