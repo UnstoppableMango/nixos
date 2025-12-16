@@ -3,7 +3,7 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs?ref=release-25.11";
-    nixos-hardware.url = "github:nixos/nixos-hardware/master";
+    nixos-hardware.url = "github:nixos/nixos-hardware?ref=master";
     flake-parts.url = "github:hercules-ci/flake-parts";
 
     home-manager = {
