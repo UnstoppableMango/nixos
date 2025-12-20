@@ -193,6 +193,7 @@
       bitwarden-desktop
       bitwarden-cli
       cachix
+      chiaki-ng
       spotify
       discord
       tutanota-desktop
