@@ -13,12 +13,16 @@
 
     nixvim = {
       url = "github:nix-community/nixvim?ref=nixos-25.11";
-      inputs.nixpkgs.follows = "nixpkgs";
       inputs.flake-parts.follows = "flake-parts";
     };
 
     treefmt-nix = {
       url = "github:numtide/treefmt-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    disko = {
+      url = "github:nix-community/disko";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -46,6 +50,7 @@
       imports = with inputs; [
         flake-parts.flakeModules.modules
         treefmt-nix.flakeModule
+        disko.flakeModules.default
         home-manager.flakeModules.home-manager
 
         ./hardware
