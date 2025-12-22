@@ -2,7 +2,7 @@
   description = "UnstoppableMango's NixOS configuration";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs";
+    nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
     nixos-hardware.url = "github:nixos/nixos-hardware?ref=master";
     flake-parts.url = "github:hercules-ci/flake-parts";
 
