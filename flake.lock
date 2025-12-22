@@ -98,11 +98,11 @@
         "zed": "zed"
       },
       "locked": {
-        "lastModified": 1766372333,
-        "narHash": "sha256-3ctOceiTTisWzCSz7Ig2Mienfp5Tcj25bVCdYjoWruM=",
+        "lastModified": 1766376782,
+        "narHash": "sha256-7Cas4+L0g62uVS2P0GPR861MFsjYQa5uuhLZ71Wug0Y=",
         "owner": "unstoppablemango",
         "repo": "dotfiles",
-        "rev": "07c16d3fb26319b860be12ea57c85fd34c5ecafe",
+        "rev": "07b275db53e62f19b8951f9b0814948669233931",
         "type": "github"
       },
       "original": {
@@ -324,11 +324,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1766191352,
-        "narHash": "sha256-TjD30cTHtEpoDunEAkLa6ugp1DqjWkxf35oGO3AfP0k=",
+        "lastModified": 1766374503,
+        "narHash": "sha256-xv/UN2sVDyulTZwpq9WXS2twZ9X3BLZHUocFOfUPQXw=",
         "owner": "UnstoppableMango",
         "repo": "nix",
-        "rev": "6ca6f2f690d2b328d36a52e589b237407c2d4302",
+        "rev": "c74c614cf4843641d3b0d59875a0ca384311b3cf",
         "type": "github"
       },
       "original": {
@@ -685,11 +685,11 @@
         "treefmt-nix": "treefmt-nix_2"
       },
       "locked": {
-        "lastModified": 1766343109,
-        "narHash": "sha256-1se67pLZtm/PQC/CQglhHH/k96Y3TQPEHxnYzJQqsJ0=",
+        "lastModified": 1766373251,
+        "narHash": "sha256-1I10MoH5FjC6SvHE20zpXPJRaJkVZAMQvn6H75Ilr+M=",
         "owner": "unstoppablemango",
         "repo": "ux",
-        "rev": "f692b86ceee361af4117cd87fa4769d135426898",
+        "rev": "b792b9d5dd0d13356a3e2d0ddc07f5c69ad35d03",
         "type": "github"
       },
       "original": {
