@@ -36,7 +36,8 @@
   };
 
   # This continues to randomly stall and fail
-  boot.initrd.kernelModules = [ "amdgpu" ];
+  # Going to see if disabling it helps
+  # boot.initrd.kernelModules = [ "amdgpu" ];
 
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
