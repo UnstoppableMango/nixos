@@ -17,6 +17,7 @@
           erik
           hades
           ssh
+          nix
         ]);
     };
   };

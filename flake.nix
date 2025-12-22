@@ -2,17 +2,17 @@
   description = "UnstoppableMango's NixOS configuration";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs?ref=release-25.11";
+    nixpkgs.url = "github:nixos/nixpkgs";
     nixos-hardware.url = "github:nixos/nixos-hardware?ref=master";
     flake-parts.url = "github:hercules-ci/flake-parts";
 
     home-manager = {
-      url = "github:nix-community/home-manager?ref=release-25.11";
+      url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
     nixvim = {
-      url = "github:nix-community/nixvim?ref=nixos-25.11";
+      url = "github:nix-community/nixvim";
       inputs.flake-parts.follows = "flake-parts";
     };
 
@@ -56,6 +56,7 @@
         ./hardware
         ./hosts
         ./shells
+        ./toolchain
         ./users
       ];
 
