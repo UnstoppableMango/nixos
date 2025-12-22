@@ -1,12 +1,12 @@
 let
-  nix = {
+  nixDaemonConfig = {
     # Don't kill my PC when building big things
-    nix.daemonCPUSchedPolicy = "idle";
-    nix.daemonIOSchedClass = "idle";
-    nix.daemonIOSchedPriority = 7;
+    daemonCPUSchedPolicy = "idle";
+    daemonIOSchedClass = "idle";
+    daemonIOSchedPriority = 7;
   };
 in
 {
-  flake.nixosModules = { inherit nix; };
-  flake.modules.nixos = { inherit nix; };
+  flake.nixosModules = { nix = nixDaemonConfig; };
+  flake.modules.nixos = { nix = nixDaemonConfig; };
 }
