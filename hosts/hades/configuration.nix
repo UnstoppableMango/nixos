@@ -332,6 +332,32 @@
 
   services.openssh.enable = true;
 
+  security.pki.certificates = [
+    # thecluster.lan Nginx CA
+    ''
+      -----BEGIN CERTIFICATE-----
+      MIIDQjCCAiqgAwIBAgIQewg0tCvOBeo2QhAy4f0HAzANBgkqhkiG9w0BAQsFADA7
+      MRYwFAYDVQQKEw1pbmdyZXNzLW5naW54MSEwHwYDVQQDExhjYS53ZWJob29rLmlu
+      Z3Jlc3MtbmdpbngwHhcNMjUwOTA2MjI0ODEwWhcNMzAwOTA1MjI0ODEwWjA7MRYw
+      FAYDVQQKEw1pbmdyZXNzLW5naW54MSEwHwYDVQQDExhjYS53ZWJob29rLmluZ3Jl
+      c3MtbmdpbngwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQD7C/OMWFln
+      g6L2CpvqL7UbN1l5h1ObV9UoMBUFmzdu47bwWrb3lAPlclprW746Mhn0POGn8cM/
+      bYnRAdK7nwkEHeTe4uqGIs1wygZTCwhu5Ws272C4Sk/ugbjx+PpPUltR8CV0M6pU
+      2aJtZOWfS/X2X42ygY/z1Y9CnJO5gHV2mfWWzcg9Q3w8qAf1nVTNsULxHrHI3vFR
+      hxfekBWIoTOORLbIcbYQTIGPHXI+Gm5wDDF6MVE3Kt7oYXslvO+3mePs0zjVivvl
+      b2JnuAOM/GubxUt+ab7LhjWk6H3OQvhmkf28M4zWXPWGhfFz39B9ulEznmx/nAhU
+      0gWUUO28VIx3AgMBAAGjQjBAMA4GA1UdDwEB/wQEAwICpDAPBgNVHRMBAf8EBTAD
+      AQH/MB0GA1UdDgQWBBQNYxQ09OfqkbAJspyZAi4dIriAkzANBgkqhkiG9w0BAQsF
+      AAOCAQEAXqmHSRvsrrkkrzSKpZbDAWyVVoibdej274n2zfU1npBbXdhQjx0OeQli
+      QE46eN6Ot7WgU/GNJY3J1JZOkP0HKOxtuWPcmT5of9QLzd67t1wm6JHn9D45A62U
+      DkBLQgq1rT5Coho+S7bMUlxxJ0odkGrgr8hePKpJcMCdzJGw3+4xP7bzw/vD1a3b
+      CraYackx1ugA+rD+sMyNRo5O4stWRug1Hdo9j/AZLAdt5lCpFlhLiWaIwrjdDNxL
+      0Laeu9Yx0mNK4os8yVAh106jQF+/in1jqiLE3KJl6RLhzYs2WLgCwOaosE752cPX
+      ZY63p/X0MjSTCkswRIco5k1XzgEHrA==
+      -----END CERTIFICATE-----
+    ''
+  ];
+
   # Open ports in the firewall.
   # networking.firewall.allowedTCPPorts = [ ... ];
   # networking.firewall.allowedUDPPorts = [ ... ];
