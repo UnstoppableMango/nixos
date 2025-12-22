@@ -17,7 +17,7 @@
           erik
           hades
           ssh
-          nix
+          nixDaemonConfig
         ]);
     };
   };
