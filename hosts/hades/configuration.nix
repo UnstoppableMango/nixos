@@ -2,7 +2,7 @@
 {
   nix.settings = {
     extra-substituters = [
-      "http://ncps.thecluster.lan"
+      "https://ncps.thecluster.lan"
       "https://nix-community.cachix.org"
       "https://unstoppablemango.cachix.org"
       "https://zed.cachix.org"
