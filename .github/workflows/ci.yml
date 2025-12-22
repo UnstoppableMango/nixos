@@ -21,8 +21,6 @@ jobs:
           name: unstoppablemango
           authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
 
-      # This build is a bit too chonky for GitHub Actions to handle reliably
-      - if: false
-        run: nix build .#nixosConfigurations.hades.config.system.build.toplevel
 
       - run: nix flake check --all-systems
+      - run: nix build .#nixosConfigurations.hades.config.system.build.toplevel
