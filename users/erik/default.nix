@@ -2,7 +2,7 @@
 {
   flake.homeModules.erik = self.modules.homeManager.erik;
   flake.modules.homeManager.erik =
-    { pkgs, lib, ... }:
+    { pkgs, ... }:
     {
       imports = with inputs.dotfiles.modules.homeManager; [
         brave
