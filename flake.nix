@@ -11,6 +11,17 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    nixos-anywhere = {
+      url = "github:nix-community/nixos-anywhere";
+
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+        flake-parts.follows = "flake-parts";
+        disko.follows = "disko";
+        treefmt-nix.follows = "treefmt-nix";
+      };
+    };
+
     nixvim = {
       url = "github:nix-community/nixvim";
       inputs.flake-parts.follows = "flake-parts";
@@ -53,6 +64,7 @@
         disko.flakeModules.default
         home-manager.flakeModules.home-manager
 
+        ./desktops
         ./hardware
         ./hosts
         ./shells

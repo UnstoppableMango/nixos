@@ -15,6 +15,7 @@
         ]
         ++ (with self.modules.nixos; [
           erik
+          gnome
           hades
           ssh
           nixDaemonConfig

@@ -1,3 +1,6 @@
 {
-  imports = [ ./hades ];
+  imports = [
+    ./agreus
+    ./hades
+  ];
 }
