@@ -22,7 +22,6 @@
   ];
 
   boot.loader = {
-
     grub = {
       devices = [ "/dev/nvme0n1" ];
       efiSupport = true;
