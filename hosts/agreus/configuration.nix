@@ -36,17 +36,25 @@
     # };
   };
 
+  # https://nixos.wiki/wiki/Power_Management#systemd_sleep
+  systemd.sleep.extraConfig = ''
+    AllowSuspend=no
+    AllowHibernation=no
+    AllowHybridSleep=no
+    AllowSuspendThenHibernate=no
+  '';
+
   networking = {
     hostName = "agreus";
     networkmanager.enable = true;
 
     # https://wiki.nixos.org/wiki/NetworkManager#DNS_Management
     # Disable NetworkManager's internal DNS resolution
-    networking.networkmanager.dns = "none";
+    networkmanager.dns = "none";
 
     # These options are unnecessary when managing DNS ourselves
-    networking.useDHCP = false;
-    networking.dhcpcd.enable = false;
+    useDHCP = false;
+    dhcpcd.enable = false;
 
     nameservers = [
       "127.0.0.1"
