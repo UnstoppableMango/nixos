@@ -22,16 +22,27 @@
   ];
 
   boot.loader = {
-    efi.canTouchEfiVariables = true;
-    systemd-boot = {
-      enable = true;
-      configurationLimit = 25;
+    grub = {
+      devices = [ "/dev/nvme0n1" ];
+      efiSupport = true;
+      efiInstallAsRemovable = true;
     };
+
+    # efi.canTouchEfiVariables = true;
+    # systemd-boot = {
+    #   enable = true;
+    #   configurationLimit = 25;
+    # };
   };
 
   networking = {
     hostName = "agreus";
     networkmanager.enable = true;
+    nameservers = [
+      "127.0.0.1"
+      "192.168.1.44"
+      "192.168.1.45"
+    ];
   };
 
   services.openssh.enable = true;
