@@ -52,8 +52,6 @@
       enable = true;
 
       # https://wiki.nixos.org/wiki/NetworkManager#DNS_Management
-      # Disable NetworkManager's internal DNS resolution
-      dns = "none";
       insertNameservers = [
         "192.168.1.44"
         "192.168.1.45"
