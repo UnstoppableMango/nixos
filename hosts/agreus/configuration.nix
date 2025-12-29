@@ -28,6 +28,7 @@
       efiInstallAsRemovable = true;
     };
 
+    # TODO: Switch to systemd-boot
     # efi.canTouchEfiVariables = true;
     # systemd-boot = {
     #   enable = true;
@@ -64,6 +65,7 @@
     gitMinimal
   ];
 
+  # https://mynixos.com/nixpkgs/option/users.mutableUsers
   users.mutableUsers = true;
   users.users =
     let
