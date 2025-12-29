@@ -46,24 +46,19 @@
 
   networking = {
     hostName = "agreus";
-    networkmanager.enable = true;
-
-    # https://wiki.nixos.org/wiki/NetworkManager#DNS_Management
-    # Disable NetworkManager's internal DNS resolution
-    networkmanager.dns = "none";
-
-    # These options are unnecessary when managing DNS ourselves
     useDHCP = false;
-    dhcpcd.enable = false;
 
-    nameservers = [
-      "127.0.0.1"
-      "192.168.1.44"
-      "192.168.1.45"
-      "192.168.1.1"
-      "1.1.1.1"
-      "1.0.0.1"
-    ];
+    networkmanager = {
+      enable = true;
+
+      # https://wiki.nixos.org/wiki/NetworkManager#DNS_Management
+      insertNameservers = [
+        "192.168.1.44"
+        "192.168.1.45"
+        "1.1.1.1"
+        "1.0.0.1"
+      ];
+    };
   };
 
   services.openssh.enable = true;
