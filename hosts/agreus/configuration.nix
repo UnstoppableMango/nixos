@@ -22,7 +22,6 @@
   ];
 
   boot.loader = {
-    efi.canTouchEfiVariables = true;
 
     grub = {
       devices = [ "/dev/nvme0n1" ];
@@ -30,6 +29,7 @@
       efiInstallAsRemovable = true;
     };
 
+    # efi.canTouchEfiVariables = true;
     # systemd-boot = {
     #   enable = true;
     #   configurationLimit = 25;
