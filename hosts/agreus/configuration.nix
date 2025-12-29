@@ -38,10 +38,22 @@
   networking = {
     hostName = "agreus";
     networkmanager.enable = true;
+
+    # https://wiki.nixos.org/wiki/NetworkManager#DNS_Management
+    # Disable NetworkManager's internal DNS resolution
+    networking.networkmanager.dns = "none";
+
+    # These options are unnecessary when managing DNS ourselves
+    networking.useDHCP = false;
+    networking.dhcpcd.enable = false;
+
     nameservers = [
       "127.0.0.1"
       "192.168.1.44"
       "192.168.1.45"
+      "192.168.1.1"
+      "1.1.1.1"
+      "1.0.0.1"
     ];
   };
 
@@ -52,6 +64,7 @@
     gitMinimal
   ];
 
+  users.mutableUsers = true;
   users.users =
     let
       hadesKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEwW6dUPKvKXXzj+gKJS7EXh6UzyLjzatrcPXa0Y2qvz erik@hades";
@@ -61,6 +74,7 @@
       erik = {
         isNormalUser = true;
         home = "/home/erik";
+        initialPassword = "Password123!";
         extraGroups = [ "wheel" ];
         openssh.authorizedKeys.keys = [
           hadesKey
@@ -71,6 +85,7 @@
       office = {
         isNormalUser = true;
         home = "/home/office";
+        initialPassword = "Password123!";
         openssh.authorizedKeys.keys = [
           hadesKey
           darterKey
