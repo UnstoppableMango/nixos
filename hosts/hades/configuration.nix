@@ -21,9 +21,11 @@
     ];
   };
 
+  nixpkgs.config.allowUnfree = true;
+
   imports = [
     ./hardware-configuration.nix
-    ./disko-config.nix
+    ./disk-config.nix
   ];
 
   fileSystems = {
@@ -37,7 +39,9 @@
 
   # This continues to randomly stall and fail
   # Going to see if disabling it helps
-  # boot.initrd.kernelModules = [ "amdgpu" ];
+  #
+  # Nope, just makes the problem happen later
+  boot.initrd.kernelModules = [ "amdgpu" ];
 
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
@@ -47,14 +51,10 @@
 
   networking = {
     hostName = "hades";
-    # wireless.enable = true;  # Enables wireless support via wpa_supplicant.
     networkmanager.enable = true;
   };
 
-  # Set your time zone.
   time.timeZone = "America/Chicago";
-
-  # Select internationalisation properties.
   i18n.defaultLocale = "en_US.UTF-8";
 
   i18n.extraLocaleSettings = {
@@ -93,31 +93,6 @@
   # Enable the X11 windowing system.
   services.xserver.enable = true;
   services.xserver.videoDrivers = [ "amdgpu" ];
-
-  # Enable the GNOME Desktop Environment.
-  services.displayManager.gdm.enable = true;
-  services.desktopManager.gnome.enable = true;
-
-  environment.gnome.excludePackages = (
-    with pkgs;
-    [
-      atomix # puzzle game
-      cheese # webcam tool
-      epiphany # web browser
-      evince # document viewer
-      geary # email reader
-      gedit # text editor
-      gnome-characters
-      gnome-music
-      gnome-photos
-      gnome-terminal
-      gnome-tour
-      hitori # sudoku game
-      iagno # go game
-      tali # poker game
-      totem # video player
-    ]
-  );
 
   # Configure keymap in X11
   services.xserver.xkb = {
@@ -163,7 +138,6 @@
   programs.zsh.enable = true;
   users.defaultUserShell = pkgs.bash;
 
-  # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.erik = {
     isNormalUser = true;
     shell = pkgs.zsh;
@@ -219,10 +193,6 @@
   services.displayManager.autoLogin.enable = true;
   services.displayManager.autoLogin.user = "erik";
 
-  # Workaround for GNOME autologin: https://github.com/NixOS/nixpkgs/issues/103746#issuecomment-945091229
-  systemd.services."getty@tty1".enable = false;
-  systemd.services."autovt@tty1".enable = false;
-
   # https://github.com/NixOS/nixpkgs/issues/240444#issuecomment-1977617644
   programs.nix-ld.enable = true;
   programs.nix-ld.libraries = with pkgs; [
@@ -254,8 +224,6 @@
 
   programs.firefox.enable = false; # Only blue fox
   programs.steam.enable = true;
-
-  nixpkgs.config.allowUnfree = true;
 
   hardware.openrazer.enable = true;
 
