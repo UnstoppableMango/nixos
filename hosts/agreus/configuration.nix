@@ -104,7 +104,7 @@
       };
     };
 
-  # Enable automatic login for the user.
+  # Enable automatic login
   services.displayManager.autoLogin.enable = true;
   services.displayManager.autoLogin.user = "office";
 
