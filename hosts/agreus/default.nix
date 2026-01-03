@@ -1,20 +1,27 @@
 { inputs, self, ... }:
+let
+  mod.imports = with inputs; [
+    disko.nixosModules.disko
+    home-manager.nixosModules.home-manager
+    {
+      home-manager.users.erik.imports = [
+        nixvim.homeModules.nixvim
+        dotfiles.modules.homeManager.erik
+      ];
+    }
+    self.modules.nixos.gnome
+    ./configuration.nix
+    { hardware.facter.reportPath = ./facter.json; }
+  ];
+in
 {
-  flake.nixosConfigurations."agreus" = inputs.nixpkgs.lib.nixosSystem {
-    system = "x86_64-linux";
+  flake = {
+    modules.nixos = mod;
+    nixosModules = mod;
 
-    modules = with inputs; [
-      disko.nixosModules.disko
-      home-manager.nixosModules.home-manager
-      {
-        home-manager.users.erik.imports = [
-          nixvim.homeModules.nixvim
-          dotfiles.modules.homeManager.erik
-        ];
-      }
-      self.modules.nixos.gnome
-      ./configuration.nix
-      { hardware.facter.reportPath = ./facter.json; }
-    ];
+    nixosConfigurations."agreus" = inputs.nixpkgs.lib.nixosSystem {
+      system = "x86_64-linux";
+      modules = [ mod ];
+    };
   };
 }
