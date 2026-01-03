@@ -135,6 +135,9 @@
     nix-direnv.enable = true;
   };
 
+  # For cache fallback behaviour
+  nix.package = pkgs.nixVersions.latest;
+
   programs.zsh.enable = true;
   users.defaultUserShell = pkgs.bash;
 
@@ -156,7 +159,7 @@
       dprint
       buf
 
-      # Lofty goals lie below
+      ## Maybe eventually
       # jetbrains.webstorm
       # jetbrains.rust-rover
       # jetbrains.ruby-mine
@@ -173,7 +176,10 @@
       bitwarden-desktop
       bitwarden-cli
       cachix
-      chiaki-ng
+
+      # Broken ATM
+      # chiaki-ng
+
       spotify
       discord
       tutanota-desktop
