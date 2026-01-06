@@ -18,6 +18,7 @@
       home.packages = with pkgs; [
         github-desktop
         seabird
+        webex
       ];
 
       programs.lutris.enable = true;
