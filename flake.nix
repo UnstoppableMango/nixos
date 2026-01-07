@@ -12,9 +12,19 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    clan-core = {
+      url = "https://git.clan.lol/clan/clan-core/archive/main.tar.gz";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+        systems.follows = "systems";
+        flake-parts.follows = "flake-parts";
+        disko.follows = "disko";
+        treefmt-nix.follows = "treefmt-nix";
+      };
+    };
+
     nixos-anywhere = {
       url = "github:nix-community/nixos-anywhere";
-
       inputs = {
         nixpkgs.follows = "nixpkgs";
         flake-parts.follows = "flake-parts";
@@ -40,7 +50,6 @@
 
     dotfiles = {
       url = "github:unstoppablemango/dotfiles";
-
       inputs = {
         nixpkgs.follows = "nixpkgs";
         flake-parts.follows = "flake-parts";
@@ -57,6 +66,7 @@
       systems = import inputs.systems;
 
       imports = with inputs; [
+        clan-core.flakeModules.default
         flake-parts.flakeModules.modules
         treefmt-nix.flakeModule
         disko.flakeModules.default
@@ -77,11 +87,12 @@
           ...
         }:
         {
-          devShells.default = inputs'.dotfiles.devShells.default;
+          devShells = {
+            inherit (inputs'.dotfiles.devShells) default;
+          };
 
           treefmt = {
             programs.nixfmt.enable = true;
-
             programs.dprint = {
               enable = false; # Causing issues with flake checks
               settings.plugins = (
