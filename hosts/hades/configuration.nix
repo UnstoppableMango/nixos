@@ -2,14 +2,14 @@
 {
   nix.settings = {
     extra-substituters = [
-      "https://ncps.thecluster.lan"
+      # "https://ncps.thecluster.lan"
       "https://nix-community.cachix.org"
       "https://unstoppablemango.cachix.org"
       "https://zed.cachix.org"
       "https://cache.garnix.io"
     ];
     extra-trusted-public-keys = [
-      "ncps.thecluster.lan:D8fcKW2/D+zjKOABa3bDjEe8x+EPZpXnBDm+XwtNrhI="
+      # "ncps.thecluster.lan:D8fcKW2/D+zjKOABa3bDjEe8x+EPZpXnBDm+XwtNrhI="
       "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
       "unstoppablemango.cachix.org-1:m7uEI6X1Ov8DyFWJQX4WsRFRWFuzRW5c/Xms8ZaP74U="
       "zed.cachix.org-1:/pHQ6dpMsAZk2DiP4WCL0p9YDNKWj2Q5FL20bNmw1cU="
@@ -52,11 +52,6 @@
   networking = {
     hostName = "hades";
     networkmanager.enable = true;
-    # Temporary manual host entry while Pi-hole DNS is broken.
-    # TODO: Remove this once Pi-hole is healthy and resolving ncps.thecluster.lan correctly.
-    hosts = {
-      "192.168.1.43" = [ "ncps.thecluster.lan" ];
-    };
   };
 
   time.timeZone = "America/Chicago";
