@@ -52,6 +52,9 @@
   networking = {
     hostName = "hades";
     networkmanager.enable = true;
+    hosts = {
+      "192.168.1.43" = ["ncps.thecluster.lan"];
+    };
   };
 
   time.timeZone = "America/Chicago";
