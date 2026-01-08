@@ -72,6 +72,7 @@
         disko.flakeModules.default
         home-manager.flakeModules.home-manager
 
+        ./clan.nix
         ./desktops
         ./hardware
         ./hosts
@@ -88,7 +89,24 @@
         }:
         {
           devShells = {
-            inherit (inputs'.dotfiles.devShells) default;
+            default = pkgs.mkShell {
+              packages = with pkgs; [
+                inputs'.clan-core.packages.clan-cli
+                direnv
+                dprint
+                git
+                gnumake
+                home-manager
+                ldns
+                nil
+                # For the cache fallback behaviour in 2.32
+                nixVersions.latest
+                nixd
+                nixfmt
+                shellcheck
+                watchexec
+              ];
+            };
           };
 
           treefmt = {
