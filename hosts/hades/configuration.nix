@@ -55,7 +55,7 @@
     # Temporary manual host entry while Pi-hole DNS is broken.
     # TODO: Remove this once Pi-hole is healthy and resolving ncps.thecluster.lan correctly.
     hosts = {
-      "192.168.1.43" = ["ncps.thecluster.lan"];
+      "192.168.1.43" = [ "ncps.thecluster.lan" ];
     };
   };
 
