@@ -1,4 +1,4 @@
-{ inputs, ... }:
+{ inputs, config, ... }:
 let
   inherit (inputs) dotfiles;
 
@@ -38,6 +38,11 @@ let
   nixos = {
     nixpkgs.overlays = [
       dotfiles.overlays.default
+    ];
+
+    users.users.erik.openssh.authorizedKeys.keys = [
+      hadesKey
+      darterKey
     ];
 
     home-manager = {
