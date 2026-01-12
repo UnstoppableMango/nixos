@@ -2,5 +2,6 @@
   imports = [
     ./agreus
     ./hades
+    ./vrbox
   ];
 }

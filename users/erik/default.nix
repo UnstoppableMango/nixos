@@ -41,15 +41,15 @@ let
       dotfiles.overlays.default
     ];
 
-    users.users.erik.openssh.authorizedKeys.keys = [
-      hadesKey
-      darterKey
-    ];
+      users.users.erik.openssh.authorizedKeys.keys = [
+        hadesKey
+        darterKey
+      ];
 
-    home-manager = {
-      useGlobalPkgs = true;
-      useUserPackages = true;
-      backupFileExtension = "bak";
+      home-manager = {
+        useGlobalPkgs = true;
+        useUserPackages = true;
+        backupFileExtension = "bak";
 
       users.erik = {
         imports = [ home ];
