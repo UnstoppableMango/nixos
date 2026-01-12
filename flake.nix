@@ -93,6 +93,7 @@
               packages = with pkgs; [
                 inputs'.clan-core.packages.clan-cli
                 direnv
+                disko
                 dprint
                 git
                 gnumake

@@ -13,8 +13,8 @@ let
 in
 {
   flake = {
-    modules.nixos = mod;
-    nixosModules = mod;
+    modules.nixos.agreus = mod;
+    nixosModules.agreus = mod;
 
     nixosConfigurations."agreus" = inputs.nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
