@@ -40,10 +40,7 @@
       backupFileExtension = "bak";
 
       users.erik = {
-        imports = [
-          inputs.nixvim.homeModules.nixvim
-          self.modules.homeManager.erik
-        ];
+        imports = [ self.modules.homeManager.erik ];
       };
     };
   };

@@ -4,10 +4,7 @@ let
     disko.nixosModules.disko
     home-manager.nixosModules.home-manager
     {
-      home-manager.users.erik.imports = [
-        nixvim.homeModules.nixvim
-        dotfiles.modules.homeManager.erik
-      ];
+      home-manager.users.erik.imports = [ dotfiles.modules.homeManager.erik ];
     }
     self.modules.nixos.gnome
     ./configuration.nix
