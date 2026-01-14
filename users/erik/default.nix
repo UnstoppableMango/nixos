@@ -49,8 +49,9 @@
         useUserPackages = true;
         backupFileExtension = "bak";
 
-      users.erik = {
-        imports = [ self.modules.homeManager.erik ];
+        users.erik = {
+          imports = [ self.modules.homeManager.erik ];
+        };
       };
     };
 }

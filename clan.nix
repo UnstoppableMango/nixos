@@ -14,7 +14,7 @@
         pik8s5 = "192.168.1.105";
         pik8s6 = "192.168.1.106";
         pollux = "192.168.1.14";
-        vrbox = "192.168.1.107";
+        vrbox = "192.168.1.175";
         zeus = "192.168.1.10";
       };
     in
@@ -26,10 +26,10 @@
       };
 
       inventory.machines = {
-        # agreus = {
-        #   deploy.targetHost = "root@${ips.agreus}";
-        #   tags = [ ];
-        # };
+        agreus = {
+          deploy.targetHost = "root@${ips.agreus}";
+          tags = [ ];
+        };
 
         vrbox = {
           deploy.targetHost = "root@${ips.vrbox}";
@@ -69,16 +69,16 @@
       };
 
       machines = {
-        # agreus =
-        #   { ... }:
-        #   {
-        #     imports = [ self.modules.nixos.agreus ];
+        agreus =
+          { ... }:
+          {
+            imports = [ self.modules.nixos.agreus ];
 
-        #     # Enable remote Clan commands over SSH
-        #     nixpkgs.hostPlatform = "x86_64-linux";
+            # Enable remote Clan commands over SSH
+            nixpkgs.hostPlatform = "x86_64-linux";
 
-        #     clan.core.networking.targetHost = "root@${ips.agreus}";
-        #   };
+            clan.core.networking.targetHost = "root@${ips.agreus}";
+          };
 
         vrbox =
           { ... }:
