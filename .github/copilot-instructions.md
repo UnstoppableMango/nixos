@@ -76,7 +76,7 @@ This repository contains UnstoppableMango's personal NixOS configurations using 
 
 ### Security
 - GPG agent enabled with SSH support
-- User erik signs commits with GPG key 264283BBFDC491BC
+- Commits by user erik are automatically signed with GPG key 264283BBFDC491BC
 - Custom CA certificates for thecluster.lan domain
 - Firewall disabled by default
 
