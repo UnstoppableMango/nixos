@@ -16,7 +16,7 @@ This repository contains UnstoppableMango's personal NixOS configurations using 
 
 ### Formatting
 - Use `nix fmt` to format Nix files (uses nixfmt as configured in flake.nix)
-- Nix files use 2-space indentation (see .editorconfig)
+- Nix files use space indentation (see .editorconfig; nixfmt determines specific size)
 - YAML files use 2-space indentation
 - Other files use tabs (see .editorconfig)
 - Always include final newline and trim trailing whitespace
@@ -37,10 +37,10 @@ This repository contains UnstoppableMango's personal NixOS configurations using 
 
 ### Commands
 - `nix build .#nixosConfigurations.<HOST>.config.system.build.toplevel` - Build a host configuration
-- `nix flake check --all-systems` - Run flake checks
+- `nix flake check` - Run flake checks (CI uses `--all-systems` flag)
 - `nix fmt` - Format all Nix files
 - `make build` - Build the configuration for the current hostname
-- `make check` - Run flake checks
+- `make check` - Run flake checks (without --all-systems)
 - `make format` or `make fmt` - Format Nix files
 - `make update` - Update flake inputs
 
