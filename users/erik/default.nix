@@ -1,10 +1,12 @@
-{ inputs, self, ... }:
-{
-  flake.homeModules.erik = self.modules.homeManager.erik;
-  flake.modules.homeManager.erik =
+{ inputs, ... }:
+let
+  inherit (inputs) dotfiles;
+
+  home =
     { pkgs, ... }:
     {
-      imports = with inputs.dotfiles.modules.homeManager; [
+      imports = with dotfiles.modules.homeManager; [
+        ai
         brave
         emacs
         erik
@@ -14,6 +16,8 @@
         vscode
         zed
       ];
+
+      ai.enable = true;
 
       home.packages = with pkgs; [
         github-desktop
@@ -30,9 +34,10 @@
       };
     };
 
-  flake.nixosModules.erik = self.modules.nixos.erik;
-  flake.modules.nixos.erik = {
-    nixpkgs.overlays = [ inputs.dotfiles.overlays.default ];
+  nixos = {
+    nixpkgs.overlays = [
+      dotfiles.overlays.default
+    ];
 
     home-manager = {
       useGlobalPkgs = true;
@@ -40,8 +45,15 @@
       backupFileExtension = "bak";
 
       users.erik = {
-        imports = [ self.modules.homeManager.erik ];
+        imports = [ home ];
       };
     };
   };
+in
+{
+  flake.homeModules.erik = home;
+  flake.modules.homeManager.erik = home;
+
+  flake.nixosModules.erik = nixos;
+  flake.modules.nixos.erik = nixos;
 }
