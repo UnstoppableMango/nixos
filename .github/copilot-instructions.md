@@ -16,7 +16,7 @@ This repository contains UnstoppableMango's personal NixOS configurations using 
 
 ### Formatting
 - Use `nix fmt` to format Nix files (uses nixfmt as configured in flake.nix)
-- Nix files use space indentation (see .editorconfig; nixfmt determines specific size)
+- Nix files use space indentation as configured in .editorconfig (size determined by nixfmt)
 - YAML files use 2-space indentation
 - Other files use tabs (see .editorconfig)
 - Always include final newline and trim trailing whitespace
@@ -135,7 +135,7 @@ This repository contains UnstoppableMango's personal NixOS configurations using 
 Add to `environment.systemPackages` in the host's configuration.nix
 
 ### Adding a user package
-Add to the user's home.packages in users/<username>/default.nix
+Add to `home.packages` in the user's home-manager configuration (e.g., users/erik/default.nix)
 
 ### Adding a new host
 1. Create hosts/<hostname>/configuration.nix
