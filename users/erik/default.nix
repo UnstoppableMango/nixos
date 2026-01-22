@@ -2,10 +2,12 @@
 let
   inherit (inputs) dotfiles;
 
+  homeModules = dotfiles.modules.homeManager;
+
   home =
     { pkgs, ... }:
     {
-      imports = with dotfiles.modules.homeManager; [
+      imports = with homeModules; [
         ai
         brave
         emacs
