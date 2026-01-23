@@ -8,7 +8,6 @@ let
     { pkgs, ... }:
     {
       imports = with homeModules; [
-        ai
         brave
         emacs
         erik
