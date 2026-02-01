@@ -140,11 +140,11 @@
         "zed": "zed"
       },
       "locked": {
-        "lastModified": 1769880868,
-        "narHash": "sha256-MDmYbAT89aaiPt9thKtbiATvfko+mEnKnKJy0BETjOA=",
+        "lastModified": 1769907720,
+        "narHash": "sha256-lHRYPUhn213pqnD8W3xCny0IqTuwHJpBE63d+MEMbD4=",
         "owner": "unstoppablemango",
         "repo": "dotfiles",
-        "rev": "3678d230eb33d0e1b85d7bea8c595f196f21faf6",
+        "rev": "b244f433af410494059143c82829d508515ec300",
         "type": "github"
       },
       "original": {
@@ -417,11 +417,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1769831121,
-        "narHash": "sha256-TvGnsXWfbnnnXw44LpVeSOHsJyjZ6TSNwGj1WxQQe0E=",
+        "lastModified": 1769895190,
+        "narHash": "sha256-03X6iv1McBTu0iTbyuQDbum33BXqr2F4Yui9jqSo7EA=",
         "owner": "nix-community",
         "repo": "nix-init",
-        "rev": "4700c90f9c6c554dea395354dd5d54f14f3c9295",
+        "rev": "26b440522c89004fb3caf9ee790a50fcfc73f0d2",
         "type": "github"
       },
       "original": {

@@ -135,9 +135,6 @@
     nix-direnv.enable = true;
   };
 
-  # For cache fallback behaviour
-  nix.package = pkgs.nixVersions.latest;
-
   programs.zsh.enable = true;
   users.defaultUserShell = pkgs.bash;
 
@@ -187,6 +184,7 @@
       signal-desktop
       claude-monitor
       omnissa-horizon-client
+      xmage
 
       (wineWowPackages.full.override {
         wineRelease = "staging";
