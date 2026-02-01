@@ -19,6 +19,7 @@ let
       ];
 
       ai.enable = true;
+      openshift.enable = true;
 
       home.packages = with pkgs; [
         github-desktop
