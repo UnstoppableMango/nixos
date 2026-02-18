@@ -186,7 +186,7 @@
       omnissa-horizon-client
       xmage
 
-      (wineWowPackages.full.override {
+      (wineWow64Packages.full.override {
         wineRelease = "staging";
         mingwSupport = true;
       })
@@ -217,12 +217,12 @@
     openssl
     python3
     stdenv.cc.cc
-    xorg.libX11
-    xorg.libXcursor
-    xorg.libXext
-    xorg.libXi
-    xorg.libXrender
-    xorg.libXtst
+    libx11
+    libxcursor
+    libxext
+    libxi
+    libxrender
+    libxtst
     xz
     zlib
   ];
