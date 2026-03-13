@@ -69,17 +69,28 @@
     LC_TIME = "en_US.UTF-8";
   };
 
-  virtualisation.docker = {
-    enable = true;
-    storageDriver = "btrfs";
+  virtualisation = {
+    containers.enable = true;
 
-    daemon.settings = {
-      userland-proxy = false;
+    docker = {
+      enable = true;
+      storageDriver = "btrfs";
+
+      daemon.settings = {
+        userland-proxy = false;
+      };
+
+      rootless = {
+        enable = true;
+        setSocketVariable = true;
+      };
     };
 
-    rootless = {
+    podman = {
       enable = true;
-      setSocketVariable = true;
+
+      # Required for containers under podman-compose to be able to talk to each other.
+      defaultNetwork.settings.dns_enabled = true;
     };
   };
 
@@ -147,6 +158,7 @@
       "wheel"
       "openrazer"
       "libvirt" # crc wants `libvirt` not `libvirtd`
+      "podman"
     ];
 
     packages = with pkgs; [
