@@ -7,7 +7,7 @@
 
 let
   PID_PATH = "/tmp/ssh_sleep_block.pid";
-  PID_PIPE = "pid_pipe";
+  PID_PIPE = "/tmp/ssh_sleep_block.pid_pipe";
 
   # Prevent sleeping on active SSH
   sleep_script = pkgs.writeScript "infinite-sleep" ''
@@ -33,35 +33,41 @@ let
     # Inspired by: https://unix.stackexchange.com/a/136552/84197 and
     #              https://askubuntu.com/a/954943/388360
 
-    num_ssh=$(netstat -nt | awk '$4 ~ /:22$/ && $6 == "ESTABLISHED"' | wc -l)
+    (
+      ${pkgs.util-linux}/bin/flock 200
 
-    # echo "User id is $UID, num_ssh is $num_ssh, pam type $PAM_TYPE" > /tmp/ssh_user
+      num_ssh=$(${pkgs.iproute2}/bin/ss -nt | awk '$1 == "ESTAB" && $4 ~ /:22$/' | wc -l)
 
-    case "$PAM_TYPE" in
-        open_session)
-            if [ "$num_ssh" -gt 1 ]; then
-                exit
-            fi
+      case "$PAM_TYPE" in
+          open_session)
+              if [ "$num_ssh" -gt 1 ]; then
+                  exit
+              fi
 
-            logger "Starting sleep inhibitor"
-            mkfifo ${PID_PIPE}
-            ${inhibit_script}
-            logger "Sleep inhibitor started with PID $(cat ${PID_PIPE})"
-            rm ${PID_PIPE}
-            ;;
+              logger "Starting sleep inhibitor"
+              mkfifo ${PID_PIPE}
+              ${inhibit_script}
+              logger "Sleep inhibitor started with PID $(cat ${PID_PIPE})"
+              rm ${PID_PIPE}
+              ;;
 
-        close_session)
-            if [ "$num_ssh" -ne 0 ]; then
-                exit
-            fi
+          close_session)
+              if [ "$num_ssh" -ne 0 ]; then
+                  exit
+              fi
 
-            logger "Killing sleep inhibitor PID $(cat ${PID_PATH})"
-            kill -9 $(cat ${PID_PATH}) && rm ${PID_PATH}
-            ;;
+              if [ ! -f ${PID_PATH} ]; then
+                  exit
+              fi
 
-        *)
-            exit
-    esac
+              logger "Killing sleep inhibitor PID $(cat ${PID_PATH})"
+              kill -9 $(cat ${PID_PATH}) && rm ${PID_PATH}
+              ;;
+
+          *)
+              exit
+      esac
+    ) 200>/tmp/ssh_inhibit.lock
 
   '';
 in
