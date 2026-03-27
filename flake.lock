@@ -118,7 +118,9 @@
         "home-manager": [
           "home-manager"
         ],
-        "mynix": "mynix",
+        "mynix": [
+          "mynix"
+        ],
         "nil": "nil",
         "nix-direnv": "nix-direnv",
         "nix-init": "nix-init",
@@ -140,11 +142,11 @@
         "zed": "zed"
       },
       "locked": {
-        "lastModified": 1774638592,
-        "narHash": "sha256-arr9izE3l5IpTmkiPL8WteCUHDp0zFIGhYjYMakrmIg=",
+        "lastModified": 1774639917,
+        "narHash": "sha256-DfvJxODF+0G9XBzp3szd3MHP0bpyUUSwTWmhW6aEPzY=",
         "owner": "unstoppablemango",
         "repo": "dotfiles",
-        "rev": "f0509653d84579df672adb897af7bb77f62ff891",
+        "rev": "6d3d9cd6fc1168d3635fa118061efea71aa1be23",
         "type": "github"
       },
       "original": {
@@ -233,6 +235,27 @@
         "type": "github"
       }
     },
+    "flake-utils_2": {
+      "inputs": {
+        "systems": [
+          "mynix",
+          "systems"
+        ]
+      },
+      "locked": {
+        "lastModified": 1731533236,
+        "narHash": "sha256-l0KFg5HjrsfsO/JpG+r7fRrqm12kzFHyUHqHCVpMMbI=",
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "rev": "11707dc2f618dd54ca8739b309ec4fc024de578b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "type": "github"
+      }
+    },
     "gomod2nix": {
       "inputs": {
         "flake-utils": [
@@ -241,6 +264,28 @@
         ],
         "nixpkgs": [
           "dotfiles",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1770585520,
+        "narHash": "sha256-yBz9Ozd5Wb56i3e3cHZ8WcbzCQ9RlVaiW18qDYA/AzA=",
+        "owner": "nix-community",
+        "repo": "gomod2nix",
+        "rev": "1201ddd1279c35497754f016ef33d5e060f3da8d",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-community",
+        "repo": "gomod2nix",
+        "type": "github"
+      }
+    },
+    "gomod2nix_2": {
+      "inputs": {
+        "flake-utils": "flake-utils_2",
+        "nixpkgs": [
+          "mynix",
           "nixpkgs"
         ]
       },
@@ -296,40 +341,30 @@
     "mynix": {
       "inputs": {
         "flake-parts": [
-          "dotfiles",
           "flake-parts"
         ],
-        "gomod2nix": [
-          "dotfiles",
-          "gomod2nix"
-        ],
-        "nil": [
-          "dotfiles",
-          "nil"
-        ],
+        "gomod2nix": "gomod2nix_2",
+        "nil": "nil_2",
         "nixpkgs": [
-          "dotfiles",
           "nixpkgs"
         ],
         "systems": [
-          "dotfiles",
           "systems"
         ],
         "treefmt-nix": [
-          "dotfiles",
           "treefmt-nix"
         ]
       },
       "locked": {
-        "lastModified": 1774638219,
-        "narHash": "sha256-em4HCHlLwj+9TEakO2dTwq6coStppZbMfxZGi2dRiaE=",
-        "owner": "UnstoppableMango",
+        "lastModified": 1774639792,
+        "narHash": "sha256-T+t9UgOPbZkwt6dTGi0ffAd2MYJFkChVioFPLdHfDm4=",
+        "owner": "unstoppablemango",
         "repo": "nix",
-        "rev": "fc1b4931e00d5bd378f3c063fa08037bab8230e3",
+        "rev": "4dac2780367593bfb877e34b3cf6421f8eb119ef",
         "type": "github"
       },
       "original": {
-        "owner": "UnstoppableMango",
+        "owner": "unstoppablemango",
         "repo": "nix",
         "type": "github"
       }
@@ -338,6 +373,27 @@
       "inputs": {
         "nixpkgs": [
           "dotfiles",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1765326831,
+        "narHash": "sha256-18j8X2Nbe0Wg1+7YrWRlYzmjZ5Wq0NCVwJHJlBIw/dc=",
+        "owner": "oxalica",
+        "repo": "nil",
+        "rev": "504599f7e555a249d6754698473124018b80d121",
+        "type": "github"
+      },
+      "original": {
+        "owner": "oxalica",
+        "repo": "nil",
+        "type": "github"
+      }
+    },
+    "nil_2": {
+      "inputs": {
+        "nixpkgs": [
+          "mynix",
           "nixpkgs"
         ]
       },
@@ -638,6 +694,7 @@
         "dotfiles": "dotfiles",
         "flake-parts": "flake-parts",
         "home-manager": "home-manager",
+        "mynix": "mynix",
         "nixos-anywhere": "nixos-anywhere",
         "nixos-hardware": "nixos-hardware",
         "nixpkgs": "nixpkgs",
