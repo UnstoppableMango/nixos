@@ -40,6 +40,17 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    mynix = {
+      url = "github:unstoppablemango/nix";
+
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+        flake-parts.follows = "flake-parts";
+        systems.follows = "systems";
+        treefmt-nix.follows = "treefmt-nix";
+      };
+    };
+
     dotfiles = {
       url = "github:unstoppablemango/dotfiles";
 
@@ -47,6 +58,7 @@
         nixpkgs.follows = "nixpkgs";
         flake-parts.follows = "flake-parts";
         home-manager.follows = "home-manager";
+        mynix.follows = "mynix";
         nixvim.follows = "nixvim";
         systems.follows = "systems";
         treefmt-nix.follows = "treefmt-nix";
