@@ -19,6 +19,7 @@
       "nix-command"
       "flakes"
     ];
+    system-features = [ "kvm" ];
   };
 
   nixpkgs.config.allowUnfree = true;
