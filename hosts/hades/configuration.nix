@@ -39,9 +39,7 @@
   };
 
   # This continues to randomly stall and fail
-  # Going to see if disabling it helps
-  #
-  # Nope, just makes the problem happen later
+  # Removing just makes the problem happen later
   boot.initrd.kernelModules = [ "amdgpu" ];
 
   # Bootloader.
@@ -49,6 +47,13 @@
   boot.loader.efi.canTouchEfiVariables = true;
   # https://github.com/NixOS/nixpkgs/issues/23926#issuecomment-3298421104
   boot.loader.systemd-boot.configurationLimit = 25;
+
+  boot.kernelModules = [
+    "ip6_tables"
+    "ip6table_nat"
+    "ip_tables"
+    "iptable_nat"
+  ];
 
   networking = {
     hostName = "hades";
