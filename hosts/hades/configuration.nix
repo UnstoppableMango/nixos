@@ -164,6 +164,7 @@
       "wheel"
       "openrazer"
       "libvirt" # crc wants `libvirt` not `libvirtd`
+      "docker" # for kind, hopefully
       "podman"
     ];
 
