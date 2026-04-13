@@ -324,6 +324,11 @@
     enableSSHSupport = true;
   };
 
+  sops = {
+    defaultSopsFile = ./secrets/secrets.yaml;
+    age.keyFile = "/var/lib/sops-nix/key.txt";
+  };
+
   services.openssh.enable = true;
 
   security.pki.certificates = [
