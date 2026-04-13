@@ -12,6 +12,7 @@
           nixos-hardware.nixosModules.common-pc-ssd
           home-manager.nixosModules.home-manager
           disko.nixosModules.disko
+          sops-nix.nixosModules.sops
         ]
         ++ (with self.modules.nixos; [
           erik
