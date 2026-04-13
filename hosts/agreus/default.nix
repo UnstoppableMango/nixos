@@ -10,6 +10,7 @@ in
         imports = with inputs; [
           disko.nixosModules.disko
           home-manager.nixosModules.home-manager
+          sops-nix.nixosModules.sops
           # self.modules.nixos.erik
           self.modules.nixos.gnome
           ./configuration.nix
