@@ -314,7 +314,6 @@
   fonts.fontconfig.enable = true;
   fonts.fontDir.enable = true;
   fonts.packages = with pkgs; [
-    meslo-lgs-nf
     nerd-fonts.meslo-lg
     nerd-fonts.droid-sans-mono
     nerd-fonts.fira-mono
