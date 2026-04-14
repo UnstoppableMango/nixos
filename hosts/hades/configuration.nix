@@ -75,6 +75,14 @@
     LC_TIME = "en_US.UTF-8";
   };
 
+  # Disable ibus — it intercepts keyboard input on Wayland but can't deliver it
+  # back into bwrap sandboxes, making text fields in apps like Omnissa Horizon
+  # Client non-interactive. A plain xkb US layout needs no input method daemon.
+  i18n.inputMethod = {
+    enable = true;
+    # type = null; # Disables IBus and other input method frameworks
+  };
+
   virtualisation = {
     containers.enable = true;
 
@@ -303,8 +311,10 @@
 
   environment.pathsToLink = [ "/share/zsh" ];
 
+  fonts.fontconfig.enable = true;
+  fonts.fontDir.enable = true;
   fonts.packages = with pkgs; [
-    meslo-lgs-nf
+    nerd-fonts.meslo-lg
     nerd-fonts.droid-sans-mono
     nerd-fonts.fira-mono
     nerd-fonts.fira-code
@@ -314,6 +324,13 @@
     nerd-fonts.noto
     nerd-fonts.open-dyslexic
     nerd-fonts.roboto-mono
+
+    # Thanks Grey
+    open-sans
+    corefonts # Microsoft fonts (Arial, Times New Roman, etc.)
+    dejavu_fonts # Great standard fallback
+    liberation_ttf # Another standard set of fallbacks
+    ubuntu-classic
   ];
 
   # Some programs need SUID wrappers, can be configured further or are
@@ -327,6 +344,7 @@
   sops = {
     defaultSopsFile = ./secrets/secrets.yaml;
     age.keyFile = "/var/lib/sops-nix/key.txt";
+    age.sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
   };
 
   services.openssh.enable = true;
