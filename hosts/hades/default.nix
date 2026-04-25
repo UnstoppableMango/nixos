@@ -1,27 +1,26 @@
+{ inputs, self, ... }:
 {
-  disko,
-  erik,
-  gnome,
-  hades,
-  ssh,
-  nixDaemonConfig,
-  nixos-hardware,
-  home-manager,
-  nixosSystem,
-  sops-nix,
-  ...
-}:
-nixosSystem {
-  modules = [
-    nixos-hardware.nixosModules.asus-rog-strix-x570e
-    nixos-hardware.nixosModules.common-pc-ssd
-    home-manager.nixosModules.home-manager
-    disko.nixosModules.disko
-    sops-nix.nixosModules.sops
-    erik
-    gnome
-    hades
-    ssh
-    nixDaemonConfig
-  ];
+  flake = {
+    modules.nixos.hades = ./configuration.nix;
+    nixosModules.hades = ./configuration.nix;
+
+    nixosConfigurations.hades = inputs.nixpkgs.lib.nixosSystem {
+      modules =
+        with inputs;
+        [
+          nixos-hardware.nixosModules.asus-rog-strix-x570e
+          nixos-hardware.nixosModules.common-pc-ssd
+          home-manager.nixosModules.home-manager
+          disko.nixosModules.disko
+          sops-nix.nixosModules.sops
+        ]
+        ++ (with self.modules.nixos; [
+          erik
+          gnome
+          hades
+          ssh
+          nixDaemonConfig
+        ]);
+    };
+  };
 }
