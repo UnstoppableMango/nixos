@@ -8,11 +8,9 @@
     agreus = import ./agreus {
       inherit (self.modules.nixos) gnome;
       inherit (inputs.nixpkgs.lib) nixosSystem;
-      inherit (inputs)
-        disko
-        home-manager
-        sops-nix
-        ;
+      inherit (inputs.disko.nixosModules) disko;
+      inherit (inputs.home-manager.nixosModules) home-manager;
+      inherit (inputs.sops-nix.nixosModules) sops;
     };
 
     # hades = import ./hades {

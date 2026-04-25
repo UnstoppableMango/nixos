@@ -2,7 +2,7 @@
   disko,
   gnome,
   home-manager,
-  sops-nix,
+  sops,
   nixosSystem,
 }:
 nixosSystem {
@@ -10,10 +10,9 @@ nixosSystem {
   modules = [
     {
       imports = [
-        disko.nixosModules.disko
-        home-manager.nixosModules.home-manager
-        sops-nix.nixosModules.sops
-        # self.modules.nixos.erik
+        disko
+        home-manager
+        sops
         gnome
         ./configuration.nix
         { hardware.facter.reportPath = ./facter.json; }
