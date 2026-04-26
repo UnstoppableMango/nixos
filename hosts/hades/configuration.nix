@@ -21,8 +21,9 @@
     ];
 
     system-features = [ "kvm" ];
+  };
 
-    # TODO: Where do these go
+  nix = {
     # Don't kill my PC when building big things
     daemonCPUSchedPolicy = "idle";
     daemonIOSchedClass = "idle";
