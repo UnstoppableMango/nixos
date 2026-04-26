@@ -102,13 +102,7 @@
         treefmt-nix.flakeModule
         disko.flakeModules.default
         home-manager.flakeModules.home-manager
-
-        ./desktops
-        ./hardware
         ./hosts
-        ./shells
-        ./toolchain
-        ./users
       ];
 
       perSystem =
@@ -118,7 +112,9 @@
           ...
         }:
         {
-          devShells.default = inputs'.dotfiles.devShells.default;
+          devShells = {
+            inherit (inputs'.dotfiles.devShells) default;
+          };
 
           treefmt = {
             programs.nixfmt.enable = true;

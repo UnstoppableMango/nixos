@@ -1,26 +1,12 @@
-{ inputs, ... }:
-let
-  inherit (inputs) dotfiles;
+{ inputs, pkgs, ... }:
+{
+  home-manager = {
+    useGlobalPkgs = true;
+    useUserPackages = true;
+    backupFileExtension = "bak";
+    extraSpecialArgs = { inherit inputs; };
 
-  homeModules = dotfiles.modules.homeManager;
-
-  home =
-    { pkgs, ... }:
-    {
-      imports = with homeModules; [
-        brave
-        emacs
-        erik
-        ghostty
-        gnome
-        kitty
-        vscode
-        zed
-      ];
-
-      ai.enable = true;
-      openshift.enable = true;
-
+    users.erik = {
       home.packages = with pkgs; [
         github-desktop
         seabird
@@ -34,28 +20,18 @@ let
         key = "264283BBFDC491BC";
         signByDefault = true;
       };
-    };
 
-  nixos = {
-    nixpkgs.overlays = [
-      dotfiles.overlays.default
-    ];
-
-    home-manager = {
-      useGlobalPkgs = true;
-      useUserPackages = true;
-      backupFileExtension = "bak";
-
-      users.erik = {
-        imports = [ home ];
+      dotfiles = {
+        ai.enable = true;
+        openshift.enable = true;
+        brave.enable = true;
+        emacs.enable = true;
+        ghostty.enable = true;
+        gnome.enable = true;
+        kitty.enable = true;
+        vscode.enable = true;
+        zed.enable = true;
       };
     };
   };
-in
-{
-  flake.homeModules.erik = home;
-  flake.modules.homeManager.erik = home;
-
-  flake.nixosModules.erik = nixos;
-  flake.modules.nixos.erik = nixos;
 }
