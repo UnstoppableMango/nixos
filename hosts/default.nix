@@ -19,6 +19,7 @@
         disko.nixosModules.disko
         sops-nix.nixosModules.sops
         dotfiles.nixosModules.erik
+        { nixpkgs.overlays = [ dotfiles.overlays.default ]; }
 
         ../desktops
         ../users/erik
