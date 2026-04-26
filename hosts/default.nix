@@ -22,6 +22,7 @@
         { nixpkgs.overlays = [ dotfiles.overlays.default ]; }
 
         ../desktops
+        ../shells
         ../users/erik
         ./hades/configuration.nix
       ];
