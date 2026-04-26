@@ -13,12 +13,13 @@
         webex
       ];
 
-      programs.lutris.enable = true;
-
-      programs.git.signing = {
-        format = "openpgp";
-        key = "264283BBFDC491BC";
-        signByDefault = true;
+      programs = {
+        lutris.enable = true;
+        git.signing = {
+          format = "openpgp";
+          key = "264283BBFDC491BC";
+          signByDefault = true;
+        };
       };
 
       dotfiles = {

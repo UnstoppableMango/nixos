@@ -19,7 +19,6 @@
 
     nixos-anywhere = {
       url = "github:nix-community/nixos-anywhere";
-
       inputs = {
         nixpkgs.follows = "nixpkgs";
         flake-parts.follows = "flake-parts";
@@ -63,7 +62,6 @@
 
     mynix = {
       url = "github:unstoppablemango/nix";
-
       inputs = {
         nixpkgs.follows = "nixpkgs";
         flake-parts.follows = "flake-parts";
@@ -76,7 +74,6 @@
 
     dotfiles = {
       url = "github:unstoppablemango/dotfiles";
-
       inputs = {
         nixpkgs.follows = "nixpkgs";
         flake-parts.follows = "flake-parts";
@@ -106,11 +103,7 @@
       ];
 
       perSystem =
-        {
-          inputs',
-          pkgs,
-          ...
-        }:
+        { inputs', pkgs, ... }:
         {
           devShells = {
             inherit (inputs'.dotfiles.devShells) default;
