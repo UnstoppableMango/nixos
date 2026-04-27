@@ -16,13 +16,6 @@
           signByDefault = true;
         };
       };
-
-      dotfiles = {
-        emacs.enable = true;
-        ghostty.enable = true;
-        gnome.enable = true;
-        kitty.enable = true;
-      };
     };
   };
 }

@@ -73,6 +73,7 @@
       gnome.enable = true;
       brave.enable = true;
       ghostty.enable = true;
+      emacs.enable = true;
     };
   };
 

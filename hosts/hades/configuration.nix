@@ -179,6 +179,7 @@
     dotfiles = {
       gnome.enable = true;
       brave.enable = true;
+      emacs.enable = true;
       vscode.enable = true;
       zed.enable = true;
       helix.enable = true;
