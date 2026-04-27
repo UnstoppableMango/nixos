@@ -68,6 +68,14 @@
     gitMinimal
   ];
 
+  home-manager.users.erik = {
+    dotfiles = {
+      gnome.enable = true;
+      brave.enable = true;
+      ghostty.enable = true;
+    };
+  };
+
   # https://mynixos.com/nixpkgs/option/users.mutableUsers
   users.mutableUsers = true;
   users.users =
