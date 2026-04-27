@@ -175,6 +175,24 @@
     gnome.enable = true;
   };
 
+  home-manager.users.erik = {
+    dotfiles = {
+      gnome.enable = true;
+      brave.enable = true;
+      emacs.enable = true;
+      vscode.enable = true;
+      zed.enable = true;
+      helix.enable = true;
+      ai.enable = true;
+      ghostty.enable = true;
+      kitty.enable = true;
+      containers.enable = true;
+      openshift.enable = true;
+      ocaml.enable = true;
+      dotnet.enable = true;
+    };
+  };
+
   users.users.erik = {
     isNormalUser = true;
     shell = pkgs.zsh;
@@ -212,6 +230,8 @@
       bitwarden-desktop
       bitwarden-cli
       cachix
+      github-desktop
+      seabird
 
       # Broken ATM
       # chiaki-ng
@@ -220,6 +240,7 @@
       discord
       tutanota-desktop
       slack
+      webex
       signal-desktop
       claude-monitor
       omnissa-horizon-client

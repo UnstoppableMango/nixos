@@ -1,12 +1,22 @@
 { inputs, ... }:
 {
   flake.nixosConfigurations = {
-    agreus = import ./agreus {
-      gnome = ../desktops/gnome;
-      inherit (inputs.nixpkgs.lib) nixosSystem;
-      inherit (inputs.disko.nixosModules) disko;
-      inherit (inputs.home-manager.nixosModules) home-manager;
-      inherit (inputs.sops-nix.nixosModules) sops;
+    agreus = inputs.nixpkgs.lib.nixosSystem {
+      specialArgs = { inherit (inputs.dotfiles) inputs; };
+
+      modules = with inputs; [
+        home-manager.nixosModules.home-manager
+        disko.nixosModules.disko
+        sops-nix.nixosModules.sops
+        dotfiles.nixosModules.erik
+        { nixpkgs.overlays = [ dotfiles.overlays.default ]; }
+        { hardware.facter.reportPath = ./agreus/facter.json; }
+
+        ../desktops
+        ../shells
+        ../users/erik
+        ./agreus/configuration.nix
+      ];
     };
 
     hades = inputs.nixpkgs.lib.nixosSystem {
