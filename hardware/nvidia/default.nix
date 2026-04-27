@@ -1,5 +1,8 @@
+{ lib, config, ... }:
 {
-  flake.modules.nixos.hardware.nvidia = {
+  options.dotfiles.nvidia.enable = lib.mkEnableOption "NVidia";
+
+  config = lib.mkIf config.dotfiles.nvidia.enable {
     # Open drivers (NVreg_OpenRmEnableUnsupportedGpus=1)
     open = true;
 
