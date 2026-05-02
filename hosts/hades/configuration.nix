@@ -54,7 +54,7 @@
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
   # https://github.com/NixOS/nixpkgs/issues/23926#issuecomment-3298421104
-  boot.loader.systemd-boot.configurationLimit = 25;
+  boot.loader.systemd-boot.configurationLimit = 10;
 
   boot.kernelModules = [
     "ip6_tables"
