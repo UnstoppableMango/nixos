@@ -27,6 +27,18 @@
       };
     };
 
+    clan-core = {
+      url = "https://git.clan.lol/clan/clan-core/archive/25.11.tar.gz";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+        systems.follows = "systems";
+        flake-parts.follows = "flake-parts";
+        disko.follows = "disko";
+        sops-nix.follows = "sops-nix";
+        treefmt-nix.follows = "treefmt-nix";
+      };
+    };
+
     nixvim = {
       url = "github:nix-community/nixvim";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -78,6 +90,7 @@
         nixpkgs.follows = "nixpkgs";
         flake-parts.follows = "flake-parts";
         flake-utils.follows = "flake-utils";
+        clan-core.follows = "clan-core";
         gomod2nix.follows = "gomod2nix";
         home-manager.follows = "home-manager";
         mynix.follows = "mynix";
