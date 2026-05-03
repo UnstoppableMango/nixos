@@ -113,15 +113,10 @@
         disko.flakeModules.default
         home-manager.flakeModules.home-manager
         clan-core.flakeModules.default
+
         ./hosts
+        ./clan.nix
       ];
-
-      clan = {
-        meta.name = "thecluster";
-        meta.domain = "thecluster.io";
-
-        machines = { };
-      };
 
       perSystem =
         { inputs', pkgs, ... }:
