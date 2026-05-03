@@ -123,28 +123,24 @@
       };
 
       perSystem =
-        { inputs', pkgs, ... }:
+        { inputs', system, ... }:
         {
+          _module.args.pkgs = import inputs.nixpkgs {
+            inherit system;
+
+            overlays = [
+              inputs.dotfiles.overlays.default
+            ];
+
+            config.allowUnfree = true;
+          };
+
           devShells = {
             inherit (inputs'.dotfiles.devShells) default;
           };
 
           treefmt = {
             programs.nixfmt.enable = true;
-
-            programs.dprint = {
-              enable = false; # Causing issues with flake checks
-              settings.plugins = (
-                pkgs.dprint-plugins.getPluginList (
-                  plugins: with plugins; [
-                    dprint-plugin-json
-                    dprint-plugin-markdown
-                    g-plane-markup_fmt
-                    g-plane-pretty_yaml
-                  ]
-                )
-              );
-            };
           };
         };
     };

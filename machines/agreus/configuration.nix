@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, inputs, ... }:
 {
   nix.settings = {
     extra-substituters = [
@@ -17,20 +17,17 @@
     ];
   };
 
-  imports = [
+  imports = with inputs; [
+    home-manager.nixosModules.home-manager
+    dotfiles.nixosModules.erik
+
     ./disk-config.nix
     ../../desktops
     ../../shells
-    ../../users/erik
+    # ../../users/erik
   ];
 
   boot.loader = {
-    # grub = {
-    #   devices = [ "/dev/nvme0n1" ];
-    #   efiSupport = true;
-    #   efiInstallAsRemovable = true;
-    # };
-
     efi.canTouchEfiVariables = true;
     systemd-boot = {
       enable = true;
@@ -79,39 +76,9 @@
     };
   };
 
-  # https://mynixos.com/nixpkgs/option/users.mutableUsers
-  users.mutableUsers = true;
-  users.users =
-    let
-      hadesKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEwW6dUPKvKXXzj+gKJS7EXh6UzyLjzatrcPXa0Y2qvz erik@hades";
-      darterKey = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDB02UwohkEJGpb8Uud4bNQa73X9WvwQcbsRr1M8c7nztbnUCCeLBTyCtRTMnR6dmoQ3xfGLbv55nlTFT/s6ZZKWEAql/gPJoBF9nEr0622IJQ6VPIpgcI8eA2YDwYA0l19Bji4u3VbTMB+M3Tz7JRmKqHo5bUvnZWi2cp+G5Hh2f2k0lQOa9ttjvVlLBQLCJV8NmCxikJS0ZuH2+KJPT2DVsY8dMZ2fQHh1/DI+ZAo6V1qjEU4SQKjpdIrUsPt9Ah1CBU7W3tG57+aYCoaay/BuUY4zlewxGdn3MAv/mjyqF6WgkzCilr7VBnO8CUgzLGu6F+8ljEJVZ5zqyTGfuni/069qMROEp6abhQe7MGToqFgsDkIJhSihomUNylM2piVFobZTeqGBXqh8h3W1fkQHsfMjYbkYP6kHx7yZ03Xw7X+4ZfySZ4s1PqvJE1ZALHdpzYSDK06+iqbJ3ZA/lpipg+Mzx7iRrD3CsPjzgi1iE6w5DVu5xAMIZIRFetTIAs= erik@darter";
-    in
-    {
-      erik = {
-        isNormalUser = true;
-        home = "/home/erik";
-        initialPassword = "Password123!";
-        extraGroups = [ "wheel" ];
-        openssh.authorizedKeys.keys = [
-          hadesKey
-          darterKey
-        ];
-      };
-
-      office = {
-        isNormalUser = true;
-        home = "/home/office";
-        initialPassword = "Password123!";
-        openssh.authorizedKeys.keys = [
-          hadesKey
-          darterKey
-        ];
-      };
-    };
-
   # Enable automatic login
-  services.displayManager.autoLogin.enable = true;
-  services.displayManager.autoLogin.user = "office";
+  # services.displayManager.autoLogin.enable = true;
+  # services.displayManager.autoLogin.user = "office";
 
   security.pki.certificates = [
     # thecluster.lan Nginx CA
