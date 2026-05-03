@@ -115,8 +115,12 @@
         clan-core.flakeModules.default
 
         ./hosts
-        ./clan.nix
       ];
+
+      clan = {
+        imports = [ ./clan.nix ];
+        specialArgs = { inherit inputs; };
+      };
 
       perSystem =
         { inputs', pkgs, ... }:

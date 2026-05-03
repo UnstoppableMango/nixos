@@ -19,21 +19,23 @@
 
   imports = [
     ./disk-config.nix
+    ../../desktops
+    ../../shells
+    ../../users/erik
   ];
 
   boot.loader = {
-    grub = {
-      devices = [ "/dev/nvme0n1" ];
-      efiSupport = true;
-      efiInstallAsRemovable = true;
-    };
-
-    # TODO: Switch to systemd-boot
-    # efi.canTouchEfiVariables = true;
-    # systemd-boot = {
-    #   enable = true;
-    #   configurationLimit = 25;
+    # grub = {
+    #   devices = [ "/dev/nvme0n1" ];
+    #   efiSupport = true;
+    #   efiInstallAsRemovable = true;
     # };
+
+    efi.canTouchEfiVariables = true;
+    systemd-boot = {
+      enable = true;
+      configurationLimit = 25;
+    };
   };
 
   # https://nixos.wiki/wiki/Power_Management#systemd_sleep
@@ -103,12 +105,6 @@
         openssh.authorizedKeys.keys = [
           hadesKey
           darterKey
-        ];
-      };
-
-      root = {
-        openssh.authorizedKeys.keys = [
-          hadesKey
         ];
       };
     };
