@@ -47,14 +47,10 @@
     hostName = "agreus";
     useDHCP = false;
 
-    networkmanager = {
-      enable = true;
-      # https://wiki.nixos.org/wiki/NetworkManager#DNS_Management
-      insertNameservers = [
-        "192.168.1.46"
-        "192.168.1.47"
-      ];
-    };
+    nameservers = [
+      "192.168.1.46"
+      "192.168.1.47"
+    ];
   };
 
   services.openssh.enable = true;
