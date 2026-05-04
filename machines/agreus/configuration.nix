@@ -38,7 +38,7 @@
   # https://nixos.wiki/wiki/Power_Management#systemd_sleep
   systemd.sleep.settings.Sleep = {
     AllowSuspend = "no";
-    AllowHibernationn = "no";
+    AllowHibernation = "no";
     AllowHybridSleep = "no";
     AllowSuspendThenHibernate = "no";
   };
@@ -49,13 +49,10 @@
 
     networkmanager = {
       enable = true;
-
       # https://wiki.nixos.org/wiki/NetworkManager#DNS_Management
       insertNameservers = [
-        "192.168.1.44"
-        "192.168.1.45"
-        "1.1.1.1"
-        "1.0.0.1"
+        "192.168.1.46"
+        "192.168.1.47"
       ];
     };
   };
