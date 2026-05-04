@@ -1,4 +1,4 @@
-{ pkgs, inputs, ... }:
+{ pkgs, ... }:
 {
   nix.settings = {
     extra-substituters = [
@@ -17,9 +17,9 @@
     ];
   };
 
-  imports = with inputs; [
-    home-manager.nixosModules.home-manager
-    dotfiles.nixosModules.erik
+  imports = [
+    # home-manager.nixosModules.home-manager
+    # dotfiles.nixosModules.erik
 
     ./disk-config.nix
     ../../desktops
@@ -67,14 +67,14 @@
     gitMinimal
   ];
 
-  home-manager.users.erik = {
-    dotfiles = {
-      gnome.enable = true;
-      brave.enable = true;
-      ghostty.enable = true;
-      emacs.enable = true;
-    };
-  };
+  # home-manager.users.erik = {
+  #   dotfiles = {
+  #     gnome.enable = true;
+  #     brave.enable = true;
+  #     ghostty.enable = true;
+  #     emacs.enable = true;
+  #   };
+  # };
 
   # Enable automatic login
   # services.displayManager.autoLogin.enable = true;
