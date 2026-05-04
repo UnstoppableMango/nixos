@@ -88,11 +88,12 @@
 
   inventory.instances = {
     admin = {
-      roles.default.tags.all = {};
+      roles.default.tags.all = { };
 
       roles.default.settings = {
         allowedKeys = {
-          "root" = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEwW6dUPKvKXXzj+gKJS7EXh6UzyLjzatrcPXa0Y2qvz erik@hades";
+          "root" =
+            "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEwW6dUPKvKXXzj+gKJS7EXh6UzyLjzatrcPXa0Y2qvz erik@hades";
         };
       };
     };
@@ -101,7 +102,7 @@
       module.name = "users";
 
       # Add to all machines
-      roles.default.tags.all = {};
+      roles.default.tags.all = { };
 
       roles.default.settings = {
         user = "erik";

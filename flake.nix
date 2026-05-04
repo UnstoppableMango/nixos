@@ -124,22 +124,19 @@
 
       perSystem =
         { inputs', system, ... }:
-        let
-          inherit (inputs') dotfiles nixpkgs;
-        in
         {
-          _module.args.pkgs = import nixpkgs {
+          _module.args.pkgs = import inputs.nixpkgs {
             inherit system;
 
             overlays = [
-              dotfiles.overlays.default
+              inputs.dotfiles.overlays.default
             ];
 
             config.allowUnfree = true;
           };
 
           devShells = {
-            inherit (dotfiles.devShells) default;
+            inherit (inputs'.dotfiles.devShells) default;
           };
 
           treefmt = {
