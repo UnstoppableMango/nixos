@@ -114,6 +114,15 @@
         ];
       };
     };
+
+    sshd = {
+      module = {
+        name = "sshd";
+        input = "clan-core";
+      };
+
+      roles.server.tags.all = { };
+    };
   };
 
   machines = {

@@ -62,6 +62,7 @@
   environment.systemPackages = with pkgs; [
     curl
     gitMinimal
+    ldns
   ];
 
   # home-manager.users.erik = {
