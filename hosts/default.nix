@@ -31,9 +31,9 @@
         dotfiles.nixosModules.erik
         { nixpkgs.overlays = [ dotfiles.overlays.default ]; }
 
-        ../desktops
-        ../shells
-        ../users/erik
+        ../modules/desktops
+        ../modules/shells
+        ../modules/users/erik
         ./hades/configuration.nix
       ];
     };
