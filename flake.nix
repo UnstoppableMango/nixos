@@ -127,12 +127,10 @@
         {
           _module.args.pkgs = import inputs.nixpkgs {
             inherit system;
-
+            config.allowUnfree = true;
             overlays = [
               inputs.dotfiles.overlays.default
             ];
-
-            config.allowUnfree = true;
           };
 
           devShells = {

@@ -38,52 +38,52 @@
         ];
       };
 
-      castor = {
-        deploy.targetHost = "root@192.168.1.13";
-        tags = [
-          "basement"
-          "k8s"
-          "worker"
-          "rack"
-        ];
-      };
+      # castor = {
+      #   deploy.targetHost = "root@192.168.1.13";
+      #   tags = [
+      #     "basement"
+      #     "k8s"
+      #     "worker"
+      #     "rack"
+      #   ];
+      # };
 
-      pollux = {
-        deploy.targetHost = "root@192.168.1.14";
-        tags = [
-          "basement"
-          "k8s"
-          "worker"
-          "rack"
-        ];
-      };
+      # pollux = {
+      #   deploy.targetHost = "root@192.168.1.14";
+      #   tags = [
+      #     "basement"
+      #     "k8s"
+      #     "worker"
+      #     "rack"
+      #   ];
+      # };
 
-      gaea = {
-        deploy.targetHost = "root@192.168.1.11";
-        tags = [
-          "basement"
-          "k8s"
-          "worker"
-          "rack"
-        ];
-      };
+      # gaea = {
+      #   deploy.targetHost = "root@192.168.1.11";
+      #   tags = [
+      #     "basement"
+      #     "k8s"
+      #     "worker"
+      #     "rack"
+      #   ];
+      # };
 
-      zeus = {
-        deploy.targetHost = "root@192.168.1.10";
-        tags = [
-          "basement"
-          "k8s"
-          "worker"
-          "tower"
-        ];
-      };
+      # zeus = {
+      #   deploy.targetHost = "root@192.168.1.10";
+      #   tags = [
+      #     "basement"
+      #     "k8s"
+      #     "worker"
+      #     "tower"
+      #   ];
+      # };
 
-      pik8s1 = pik8s 1;
-      pik8s2 = pik8s 2;
-      pik8s3 = pik8s 3;
-      pik8s4 = pik8s 4;
-      pik8s5 = pik8s 5;
-      pik8s6 = pik8s 6;
+      # pik8s1 = pik8s 1;
+      # pik8s2 = pik8s 2;
+      # pik8s3 = pik8s 3;
+      # pik8s4 = pik8s 4;
+      # pik8s5 = pik8s 5;
+      # pik8s6 = pik8s 6;
     };
 
   inventory.instances = {
