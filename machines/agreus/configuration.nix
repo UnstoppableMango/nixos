@@ -22,9 +22,9 @@
     # dotfiles.nixosModules.erik
 
     ./disk-config.nix
-    ../../desktops
-    ../../shells
-    # ../../users/erik
+    ../../modules/desktops
+    ../../modules/shells
+    # ../../modules/users/erik
   ];
 
   boot.loader = {
