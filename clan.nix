@@ -19,14 +19,14 @@
       };
     in
     {
-      hades = {
-        deploy.targetHost = "root@192.168.1.69";
-        tags = [
-          "workstation"
-          "gaming"
-          "tower"
-        ];
-      };
+      # hades = {
+      #   deploy.targetHost = "root@192.168.1.69";
+      #   tags = [
+      #     "workstation"
+      #     "gaming"
+      #     "tower"
+      #   ];
+      # };
 
       agreus = {
         deploy.targetHost = "root@192.168.1.237";
