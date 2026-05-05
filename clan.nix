@@ -5,7 +5,7 @@
     description = "THECLUSTER";
   };
 
-  modules."@UnstoppableMango/pi" = import ../modules/service/pi/service.nix;
+  modules.pi = import ./modules/service/pi/service.nix;
 
   inventory.machines =
     let
