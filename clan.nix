@@ -5,7 +5,8 @@
     description = "THECLUSTER";
   };
 
-  modules.pi = import ./modules/service/pi/service.nix;
+  modules.k3s = import ./modules/service/k3s;
+  modules.pi = import ./modules/service/pi;
 
   inventory.machines =
     let
@@ -13,7 +14,7 @@
         deploy.targetHost = "root@192.168.1.10${toString idx}";
         tags = [
           "basement"
-          "pi"
+          "pi4b" # They're all 4bs right now
           "k8s"
           "control-plane"
           "rack"
@@ -136,8 +137,16 @@
       module.input = "self";
       module.name = "pi";
 
-      # They're all 4bs right now
-      roles.pi4b.tags.pi = { };
+      # This makes me feel like I'm doing something wrong
+      roles.pi4b.tags.pi4b = { };
+    };
+
+    k3s = {
+      module.input = "self";
+      module.name = "k3s";
+
+      roles.control-plane.tags.control-plane = { };
+      roles.worker.tags.worker = { };
     };
   };
 
