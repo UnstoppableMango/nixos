@@ -53,7 +53,8 @@
     ];
   };
 
-  services.openssh.enable = true;
+  # TODO: Confirm this is working via clan
+  # services.openssh.enable = true;
 
   environment.systemPackages = with pkgs; [
     curl
@@ -74,6 +75,7 @@
   # services.displayManager.autoLogin.enable = true;
   # services.displayManager.autoLogin.user = "office";
 
+  # TODO: Move to cert service
   security.pki.certificates = [
     # thecluster.lan Nginx CA
     ''
