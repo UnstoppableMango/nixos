@@ -1,0 +1,3 @@
+{
+  imports = [ ./disk-config.nix ];
+}
