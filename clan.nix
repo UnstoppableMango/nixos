@@ -34,7 +34,7 @@
       # };
 
       agreus = {
-        deploy.targetHost = "root@192.168.1.237";
+        deploy.targetHost = "root@192.168.1.187";
         tags = [
           "office"
           "k8s"

@@ -39,6 +39,14 @@
       };
     };
 
+    nixos-facter = {
+      url = "github:nix-community/nixos-facter";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.systems.follows = "systems";
+      inputs.treefmt-nix.follows = "treefmt-nix";
+      inputs.disko.follows = "disko";
+    };
+
     nixvim = {
       url = "github:nix-community/nixvim";
       inputs.nixpkgs.follows = "nixpkgs";
