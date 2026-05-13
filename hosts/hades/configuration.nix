@@ -37,6 +37,9 @@
     ./disk-config.nix
   ];
 
+  hardware.openrazer.enable = true;
+  hardware.facter.reportPath = ./facter.json;
+
   fileSystems = {
     "/".options = [ "compress=zstd" ];
     "/home".options = [ "compress=zstd" ];
@@ -289,8 +292,6 @@
 
   programs.firefox.enable = false; # Only blue fox
   programs.steam.enable = true;
-
-  hardware.openrazer.enable = true;
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget
