@@ -190,9 +190,11 @@
       ghostty.enable = true;
       kitty.enable = true;
       containers.enable = true;
-      openshift.enable = true;
       ocaml.enable = true;
       dotnet.enable = true;
+
+      # Not currently using and also printing annoying shell warning
+      openshift.enable = false;
     };
   };
 
