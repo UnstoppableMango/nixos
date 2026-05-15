@@ -35,6 +35,8 @@
     };
   };
 
+  hardware.facter.reportPath = ./facter.json;
+
   # https://nixos.wiki/wiki/Power_Management#systemd_sleep
   systemd.sleep.settings.Sleep = {
     AllowSuspend = "no";

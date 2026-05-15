@@ -1,6 +1,6 @@
 { pkgs, ... }:
 {
-  imports = [ ];
+  imports = [ ./disk-config.nix ];
 
   boot.loader = {
     efi.canTouchEfiVariables = true;
