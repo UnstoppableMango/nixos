@@ -5,8 +5,8 @@
     description = "THECLUSTER";
   };
 
-  modules.k3s = import ./modules/service/k3s;
-  modules.pi = import ./modules/service/pi;
+  modules."@UnstoppableMango/k3s" = import ./modules/service/k3s;
+  modules."@UnstoppableMango/pi" = import ./modules/service/pi;
 
   inventory.machines =
     let
@@ -135,7 +135,7 @@
 
     raspberry-pi = {
       module.input = "self";
-      module.name = "pi";
+      module.name = "@UnstoppableMango/pi";
 
       # This makes me feel like I'm doing something wrong
       roles.pi4b.tags.pi4b = { };
@@ -143,7 +143,7 @@
 
     k3s = {
       module.input = "self";
-      module.name = "k3s";
+      module.name = "@UnstoppableMango/k3s";
 
       roles.control-plane.tags.control-plane = { };
       roles.worker.tags.worker = { };
