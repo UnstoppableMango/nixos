@@ -1,4 +1,4 @@
-{ inputs, ... }:
+{ inputs, lib, ... }:
 let
   # TODO: Less janky way of acquiring pkgs
   pkgs = inputs.nixpkgs.legacyPackages.aarch64-linux;
@@ -35,7 +35,8 @@ in
 
     deviceTree = {
       enable = true;
-      filter = "*rpi-4-*.dtb";
+      # This is more generic than what poe-hat tries to set: bcm2711-rpi-4*.dtb
+      filter = lib.mkForce "*rpi-4-*.dtb";
     };
   };
 
