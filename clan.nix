@@ -5,16 +5,21 @@
     description = "THECLUSTER";
   };
 
+  modules."@UnstoppableMango/k3s" = import ./modules/service/k3s;
+  modules."@UnstoppableMango/pi" = import ./modules/service/pi;
+
   inventory.machines =
     let
       pik8s = idx: {
         deploy.targetHost = "root@192.168.1.10${toString idx}";
         tags = [
           "basement"
-          "pi"
+          "pi4b" # They're all 4bs right now
           "k8s"
           "control-plane"
           "rack"
+          "server"
+          "headless"
         ];
       };
     in
@@ -29,12 +34,13 @@
       # };
 
       agreus = {
-        deploy.targetHost = "root@192.168.1.237";
+        deploy.targetHost = "root@192.168.1.187";
         tags = [
           "office"
           "k8s"
           "worker"
           "mini"
+          "server"
         ];
       };
 
@@ -45,6 +51,8 @@
       #     "k8s"
       #     "worker"
       #     "rack"
+      #     "server"
+      #     "headless"
       #   ];
       # };
 
@@ -55,6 +63,8 @@
       #     "k8s"
       #     "worker"
       #     "rack"
+      #     "server"
+      #     "headless"
       #   ];
       # };
 
@@ -65,6 +75,7 @@
       #     "k8s"
       #     "worker"
       #     "rack"
+      #     "server"
       #   ];
       # };
 
@@ -75,15 +86,16 @@
       #     "k8s"
       #     "worker"
       #     "tower"
+      #     "server"
       #   ];
       # };
 
-      # pik8s1 = pik8s 1;
-      # pik8s2 = pik8s 2;
-      # pik8s3 = pik8s 3;
+      pik8s1 = pik8s 1;
+      pik8s2 = pik8s 2;
+      pik8s3 = pik8s 3;
       # pik8s4 = pik8s 4;
-      # pik8s5 = pik8s 5;
-      # pik8s6 = pik8s 6;
+      pik8s5 = pik8s 5;
+      pik8s6 = pik8s 6;
     };
 
   inventory.instances = {
@@ -116,22 +128,51 @@
     };
 
     sshd = {
-      module = {
-        name = "sshd";
-        input = "clan-core";
+      module.name = "sshd";
+      module.input = "clan-core";
+      roles.server.tags.server = { };
+    };
+
+    raspberry-pi = {
+      module.input = "self";
+      module.name = "@UnstoppableMango/pi";
+
+      # This makes me feel like I'm doing something wrong
+      roles.pi4b.tags.pi4b = { };
+    };
+
+    k3s = {
+      module.input = "self";
+      module.name = "@UnstoppableMango/k3s";
+
+      roles.control-plane.tags.control-plane = { };
+      roles.worker.tags.worker = { };
+    };
+  };
+
+  machines =
+    let
+      pik8s = idx: {
+        users.users.root.openssh.authorizedKeys.keys = [
+          "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEwW6dUPKvKXXzj+gKJS7EXh6UzyLjzatrcPXa0Y2qvz erik@hades"
+          "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDB02UwohkEJGpb8Uud4bNQa73X9WvwQcbsRr1M8c7nztbnUCCeLBTyCtRTMnR6dmoQ3xfGLbv55nlTFT/s6ZZKWEAql/gPJoBF9nEr0622IJQ6VPIpgcI8eA2YDwYA0l19Bji4u3VbTMB+M3Tz7JRmKqHo5bUvnZWi2cp+G5Hh2f2k0lQOa9ttjvVlLBQLCJV8NmCxikJS0ZuH2+KJPT2DVsY8dMZ2fQHh1/DI+ZAo6V1qjEU4SQKjpdIrUsPt9Ah1CBU7W3tG57+aYCoaay/BuUY4zlewxGdn3MAv/mjyqF6WgkzCilr7VBnO8CUgzLGu6F+8ljEJVZ5zqyTGfuni/069qMROEp6abhQe7MGToqFgsDkIJhSihomUNylM2piVFobZTeqGBXqh8h3W1fkQHsfMjYbkYP6kHx7yZ03Xw7X+4ZfySZ4s1PqvJE1ZALHdpzYSDK06+iqbJ3ZA/lpipg+Mzx7iRrD3CsPjzgi1iE6w5DVu5xAMIZIRFetTIAs= erik@darter"
+        ];
+      };
+    in
+    {
+      agreus = {
+        imports = [ ./machines/agreus/configuration.nix ];
+        users.users.root.openssh.authorizedKeys.keys = [
+          "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEwW6dUPKvKXXzj+gKJS7EXh6UzyLjzatrcPXa0Y2qvz erik@hades"
+          "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDB02UwohkEJGpb8Uud4bNQa73X9WvwQcbsRr1M8c7nztbnUCCeLBTyCtRTMnR6dmoQ3xfGLbv55nlTFT/s6ZZKWEAql/gPJoBF9nEr0622IJQ6VPIpgcI8eA2YDwYA0l19Bji4u3VbTMB+M3Tz7JRmKqHo5bUvnZWi2cp+G5Hh2f2k0lQOa9ttjvVlLBQLCJV8NmCxikJS0ZuH2+KJPT2DVsY8dMZ2fQHh1/DI+ZAo6V1qjEU4SQKjpdIrUsPt9Ah1CBU7W3tG57+aYCoaay/BuUY4zlewxGdn3MAv/mjyqF6WgkzCilr7VBnO8CUgzLGu6F+8ljEJVZ5zqyTGfuni/069qMROEp6abhQe7MGToqFgsDkIJhSihomUNylM2piVFobZTeqGBXqh8h3W1fkQHsfMjYbkYP6kHx7yZ03Xw7X+4ZfySZ4s1PqvJE1ZALHdpzYSDK06+iqbJ3ZA/lpipg+Mzx7iRrD3CsPjzgi1iE6w5DVu5xAMIZIRFetTIAs= erik@darter"
+        ];
       };
 
-      roles.server.tags.all = { };
+      pik8s1 = pik8s 1;
+      pik8s2 = pik8s 2;
+      pik8s3 = pik8s 3;
+      # pik8s4 = pik8s 4;
+      pik8s5 = pik8s 5;
+      pik8s6 = pik8s 6;
     };
-  };
-
-  machines = {
-    agreus = {
-      imports = [ ./machines/agreus/configuration.nix ];
-      users.users.root.openssh.authorizedKeys.keys = [
-        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEwW6dUPKvKXXzj+gKJS7EXh6UzyLjzatrcPXa0Y2qvz erik@hades"
-        "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDB02UwohkEJGpb8Uud4bNQa73X9WvwQcbsRr1M8c7nztbnUCCeLBTyCtRTMnR6dmoQ3xfGLbv55nlTFT/s6ZZKWEAql/gPJoBF9nEr0622IJQ6VPIpgcI8eA2YDwYA0l19Bji4u3VbTMB+M3Tz7JRmKqHo5bUvnZWi2cp+G5Hh2f2k0lQOa9ttjvVlLBQLCJV8NmCxikJS0ZuH2+KJPT2DVsY8dMZ2fQHh1/DI+ZAo6V1qjEU4SQKjpdIrUsPt9Ah1CBU7W3tG57+aYCoaay/BuUY4zlewxGdn3MAv/mjyqF6WgkzCilr7VBnO8CUgzLGu6F+8ljEJVZ5zqyTGfuni/069qMROEp6abhQe7MGToqFgsDkIJhSihomUNylM2piVFobZTeqGBXqh8h3W1fkQHsfMjYbkYP6kHx7yZ03Xw7X+4ZfySZ4s1PqvJE1ZALHdpzYSDK06+iqbJ3ZA/lpipg+Mzx7iRrD3CsPjzgi1iE6w5DVu5xAMIZIRFetTIAs= erik@darter"
-      ];
-    };
-  };
 }
