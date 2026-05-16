@@ -39,6 +39,7 @@
 
   hardware.openrazer.enable = true;
   hardware.facter.reportPath = ./facter.json;
+  hardware.facter.detected.dhcp.enable = false;
 
   fileSystems = {
     "/".options = [ "compress=zstd" ];
