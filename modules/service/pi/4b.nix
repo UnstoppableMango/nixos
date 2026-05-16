@@ -1,24 +1,42 @@
-{ pkgs, ... }:
+{ inputs, ... }:
+let
+  # TODO: Less janky way of acquiring pkgs
+  pkgs = inputs.nixpkgs.legacyPackages.aarch64-linux;
+in
 {
-  imports = [ ./disk-config.nix ];
+  imports = with inputs; [
+    # Not confident about mixing facter + nixos-hardware, but it
+    # doesn't seem like facter does any rpi configuration at the moment?
+    nixos-hardware.nixosModules.raspberry-pi-4
+    ./disk-config.nix
+  ];
 
-  boot.loader = {
-    efi.canTouchEfiVariables = true;
-    systemd-boot = {
-      enable = true;
-      configurationLimit = 10;
+  boot = {
+    initrd.availableKernelModules = [
+      "xhci_pci"
+      "usbhid"
+      "usb_storage"
+    ];
+
+    loader = {
+      grub.enable = false;
+      generic-extlinux-compatible.enable = true;
     };
   };
 
+  nixpkgs.buildPlatform = "x86_64-linux";
   nixpkgs.hostPlatform = "aarch64-linux";
 
   hardware = {
-    # TODO: Wtf does this all mean
-    # raspberry-pi."4".apply-overlays-dtmerge.enable = true;
-    # deviceTree = {
-    #   enable = true;
-    #   filter = "*rpi-4-*.dtb";
-    # };
+    raspberry-pi."4" = {
+      apply-overlays-dtmerge.enable = true;
+      poe-hat.enable = true;
+    };
+
+    deviceTree = {
+      enable = true;
+      filter = "*rpi-4-*.dtb";
+    };
   };
 
   console.enable = false;
