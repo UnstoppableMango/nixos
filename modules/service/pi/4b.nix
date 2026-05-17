@@ -1,4 +1,4 @@
-{ inputs, lib, ... }:
+{ inputs, ... }:
 let
   # TODO: Less janky way of acquiring pkgs
   pkgs = inputs.nixpkgs.legacyPackages.aarch64-linux;
@@ -8,7 +8,6 @@ in
     # Not confident about mixing facter + nixos-hardware, but it
     # doesn't seem like facter does any rpi configuration at the moment?
     nixos-hardware.nixosModules.raspberry-pi-4
-    # ./disk-config.nix
   ];
 
   boot = {
@@ -33,15 +32,10 @@ in
       apply-overlays-dtmerge.enable = true;
       poe-hat.enable = true;
     };
-
-    deviceTree = {
-      enable = true;
-      # This is more generic than what poe-hat tries to set: bcm2711-rpi-4*.dtb
-      filter = lib.mkForce "*rpi-4-*.dtb";
-    };
   };
 
-  console.enable = false;
+  # TODO: make sure everything works before disabling
+  # console.enable = false;
 
   environment.systemPackages = with pkgs; [
     libraspberrypi
@@ -49,10 +43,6 @@ in
   ];
 
   networking = {
-    # TODO
-    # hostName = "pik8s${instanceName}";
-    useDHCP = false;
-
     nameservers = [
       "192.168.1.46"
       "192.168.1.47"
