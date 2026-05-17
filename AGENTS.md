@@ -9,72 +9,92 @@ This file provides guidance to AI agents when working with code in this reposito
 - `make check` - Run `nix flake check` locally
 - `make fmt` / `make format` - Format all Nix files with nixfmt
 - `make update` - Update all flake inputs
-- `make system` - Rebuild and switch the local NixOS system (`sudo nixos-rebuild switch`)
-- `make agreus-system` - Deploy agreus remotely via nixos-anywhere
+- `make system` - Update the local flake and rebuild/switch (`sudo nixos-rebuild switch --flake /etc/nixos --cores 12`)
+- `make agreus-system` - Deploy agreus remotely via nixos-anywhere with facter hardware detection
 - `nix flake check --all-systems` - What CI runs (checks all systems)
 
 ## Architecture
 
-This is a NixOS configuration flake using **flake-parts** for modular organization. The key pattern throughout is that each module exports both `flake.modules.nixos.<name>` and `flake.modules.homeManager.<name>` (mirrored as `flake.nixosModules.*` / `flake.homeModules.*`).
+This is a NixOS configuration flake using **flake-parts** and **clan-core** for modular organization. Machines are configured via two parallel structures:
+- `hosts/` — direct `nixpkgs.lib.nixosSystem` definitions (currently hades only)
+- `machines/` — clan-managed machines (agreus, pik8s cluster nodes), configured via `clan.nix`
 
 ### Module System
 
-The flake-parts `flakeModules.modules` extension is used, allowing modules to be referenced via `self.modules.nixos.*` and composed into host configurations.
+Plain NixOS modules live under `modules/` and are composed into host configs via direct `imports`.
 
-**How a host is assembled** (see `hosts/hades/default.nix`):
+**How hades is assembled** (see `hosts/default.nix`):
 ```nix
-nixosConfigurations.hades = inputs.nixpkgs.lib.nixosSystem {
-  modules = [ nixos-hardware.nixosModules.asus-rog-strix-x570e ]
-    ++ (with self.modules.nixos; [ erik gnome hades ssh nixDaemonConfig ]);
+hades = inputs.nixpkgs.lib.nixosSystem {
+  specialArgs = { inherit (inputs.dotfiles) inputs; };
+  modules = with inputs; [
+    nixos-hardware.nixosModules.asus-rog-strix-x570e
+    nixos-hardware.nixosModules.common-pc-ssd
+    home-manager.nixosModules.home-manager
+    disko.nixosModules.disko
+    sops-nix.nixosModules.sops
+    dotfiles.nixosModules.erik
+    { nixpkgs.overlays = [ dotfiles.overlays.default ]; }
+    ../modules/desktops
+    ../modules/shells
+    ../modules/users/erik
+    ./hades/configuration.nix
+  ];
 };
 ```
 
-**How a module is exported** (pattern from `desktops/gnome/default.nix`):
-```nix
-{
-  flake.modules.nixos.gnome = gnome;
-  flake.nixosModules.gnome = gnome;   # alias for compatibility
-}
-```
+Clan-managed machines (agreus, pik8s nodes) are configured in `clan.nix` via the clan inventory system; their NixOS config lives under `machines/<name>/configuration.nix` and clan service modules under `modules/service/`.
 
 ### Directory Layout
 
-- `flake.nix` - Entry point; imports all subdirectories as flake-parts modules
-- `hosts/` - Per-host NixOS system definitions (`default.nix` exports the `nixosConfiguration`)
-- `users/` - User environment modules; `users/erik/default.nix` wires home-manager config from the `dotfiles` flake input
-- `desktops/` - Desktop environment modules (currently GNOME only)
-- `hardware/` - Hardware-specific modules (currently NVIDIA config)
-- `toolchain/` - System-level toolchain modules (currently nix daemon CPU/IO scheduling)
-- `shells/` - Shell service modules (currently SSH)
+- `flake.nix` - Entry point; imports flake-parts modules and `./hosts`; clan config via `./clan.nix`
+- `hosts/` - Per-host NixOS system definitions; `default.nix` exports `flake.nixosConfigurations`; currently only hades
+- `machines/` - Per-machine config for clan-managed nodes (agreus, pik8s1–6)
+- `modules/` - Shared NixOS modules imported by host configs:
+  - `desktops/` - Desktop environment modules (currently GNOME only)
+  - `hardware/` - Hardware-specific modules (currently NVIDIA config)
+  - `shells/` - Shell service modules (currently SSH)
+  - `users/` - User environment modules; `users/erik/default.nix` wires home-manager config from the `dotfiles` input
+  - `service/` - Clan service modules (`k3s`, `pi`)
+- `clan.nix` - Clan meta-config: cluster name/domain, inventory of clan-managed machines and service instances
+- `vars/` - Per-machine variables (SSH keys, password hashes, state versions)
+- `sops/` - SOPS secrets and age keys
+- `scripts/` - Utility scripts
 
 ### Key Flake Inputs
 
 - `nixpkgs` (nixos-unstable) - Package set
 - `flake-parts` - Modular flake framework
 - `home-manager` - User environment management, integrated via `home-manager.nixosModules.home-manager`
-- `dotfiles` - Personal dotfiles flake; provides home-manager modules and overlays consumed in `users/erik/default.nix`
+- `dotfiles` - Personal dotfiles flake; provides home-manager modules and overlays consumed in `modules/users/erik/default.nix`
 - `disko` - Declarative disk partitioning (each host has a `disk-config.nix`)
 - `nixos-hardware` - Hardware-specific module presets
-- `nixvim` - Neovim configuration (pulled through `dotfiles`)
-- `treefmt-nix` - Formatter config (nixfmt enabled; dprint disabled due to flake check issues)
+- `clan-core` (v25.11) - Clan cluster management framework; manages agreus and pik8s machines
+- `sops-nix` - SOPS secrets management
+- `nixos-facter` - Hardware detection for facter-based configs
+- `nixos-anywhere` - Remote NixOS deployment
+- `nixvim` - Neovim configuration (also pulled through `dotfiles`)
+- `mynix` - Personal Nix utilities flake
+- `treefmt-nix` - Formatter config (nixfmt enabled)
 
 ### Formatter
 
-`nix fmt` uses `treefmt` with only `nixfmt` enabled. The `dprint` formatter is present in config but disabled (`programs.dprint.enable = false`).
+`nix fmt` uses `treefmt` with only `nixfmt` enabled.
 
 ## Code Style
 
 - Use `inputs@{ ... }` pattern when binding flake inputs
-- Use `with self.modules.nixos; [ ... ]` to compose modules into host configs
-- Each functional area gets its own directory with `default.nix` that registers the module via `flake.modules.nixos.*`
-- `flake.nixosModules.*` should mirror `flake.modules.nixos.*` as an alias
+- Use `with inputs; [ ... ]` when referencing multiple inputs in a module list
+- Modules are plain NixOS modules; compose them into host configs via direct `imports`
+- Each functional area under `modules/` gets its own directory with a `default.nix`
 
 ## Hosts
 
-| Host   | Hardware                   | Notes                              |
-| ------ | -------------------------- | ---------------------------------- |
-| hades  | ASUS ROG Strix X570-E      | Primary desktop; AMD GPU; BTRFS    |
-| agreus | Generic x86_64             | Deployed via nixos-anywhere; facter-based hardware config |
+| Host           | Hardware              | Notes                                                |
+| -------------- | --------------------- | ---------------------------------------------------- |
+| hades          | ASUS ROG Strix X570-E | Primary desktop; AMD GPU; BTRFS; direct nixosSystem  |
+| agreus         | Generic x86_64        | Office mini PC; clan-managed; facter hardware config |
+| pik8s1–3, 5–6  | Raspberry Pi 4B       | k8s cluster nodes; clan-managed; aarch64             |
 
 ## CI
 
