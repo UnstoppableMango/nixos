@@ -8,6 +8,7 @@ in
     # Not confident about mixing facter + nixos-hardware, but it
     # doesn't seem like facter does any rpi configuration at the moment?
     nixos-hardware.nixosModules.raspberry-pi-4
+    ./disk-config.nix
   ];
 
   boot = {
