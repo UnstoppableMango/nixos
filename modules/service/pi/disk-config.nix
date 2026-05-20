@@ -17,7 +17,10 @@
           content = {
             type = "filesystem";
             format = "vfat";
-            extraArgs = [ "-n" "FIRMWARE" ];
+            extraArgs = [
+              "-n"
+              "FIRMWARE"
+            ];
             mountpoint = "/boot/firmware";
             mountOptions = [
               "fmask=0022"
@@ -30,7 +33,10 @@
           content = {
             type = "filesystem";
             format = "ext4";
-            extraArgs = [ "-L" "NIXOS_SD" ];
+            extraArgs = [
+              "-L"
+              "NIXOS_SD"
+            ];
             mountpoint = "/";
           };
         };

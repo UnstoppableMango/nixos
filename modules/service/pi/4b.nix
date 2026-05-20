@@ -1,9 +1,6 @@
-{ inputs, config, lib, ... }:
+{ inputs, ... }:
 let
-  # TODO: Less janky way of acquiring pkgs
   pkgs = inputs.nixpkgs.legacyPackages.aarch64-linux;
-  machineName = config.clan.core.settings.machine.name;
-  nodeIdx = lib.strings.substring (lib.strings.stringLength machineName - 1) 1 machineName;
 in
 {
   imports = with inputs; [
@@ -47,15 +44,6 @@ in
 
   networking = {
     useDHCP = false;
-    interfaces.eth0 = {
-      useDHCP = false;
-      ipv4.addresses = [
-        {
-          address = "192.168.1.10${nodeIdx}";
-          prefixLength = 24;
-        }
-      ];
-    };
     defaultGateway = "192.168.1.1";
     nameservers = [
       "192.168.1.46"
