@@ -93,7 +93,7 @@
       pik8s1 = pik8s 1;
       pik8s2 = pik8s 2;
       pik8s3 = pik8s 3;
-      # pik8s4 = pik8s 4;
+      pik8s4 = pik8s 4;
       pik8s5 = pik8s 5;
       pik8s6 = pik8s 6;
     };
@@ -171,7 +171,7 @@
       pik8s1 = pik8s 1;
       pik8s2 = pik8s 2;
       pik8s3 = pik8s 3;
-      # pik8s4 = pik8s 4;
+      pik8s4 = pik8s 4;
       pik8s5 = pik8s 5;
       pik8s6 = pik8s 6;
     };

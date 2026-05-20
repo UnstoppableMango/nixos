@@ -1,6 +1,5 @@
-{ inputs, lib, ... }:
+{ inputs, ... }:
 let
-  # TODO: Less janky way of acquiring pkgs
   pkgs = inputs.nixpkgs.legacyPackages.aarch64-linux;
 in
 {
@@ -12,6 +11,7 @@ in
   ];
 
   boot = {
+    initrd.allowMissingModules = true;
     initrd.availableKernelModules = [
       "xhci_pci"
       "usbhid"
@@ -32,15 +32,10 @@ in
       apply-overlays-dtmerge.enable = true;
       poe-hat.enable = true;
     };
-
-    deviceTree = {
-      enable = true;
-      # This is more generic than what poe-hat tries to set: bcm2711-rpi-4*.dtb
-      filter = lib.mkForce "*rpi-4-*.dtb";
-    };
   };
 
-  console.enable = false;
+  # TODO: make sure everything works before disabling
+  # console.enable = false;
 
   environment.systemPackages = with pkgs; [
     libraspberrypi
@@ -48,10 +43,11 @@ in
   ];
 
   networking = {
-    # TODO
-    # hostName = "pik8s${instanceName}";
     useDHCP = false;
-
+    defaultGateway = {
+      address = "192.168.1.1";
+      interface = "eth0";
+    };
     nameservers = [
       "192.168.1.46"
       "192.168.1.47"
