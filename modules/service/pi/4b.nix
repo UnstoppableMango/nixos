@@ -44,7 +44,10 @@ in
 
   networking = {
     useDHCP = false;
-    defaultGateway = "192.168.1.1";
+    defaultGateway = {
+      address = "192.168.1.1";
+      interface = "eth0";
+    };
     nameservers = [
       "192.168.1.46"
       "192.168.1.47"
