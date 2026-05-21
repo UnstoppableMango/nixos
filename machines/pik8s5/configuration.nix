@@ -1,6 +1,8 @@
 {
   hardware.facter.reportPath = ./facter.json;
 
+  networking.defaultGateway.interface = "eth0";
+
   networking.interfaces.eth0 = {
     useDHCP = false;
     ipv4.addresses = [

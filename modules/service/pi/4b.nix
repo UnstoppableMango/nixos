@@ -11,7 +11,7 @@ in
   ];
 
   boot = {
-    initrd.allowMissingModules = true;
+    # initrd.allowMissingModules = true;
     initrd.availableKernelModules = [
       "xhci_pci"
       "usbhid"
@@ -44,10 +44,7 @@ in
 
   networking = {
     useDHCP = false;
-    defaultGateway = {
-      address = "192.168.1.1";
-      interface = "eth0";
-    };
+    defaultGateway.address = "192.168.1.1";
     nameservers = [
       "192.168.1.46"
       "192.168.1.47"
