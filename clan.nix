@@ -134,16 +134,16 @@
     };
 
     raspberry-pi = {
-      module.input = "self";
       module.name = "@UnstoppableMango/pi";
+      module.input = "self";
 
       # This makes me feel like I'm doing something wrong
       roles.pi4b.tags.pi4b = { };
     };
 
     k3s = {
-      module.input = "self";
       module.name = "@UnstoppableMango/k3s";
+      module.input = "self";
 
       roles.control-plane.tags.control-plane = { };
       roles.worker.tags.worker = { };

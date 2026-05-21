@@ -1,3 +1,4 @@
+{ config, ... }:
 {
   # https://search.nixos.org/options?channel=unstable&query=k3s
   services.k3s = {
@@ -7,6 +8,10 @@
       "servicelb"
       "local-storage"
       "metrics-server"
+    ];
+
+    images = [
+      config.services.k3s.package.airgap-images
     ];
   };
 }
