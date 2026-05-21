@@ -2,6 +2,7 @@
   hardware.facter.reportPath = ./facter.json;
 
   networking = {
+    hostName = "pik8s4";
     defaultGateway.interface = "end0";
 
     interfaces.end0 = {
