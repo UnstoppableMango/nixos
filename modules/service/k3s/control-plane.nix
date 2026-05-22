@@ -7,8 +7,7 @@ in
 
   # https://search.nixos.org/options?channel=unstable&query=k3s
   services.k3s = {
-    # disableAgent = true;
     role = "server";
-    agentTokenFile = k3s-token.files.hash.path;
+    tokenFile = k3s-token.files.token.path;
   };
 }

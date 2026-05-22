@@ -125,7 +125,7 @@
       ];
 
       clan = {
-        imports = [ ./clan.nix ];
+        imports = [ (import ./clan.nix { inherit inputs; }) ];
         specialArgs = { inherit inputs; };
       };
 

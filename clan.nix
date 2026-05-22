@@ -1,3 +1,4 @@
+{ inputs, ... }:
 {
   meta = {
     name = "thecluster";
@@ -113,17 +114,26 @@
     erik = {
       module.name = "users";
 
-      # Add to all machines
-      roles.default.tags.all = { };
+      roles.default = {
+        # Add to all machines
+        tags.all = { };
 
-      roles.default.settings = {
-        user = "erik";
-        groups = [
-          "wheel" # sudo
-          "networkmanager"
-          "video"
-          "input"
-        ];
+        settings = {
+          user = "erik";
+          groups = [
+            "wheel" # sudo
+            "networkmanager"
+            "video"
+            "input"
+          ];
+        };
+
+        # WIP
+        # extraModules = with inputs; [
+        #   home-manager.nixosModules.home-manager
+        #   dotfiles.nixosModules.erik
+        #   ./modules/users/erik
+        # ];
       };
     };
 
@@ -131,6 +141,7 @@
       module.name = "sshd";
       module.input = "clan-core";
       roles.server.tags.server = { };
+      # roles.client.tags = [ "workstation" ];
     };
 
     raspberry-pi = {
