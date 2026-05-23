@@ -323,6 +323,7 @@
     rsync
     tmux
     ldns
+    earlyoom
 
     jetbrains-mono
     openrazer-daemon
