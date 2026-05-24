@@ -137,6 +137,8 @@
     variant = "";
   };
 
+  services.earlyoom.enable = true;
+
   # Enable CUPS to print documents.
   services.printing.enable = true;
 
@@ -323,7 +325,6 @@
     rsync
     tmux
     ldns
-    earlyoom
 
     jetbrains-mono
     openrazer-daemon
