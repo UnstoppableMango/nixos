@@ -10,4 +10,8 @@ in
     role = "server";
     tokenFile = k3s-token.files.token.path;
   };
+
+  environment.systemPackages = with pkgs; [
+    etcd # For etcdctl
+  ];
 }
