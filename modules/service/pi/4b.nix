@@ -11,7 +11,8 @@ in
   ];
 
   boot = {
-    # initrd.allowMissingModules = true;
+    # https://discourse.nixos.org/t/cannot-build-raspberry-pi-sdimage-module-dw-hdmi-not-found/71804/5
+    initrd.allowMissingModules = true;
     initrd.availableKernelModules = [
       "xhci_pci"
       "usbhid"
@@ -40,6 +41,7 @@ in
   environment.systemPackages = with pkgs; [
     libraspberrypi
     raspberrypi-eeprom
+    xfsprogs
   ];
 
   networking = {

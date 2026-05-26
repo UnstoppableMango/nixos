@@ -1,4 +1,4 @@
-{ config, ... }:
+{ config, pkgs, ... }:
 let
   inherit (config.clan.core.vars.generators) k3s-token;
 in

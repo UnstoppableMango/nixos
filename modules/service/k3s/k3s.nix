@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ config, ... }:
 let
   inherit (config.clan.core.vars.generators) k3s-token;
 in
@@ -15,8 +15,6 @@ in
     script = ''
       mv "$prompts/token" "$out/token"
     '';
-
-    runtimeInputs = [ pkgs.mkpasswd ];
   };
 
   # https://search.nixos.org/options?channel=unstable&query=k3s
