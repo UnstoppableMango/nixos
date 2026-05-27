@@ -24,9 +24,12 @@ in
     tokenFile = k3s-token.files.token.path;
 
     extraFlags = [
+      "--tls-san=192.168.1.104" # Match the existing config
+      "--tls-san=192.168.1.100"
       "--disable-cloud-controller"
       "--disable-helm-controller"
       "--disable-network-policy"
+      "--kubelet-arg=allowed-unsafe-sysctls=net.ipv4.conf.all.src_valid_mark"
     ];
 
     disable = [

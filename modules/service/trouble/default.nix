@@ -11,6 +11,8 @@
         nixosModule =
           { pkgs, ... }:
           {
+            # Or possibly
+            # https://search.nixos.org/options?channel=unstable&query=terminfo
             environment.systemPackages = with pkgs; [
               ghostty.terminfo
             ];
