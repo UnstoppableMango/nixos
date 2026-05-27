@@ -8,6 +8,7 @@
 
   modules."@UnstoppableMango/k3s" = import ./modules/service/k3s;
   modules."@UnstoppableMango/pi" = import ./modules/service/pi;
+  modules."@UnstoppableMango/trouble" = import ./modules/service/trouble;
 
   inventory.machines =
     let
@@ -100,17 +101,6 @@
     };
 
   inventory.instances = {
-    admin = {
-      roles.default.tags.all = { };
-
-      roles.default.settings = {
-        allowedKeys = {
-          "root" =
-            "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEwW6dUPKvKXXzj+gKJS7EXh6UzyLjzatrcPXa0Y2qvz erik@hades";
-        };
-      };
-    };
-
     erik = {
       module.name = "users";
 
@@ -158,6 +148,13 @@
 
       roles.control-plane.tags.control-plane = { };
       roles.worker.tags.worker = { };
+    };
+
+    trouble = {
+      module.name = "@UnstoppableMango/trouble";
+      module.input = "self";
+
+      roles.server.tags.server = { };
     };
   };
 
