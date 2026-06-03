@@ -69,7 +69,38 @@
 
   networking = {
     hostName = "hades";
-    networkmanager.enable = true;
+    # enp6s0 (RTL8125 2.5GbE, PCI 06:00.0) and enp7s0 (Intel I211 1GbE, PCI 07:00.0)
+    # share the same MAC address. DHCP is unreliable with duplicate MACs so both
+    # wired interfaces use static IPs; NM is left to manage wlp5s0.
+    networkmanager = {
+      enable = true;
+      unmanaged = [
+        "enp6s0"
+        "enp7s0"
+      ];
+    };
+    interfaces = {
+      enp6s0.useDHCP = false;
+      enp6s0.ipv4.addresses = [
+        {
+          address = "192.168.1.69";
+          prefixLength = 24;
+        }
+      ];
+
+      enp7s0.useDHCP = false;
+      enp7s0.ipv4.addresses = [
+        {
+          address = "192.168.1.70";
+          prefixLength = 24;
+        }
+      ];
+    };
+    defaultGateway = {
+      address = "192.168.1.1";
+      interface = "enp6s0";
+    };
+    nameservers = [ "192.168.1.1" ];
   };
 
   time.timeZone = "America/Chicago";
