@@ -74,13 +74,29 @@
     # wired interfaces use static IPs; NM is left to manage wlp5s0.
     networkmanager = {
       enable = true;
-      unmanaged = [ "enp6s0" "enp7s0" ];
+      unmanaged = [
+        "enp6s0"
+        "enp7s0"
+      ];
     };
     interfaces = {
-      enp6s0.ipv4.addresses = [ { address = "192.168.1.69"; prefixLength = 24; } ];
-      enp7s0.ipv4.addresses = [ { address = "192.168.1.70"; prefixLength = 24; } ];
+      enp6s0.ipv4.addresses = [
+        {
+          address = "192.168.1.69";
+          prefixLength = 24;
+        }
+      ];
+      enp7s0.ipv4.addresses = [
+        {
+          address = "192.168.1.70";
+          prefixLength = 24;
+        }
+      ];
     };
-    defaultGateway = { address = "192.168.1.1"; interface = "enp6s0"; };
+    defaultGateway = {
+      address = "192.168.1.1";
+      interface = "enp6s0";
+    };
     nameservers = [ "192.168.1.1" ];
   };
 
