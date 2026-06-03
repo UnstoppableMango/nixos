@@ -235,7 +235,7 @@
       jetbrains-toolbox
 
       gitkraken
-      bitwarden-desktop
+      # bitwarden-desktop # electron 39 EOL: https://github.com/NixOS/nixpkgs/issues/526914
       bitwarden-cli
       cachix
       github-desktop
