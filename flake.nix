@@ -21,7 +21,6 @@
       url = "github:nix-community/nixos-anywhere";
       inputs = {
         nixpkgs.follows = "nixpkgs";
-        flake-parts.follows = "flake-parts";
         disko.follows = "disko";
         treefmt-nix.follows = "treefmt-nix";
       };
