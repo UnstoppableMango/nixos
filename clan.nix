@@ -1,3 +1,4 @@
+{ inputs, ... }:
 {
   meta = {
     name = "thecluster";
@@ -7,6 +8,7 @@
 
   modules."@UnstoppableMango/k3s" = import ./modules/service/k3s;
   modules."@UnstoppableMango/pi" = import ./modules/service/pi;
+  modules."@UnstoppableMango/trouble" = import ./modules/service/trouble;
 
   inventory.machines =
     let
@@ -99,31 +101,29 @@
     };
 
   inventory.instances = {
-    admin = {
-      roles.default.tags.all = { };
-
-      roles.default.settings = {
-        allowedKeys = {
-          "root" =
-            "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEwW6dUPKvKXXzj+gKJS7EXh6UzyLjzatrcPXa0Y2qvz erik@hades";
-        };
-      };
-    };
-
     erik = {
       module.name = "users";
 
-      # Add to all machines
-      roles.default.tags.all = { };
+      roles.default = {
+        # Add to all machines
+        tags.all = { };
 
-      roles.default.settings = {
-        user = "erik";
-        groups = [
-          "wheel" # sudo
-          "networkmanager"
-          "video"
-          "input"
-        ];
+        settings = {
+          user = "erik";
+          groups = [
+            "wheel" # sudo
+            "networkmanager"
+            "video"
+            "input"
+          ];
+        };
+
+        # WIP
+        # extraModules = with inputs; [
+        #   home-manager.nixosModules.home-manager
+        #   dotfiles.nixosModules.erik
+        #   ./modules/users/erik
+        # ];
       };
     };
 
@@ -131,22 +131,30 @@
       module.name = "sshd";
       module.input = "clan-core";
       roles.server.tags.server = { };
+      # roles.client.tags = [ "workstation" ];
     };
 
     raspberry-pi = {
-      module.input = "self";
       module.name = "@UnstoppableMango/pi";
+      module.input = "self";
 
       # This makes me feel like I'm doing something wrong
       roles.pi4b.tags.pi4b = { };
     };
 
     k3s = {
-      module.input = "self";
       module.name = "@UnstoppableMango/k3s";
+      module.input = "self";
 
       roles.control-plane.tags.control-plane = { };
       roles.worker.tags.worker = { };
+    };
+
+    trouble = {
+      module.name = "@UnstoppableMango/trouble";
+      module.input = "self";
+
+      roles.server.tags.server = { };
     };
   };
 
