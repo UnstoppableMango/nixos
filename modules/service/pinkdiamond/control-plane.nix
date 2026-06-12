@@ -93,9 +93,37 @@ in
       type = lib.types.listOf lib.types.str;
       description = "etcd peer URLs advertised during bootstrap (https://<node-ip>:2380).";
     };
+
+    etcd.initialCluster = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      description = "etcd initial cluster peer URLs; defaults to all nodes, override during member replacement.";
+    };
+
+    etcd.initialClusterState = lib.mkOption {
+      type = lib.types.enum [
+        "new"
+        "existing"
+      ];
+      default = "new";
+      description = "etcd initial cluster state; set to \"existing\" when replacing a member or restoring into a live cluster.";
+    };
+
+    pki.keyBits = lib.mkOption {
+      type = lib.types.int;
+      default = 2048;
+      description = "RSA key size in bits for all generated certificates.";
+    };
+
+    pki.certValidityDays = lib.mkOption {
+      type = lib.types.int;
+      default = 3650;
+      description = "Validity period in days for all generated certificates.";
+    };
   };
 
   config = {
+    cluster.pinkdiamond.etcd.initialCluster = lib.mkDefault etcdPeerEndpoints;
+
     clan.core.vars.generators."pinkdiamond-certs" = {
       share = true;
 
@@ -144,11 +172,11 @@ in
           signFn = ''
             sign() {
               local name="$1" subj="$2" ext="$3"
-              openssl req -newkey rsa:2048 -nodes \
+              openssl req -newkey rsa:${toString cfg.pki.keyBits} -nodes \
                 -keyout "$out/$name-key" -subj "$subj" -out "$name.csr" 2>/dev/null
               openssl x509 -req -in "$name.csr" \
                 -CA "$prompts/ca-crt" -CAkey "$prompts/ca-key" -CAcreateserial \
-                -days 3650 -sha256 \
+                -days ${toString cfg.pki.certValidityDays} -sha256 \
                 -extfile <(printf '%s' "$ext") \
                 -out "$out/$name-crt" 2>/dev/null
             }
@@ -205,7 +233,7 @@ in
             "${clientExt}"
 
           # Service account key pair — shared generator ensures identical keys on all nodes
-          openssl genrsa -out "$out/sa-key" 2048 2>/dev/null
+          openssl genrsa -out "$out/sa-key" ${toString cfg.pki.keyBits} 2>/dev/null
           openssl rsa -in "$out/sa-key" -pubout -out "$out/sa-pub" 2>/dev/null
         '';
     };
@@ -270,7 +298,8 @@ in
       listenPeerUrls = [ "https://0.0.0.0:2380" ];
       advertiseClientUrls = cfg.etcd.advertiseClientUrls;
       initialAdvertisePeerUrls = cfg.etcd.initialAdvertisePeerUrls;
-      initialCluster = etcdPeerEndpoints;
+      initialCluster = cfg.etcd.initialCluster;
+      initialClusterState = cfg.etcd.initialClusterState;
       clientCertAuth = true;
       peerClientCertAuth = true;
       trustedCaFile = certs."etcd-ca-crt".path;
