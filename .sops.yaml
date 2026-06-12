@@ -1,15 +1,21 @@
 keys:
   - &hades age1p0uw4hxuhrnf93tz62rntvquqrgxdzj8scykf5xu5dhfeuptv3dq6zd39a
   - &darter age1uezgu6hzmnzspf446havmdz682gw9wm273tn0w9m82qxm63pfqlqxfyys0
+  - &agreus age15htrk7qvlzgj9axepv34vl2tn6ea98wsyxgmjgtmuclzys70gd6qvwjlv9
   - &gaea age1j7vr2z2xhhelnpljrcs8r34hjwpsnd9hmqq25hr2ynegrq8ehudsa4kf67
   - &zeus age124unzmrq8de2qh9a9z7u96dm258w3y7ytumswx344wf980uwpfmqvuc775
   - &pik8s1 age16c82v4dsh2emnrrl64ya9mx2kscj7t440gslttgnnrvvj9zvketssjwynx
   - &pik8s2 age13g94d3h44frn6axrgz6u6gw5kmvzr3a4ytp4l7qnrv3rtre2cvuqu9musf
   - &pik8s3 age1rnuup00fn4w0h30a4ffv6m9ayg0shgqrfm0xhxw7txlpegy9736sjjx9ul
+  - &pik8s4 age152590smwq8dpvsxcuuzyp26hn8d2syuqd4nw8xxvu2qzyvet590q4epq3r
   - &pik8s5 age1dskgmw3psffk5eyxzz0a3jtvars54pdzyue62xgm9qv2u8tpm47q9fkcaz
   - &pik8s6 age1re9qdeg4p2s9wxyj65f3e4y7uvfmpenzzfkh2h0cjh98lqugg5zqk95zsp
 
 creation_rules:
+  - path_regex: machines/agreus/secrets/.*\.(yaml|json|env|ini)$
+    key_groups:
+      - age:
+          - *agreus
   - path_regex: hosts/hades/secrets/.*\.(yaml|json|env|ini)$
     key_groups:
       - age:
@@ -26,11 +32,18 @@ creation_rules:
     key_groups:
       - age:
           - *zeus
+  - path_regex: sops/cluster/secrets/.*\.(yaml|json|env|ini)$
+    key_groups:
+      - age:
+          - *pik8s4
+          - *pik8s5
+          - *pik8s6
   - path_regex: secrets/.*\.(yaml|json|env|ini)$
     key_groups:
       - age:
           - *hades
           - *darter
+          - *agreus
           - *gaea
           - *zeus
           - *pik8s1

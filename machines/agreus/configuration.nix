@@ -61,6 +61,8 @@
   environment.systemPackages = with pkgs; [
     curl
     gitMinimal
+    kubectl
+    kubernetes-helm
     ldns
   ];
 

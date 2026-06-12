@@ -1,4 +1,4 @@
-{ inputs, ... }:
+{ ... }:
 {
   meta = {
     name = "thecluster";
@@ -8,21 +8,23 @@
 
   modules."@UnstoppableMango/k3s" = import ./modules/service/k3s;
   modules."@UnstoppableMango/pi" = import ./modules/service/pi;
+  modules."@UnstoppableMango/pinkdiamond" = import ./modules/service/pinkdiamond;
   modules."@UnstoppableMango/trouble" = import ./modules/service/trouble;
 
   inventory.machines =
     let
+      piTags = [
+        "basement"
+        "pi4b"
+        "k8s"
+        "control-plane"
+        "server"
+        "headless"
+      ];
+
       pik8s = idx: {
         deploy.targetHost = "root@192.168.1.10${toString idx}";
-        tags = [
-          "basement"
-          "pi4b" # They're all 4bs right now
-          "k8s"
-          "control-plane"
-          "rack"
-          "server"
-          "headless"
-        ];
+        tags = piTags;
       };
     in
     {
@@ -95,9 +97,21 @@
       pik8s1 = pik8s 1;
       pik8s2 = pik8s 2;
       pik8s3 = pik8s 3;
-      pik8s4 = pik8s 4;
-      pik8s5 = pik8s 5;
-      pik8s6 = pik8s 6;
+
+      pik8s4 = {
+        deploy.targetHost = "root@192.168.1.104";
+        tags = piTags ++ [ "pinkdiamond" ];
+      };
+
+      pik8s5 = {
+        deploy.targetHost = "root@192.168.1.105";
+        tags = piTags ++ [ "pinkdiamond" ];
+      };
+
+      pik8s6 = {
+        deploy.targetHost = "root@192.168.1.106";
+        tags = piTags ++ [ "pinkdiamond" ];
+      };
     };
 
   inventory.instances = {
@@ -137,8 +151,6 @@
     raspberry-pi = {
       module.name = "@UnstoppableMango/pi";
       module.input = "self";
-
-      # This makes me feel like I'm doing something wrong
       roles.pi4b.tags.pi4b = { };
     };
 
@@ -155,6 +167,27 @@
       module.input = "self";
 
       roles.server.tags.server = { };
+    };
+
+    pinkdiamond = {
+      module.name = "@UnstoppableMango/pinkdiamond";
+      module.input = "self";
+
+      roles.control-plane = {
+        tags = [
+          "control-plane"
+          "pinkdiamond"
+        ];
+        settings = {
+          nodes = [
+            { name = "pik8s4"; ip = "192.168.1.104"; }
+            { name = "pik8s5"; ip = "192.168.1.105"; }
+            { name = "pik8s6"; ip = "192.168.1.106"; }
+          ];
+          vip = "192.168.1.100";
+          clusterName = "pinkdiamond";
+        };
+      };
     };
   };
 
