@@ -181,13 +181,20 @@ in
                 -out "$out/$name-crt" 2>/dev/null
             }
           '';
-          serverExt =
-            sans:
-            "keyUsage=critical,digitalSignature,keyEncipherment\nextendedKeyUsage=serverAuth\nsubjectAltName=${sans}";
-          clientExt = "keyUsage=critical,digitalSignature,keyEncipherment\nextendedKeyUsage=clientAuth";
-          peerExt =
-            sans:
-            "keyUsage=critical,digitalSignature,keyEncipherment\nextendedKeyUsage=serverAuth,clientAuth\nsubjectAltName=${sans}";
+
+          serverExt = sans: ''
+            keyUsage=critical,digitalSignature,keyEncipherment
+            extendedKeyUsage=serverAuth
+            subjectAltName=${sans}'';
+
+          clientExt = ''
+            keyUsage=critical,digitalSignature,keyEncipherment
+            extendedKeyUsage=clientAuth'';
+
+          peerExt = sans: ''
+            keyUsage=critical,digitalSignature,keyEncipherment
+            extendedKeyUsage=serverAuth,clientAuth
+            subjectAltName=${sans}'';
         in
         ''
           set -euo pipefail
