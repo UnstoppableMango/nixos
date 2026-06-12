@@ -5,8 +5,8 @@
   ...
 }:
 let
-  cfg = config.cluster.pinkdiamond;
-  certs = config.clan.core.vars.generators."pinkdiamond-certs".files;
+  cfg = config.cluster.rosequartz;
+  certs = config.clan.core.vars.generators."rosequartz-certs".files;
 
   etcdClientEndpoints = map (n: "https://${n.ip}:2379") cfg.nodes;
   etcdPeerEndpoints = map (n: "${n.name}=https://${n.ip}:2380") cfg.nodes;
@@ -27,7 +27,7 @@ let
   ];
 in
 {
-  options.cluster.pinkdiamond = {
+  options.cluster.rosequartz = {
     nodes = lib.mkOption {
       type = lib.types.listOf (
         lib.types.submodule {
@@ -122,9 +122,9 @@ in
   };
 
   config = {
-    cluster.pinkdiamond.etcd.initialCluster = lib.mkDefault etcdPeerEndpoints;
+    cluster.rosequartz.etcd.initialCluster = lib.mkDefault etcdPeerEndpoints;
 
-    clan.core.vars.generators."pinkdiamond-certs" = {
+    clan.core.vars.generators."rosequartz-certs" = {
       share = true;
 
       runtimeInputs = [ pkgs.openssl ];

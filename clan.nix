@@ -8,7 +8,7 @@
 
   modules."@UnstoppableMango/k3s" = import ./modules/service/k3s;
   modules."@UnstoppableMango/pi" = import ./modules/service/pi;
-  modules."@UnstoppableMango/pinkdiamond" = import ./modules/service/pinkdiamond;
+  modules."@UnstoppableMango/rosequartz" = import ./modules/service/rosequartz;
   modules."@UnstoppableMango/trouble" = import ./modules/service/trouble;
 
   inventory.machines =
@@ -100,17 +100,17 @@
 
       pik8s4 = {
         deploy.targetHost = "root@192.168.1.104";
-        tags = piTags ++ [ "pinkdiamond" ];
+        tags = piTags ++ [ "rosequartz" ];
       };
 
       pik8s5 = {
         deploy.targetHost = "root@192.168.1.105";
-        tags = piTags ++ [ "pinkdiamond" ];
+        tags = piTags ++ [ "rosequartz" ];
       };
 
       pik8s6 = {
         deploy.targetHost = "root@192.168.1.106";
-        tags = piTags ++ [ "pinkdiamond" ];
+        tags = piTags ++ [ "rosequartz" ];
       };
     };
 
@@ -169,14 +169,14 @@
       roles.server.tags.server = { };
     };
 
-    pinkdiamond = {
-      module.name = "@UnstoppableMango/pinkdiamond";
+    rosequartz = {
+      module.name = "@UnstoppableMango/rosequartz";
       module.input = "self";
 
       roles.control-plane = {
         tags = [
           "control-plane"
-          "pinkdiamond"
+          "rosequartz"
         ];
         settings = {
           nodes = [
@@ -185,7 +185,7 @@
             { name = "pik8s6"; ip = "192.168.1.106"; }
           ];
           vip = "192.168.1.100";
-          clusterName = "pinkdiamond";
+          clusterName = "rosequartz";
         };
       };
     };

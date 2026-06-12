@@ -1,6 +1,6 @@
 {
   _class = "clan.service";
-  manifest.name = "pinkdiamond";
+  manifest.name = "rosequartz";
   manifest.readme = builtins.readFile ./README.md;
 
   roles.control-plane = {
@@ -37,7 +37,7 @@
       {
         nixosModule = {
           imports = [ ./control-plane.nix ];
-          cluster.pinkdiamond = {
+          cluster.rosequartz = {
             inherit (settings) nodes vip clusterName;
           };
         };

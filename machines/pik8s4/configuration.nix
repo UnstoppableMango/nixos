@@ -18,7 +18,7 @@
     };
   };
 
-  cluster.pinkdiamond = {
+  cluster.rosequartz = {
     interface = "end0";
     advertiseAddress = "192.168.1.104";
     keepalivedPriority = 100;
