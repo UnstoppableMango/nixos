@@ -3,6 +3,7 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
+    nixpkgs-stable.url = "github:nixos/nixpkgs?ref=nixos-25.11";
     systems.url = "github:nix-systems/default";
     nixos-hardware.url = "github:nixos/nixos-hardware?ref=master";
     flake-parts.url = "github:hercules-ci/flake-parts";
@@ -29,7 +30,7 @@
     clan-core = {
       url = "https://git.clan.lol/clan/clan-core/archive/25.11.tar.gz";
       inputs = {
-        nixpkgs.follows = "nixpkgs";
+        nixpkgs.follows = "nixpkgs-stable";
         systems.follows = "systems";
         flake-parts.follows = "flake-parts";
         disko.follows = "disko";
