@@ -154,18 +154,6 @@
       roles.pi4b.tags.pi4b = { };
     };
 
-    k3s = {
-      module.name = "@UnstoppableMango/k3s";
-      module.input = "self";
-
-      roles.control-plane.tags = [
-        "control-plane"
-        "k3s"
-      ];
-
-      roles.worker.tags.worker = { };
-    };
-
     trouble = {
       module.name = "@UnstoppableMango/trouble";
       module.input = "self";
