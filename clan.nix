@@ -158,7 +158,11 @@
       module.name = "@UnstoppableMango/k3s";
       module.input = "self";
 
-      roles.control-plane.tags.control-plane = { };
+      roles.control-plane.tags = [
+        "control-plane"
+        "k3s"
+      ];
+
       roles.worker.tags.worker = { };
     };
 
@@ -178,11 +182,21 @@
           "control-plane"
           "rosequartz"
         ];
+
         settings = {
           nodes = [
-            { name = "pik8s4"; ip = "192.168.1.104"; }
-            { name = "pik8s5"; ip = "192.168.1.105"; }
-            { name = "pik8s6"; ip = "192.168.1.106"; }
+            {
+              name = "pik8s4";
+              ip = "192.168.1.104";
+            }
+            {
+              name = "pik8s5";
+              ip = "192.168.1.105";
+            }
+            {
+              name = "pik8s6";
+              ip = "192.168.1.106";
+            }
           ];
           vip = "192.168.1.100";
           clusterName = "rosequartz";
