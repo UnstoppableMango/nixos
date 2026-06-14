@@ -2,6 +2,8 @@ HOST ?= $(shell hostname)
 NIX  ?= nix
 DISK ?= /dev/sdi
 
+PIS := pik8s1 pik8s2 pik8s3 pik8s4 pik8s5 pik8s6
+
 build:
 	$(NIX) build .#nixosConfigurations.${HOST}.config.system.build.toplevel
 
@@ -23,3 +25,20 @@ update:
 system:
 	sudo nix flake update --flake /etc/nixos
 	sudo nixos-rebuild switch --flake /etc/nixos --cores 12
+
+bin:
+	mkdir -p bin
+
+sd-images: ${PIS:%=%-sd}
+
+${PIS:%=%-sd}: %-sd: bin/%-sd-card.img
+
+bin/%-sd-card.img: bin/%-sd-card | bin
+	unzstd -o $@ $</*.img.zst
+
+.SECONDARY: ${PIS:%=%-sd-card}
+bin/%-sd-card: | bin
+	$(NIX) build --out-link $@ .#nixosConfigurations.$*.config.system.build.images.sd-card
+
+.PHONY: build hades agreus check format fmt update system sd-images \
+        pik8s1-sd pik8s2-sd pik8s3-sd pik8s4-sd pik8s5-sd pik8s6-sd
