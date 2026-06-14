@@ -195,6 +195,8 @@
     fileSystems = [ "/" ];
   };
 
+  boot.binfmt.emulatedSystems = [ "aarch64-linux" ];
+
   programs.appimage = {
     enable = true;
     binfmt = true;
