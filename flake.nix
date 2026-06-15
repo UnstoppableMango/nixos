@@ -123,6 +123,7 @@
         clan-core.flakeModules.default
 
         ./hosts
+        ./apps/rosequartz.nix
       ];
 
       clan = {

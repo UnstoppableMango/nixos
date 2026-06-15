@@ -186,6 +186,11 @@ in
           secret = true;
           owner = "kubernetes";
         };
+        "admin-crt".secret = false;
+        "admin-key" = {
+          secret = true;
+          owner = "kubernetes";
+        };
         "sa-pub".secret = false;
         "sa-key" = {
           secret = true;
@@ -265,6 +270,10 @@ in
 
           sign etcd-client \
             "/CN=kube-apiserver-etcd-client/O=system:masters" \
+            "${clientExt}"
+
+          sign admin \
+            "/CN=kubernetes-admin/O=system:masters" \
             "${clientExt}"
 
           # Service account key pair — shared generator ensures identical keys on all nodes

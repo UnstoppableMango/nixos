@@ -5,3 +5,5 @@
 *.zst
 .claude/
 bin/
+.kube/
+*kubeconfig
