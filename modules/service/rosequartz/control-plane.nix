@@ -11,6 +11,10 @@ let
   etcdClientEndpoints = map (n: "https://${n.ip}:2379") cfg.nodes;
   etcdPeerEndpoints = map (n: "${n.name}=https://${n.ip}:2380") cfg.nodes;
 
+  localNode = lib.findFirst (n: n.ip == cfg.advertiseAddress)
+    (throw "no rosequartz node matches advertiseAddress ${cfg.advertiseAddress}")
+    cfg.nodes;
+
   nodeIps = map (n: n.ip) cfg.nodes;
 
   nodeSANs = lib.concatMapStringsSep "," (ip: "IP:${ip}") nodeIps;
@@ -325,6 +329,7 @@ in
     # etcd cluster
     # -------------------------------------------------------------------------
     services.etcd = {
+      name = localNode.name;
       listenClientUrls = [ "https://0.0.0.0:2379" ];
       listenPeerUrls = [ "https://0.0.0.0:2380" ];
       advertiseClientUrls = cfg.etcd.advertiseClientUrls;
