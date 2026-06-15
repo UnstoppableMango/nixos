@@ -143,26 +143,50 @@ in
       files = {
         "ca-crt".secret = false;
         "apiserver-crt".secret = false;
-        "apiserver-key".secret = true;
+        "apiserver-key" = {
+          secret = true;
+          owner = "kubernetes";
+        };
         "apiserver-kubelet-client-crt".secret = false;
-        "apiserver-kubelet-client-key".secret = true;
+        "apiserver-kubelet-client-key" = {
+          secret = true;
+          owner = "kubernetes";
+        };
         "controller-manager-crt".secret = false;
-        "controller-manager-key".secret = true;
+        "controller-manager-key" = {
+          secret = true;
+          owner = "kubernetes";
+        };
         "scheduler-crt".secret = false;
-        "scheduler-key".secret = true;
+        "scheduler-key" = {
+          secret = true;
+          owner = "kubernetes";
+        };
         "kubelet-crt".secret = false;
         "kubelet-key".secret = true;
         "kubelet-client-crt".secret = false;
         "kubelet-client-key".secret = true;
         "etcd-ca-crt".secret = false;
         "etcd-server-crt".secret = false;
-        "etcd-server-key".secret = true;
+        "etcd-server-key" = {
+          secret = true;
+          owner = "etcd";
+        };
         "etcd-peer-crt".secret = false;
-        "etcd-peer-key".secret = true;
+        "etcd-peer-key" = {
+          secret = true;
+          owner = "etcd";
+        };
         "etcd-client-crt".secret = false;
-        "etcd-client-key".secret = true;
+        "etcd-client-key" = {
+          secret = true;
+          owner = "kubernetes";
+        };
         "sa-pub".secret = false;
-        "sa-key".secret = true;
+        "sa-key" = {
+          secret = true;
+          owner = "kubernetes";
+        };
       };
 
       script =

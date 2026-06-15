@@ -1,4 +1,4 @@
-{ ... }:
+{ lib, ... }:
 {
   disko.devices.disk.sda = {
     device = "/dev/sda";
@@ -27,10 +27,10 @@
   # so we must declare fileSystems explicitly here too. Use the same lib.mkDefault
   # wrapping pattern so priority matches and the SD card entries in disk-config.nix
   # are not superseded.
-  # fileSystems = lib.mkDefault {
-  #   "/var" = {
-  #     device = "/dev/disk/by-label/VAR";
-  #     fsType = "xfs";
-  #   };
-  # };
+  fileSystems = lib.mkDefault {
+    "/var" = {
+      device = "/dev/disk/by-label/VAR";
+      fsType = "xfs";
+    };
+  };
 }

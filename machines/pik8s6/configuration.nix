@@ -1,5 +1,5 @@
 {
-  imports = [ ./disk-config.nix ];
+  # imports = [ ./disk-config.nix ];
 
   hardware.facter.reportPath = ./facter.json;
 
