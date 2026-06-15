@@ -346,8 +346,37 @@ in
       peerTrustedCaFile = certs."etcd-ca-crt".path;
     };
 
-    # Flannel needs all etcd endpoints, not just the VIP
-    services.flannel.etcd.endpoints = etcdClientEndpoints;
+    # services.kubernetes.roles auto-enables the kubernetes flannel integration,
+    # which uses in-cluster config and breaks when flannel runs as a systemd
+    # service outside a pod. Force etcd backend with manual PKI instead.
+    services.kubernetes.flannel.enable = lib.mkForce false;
+    services.flannel = {
+      enable = true;
+      storageBackend = "etcd";
+      network = config.services.kubernetes.clusterCidr;
+      etcd = {
+        endpoints = etcdClientEndpoints;
+        caFile = certs."etcd-ca-crt".path;
+        certFile = certs."etcd-client-crt".path;
+        keyFile = certs."etcd-client-key".path;
+      };
+    };
+    services.kubernetes.kubelet.cni.config = lib.mkDefault [
+      {
+        name = "cni0";
+        type = "flannel";
+        cniVersion = "0.3.1";
+        delegate = {
+          isDefaultGateway = true;
+          hairpinMode = true;
+          bridge = "cni0";
+        };
+      }
+    ];
+    networking.dhcpcd.denyInterfaces = [
+      "cni0*"
+      "flannel*"
+    ];
 
     # -------------------------------------------------------------------------
     # keepalived — floating VIP
