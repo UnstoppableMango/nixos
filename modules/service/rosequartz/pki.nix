@@ -1,47 +1,101 @@
-{ lib, pkgs, keyBits ? 2048, certValidityDays ? 3650 }:
+{
+  lib,
+  pkgs,
+  certValidityDays ? 3650,
+}:
 let
-  clientExt = ''
-    keyUsage=critical,digitalSignature,keyEncipherment
-    extendedKeyUsage=clientAuth'';
+  # ─── Config (JSON) ───────────────────────────────────────────────────────────
 
-  serverExt = sans: ''
-    keyUsage=critical,digitalSignature,keyEncipherment
-    extendedKeyUsage=serverAuth
-    subjectAltName=${sans}'';
+  expiryHours = certValidityDays * 24;
 
-  peerExt = sans: ''
-    keyUsage=critical,digitalSignature,keyEncipherment
-    extendedKeyUsage=serverAuth,clientAuth
-    subjectAltName=${sans}'';
+  signingConfigFile = pkgs.writeText "cfssl-signing-config.json" (
+    builtins.toJSON {
+      signing = {
+        default.expiry = "${toString expiryHours}h";
+        profiles = {
+          server = {
+            expiry = "${toString expiryHours}h";
+            usages = [
+              "digital signature"
+              "server auth"
+            ];
+          };
+          client = {
+            expiry = "${toString expiryHours}h";
+            usages = [
+              "digital signature"
+              "client auth"
+            ];
+          };
+          peer = {
+            expiry = "${toString expiryHours}h";
+            usages = [
+              "digital signature"
+              "server auth"
+              "client auth"
+            ];
+          };
+        };
+      };
+    }
+  );
 
-  sign = subj: ext: ''
+  mkCsrFile =
+    name:
+    {
+      cn,
+      org ? null,
+      hosts ? [ ],
+    }:
+    pkgs.writeText "${name}-csr.json" (
+      builtins.toJSON {
+        CN = cn;
+        key = {
+          algo = "ecdsa";
+          size = 256;
+        };
+        hosts = hosts;
+        names = lib.optional (org != null) { O = org; };
+      }
+    );
+
+  # ─── Scripting ───────────────────────────────────────────────────────────────
+
+  gencert = profile: csrFile: ''
     set -euo pipefail
-    openssl req -newkey rsa:${toString keyBits} -nodes \
-      -keyout "$out/key" -subj "${subj}" -out tmp.csr 2>/dev/null
-    openssl x509 -req -in tmp.csr \
-      -CA "$in/rosequartz-ca/crt" -CAkey "$in/rosequartz-ca/key" -CAcreateserial \
-      -days ${toString certValidityDays} -sha256 \
-      -extfile <(printf '%s' "${ext}") \
-      -out "$out/crt" 2>/dev/null
+    cfssl gencert \
+      -ca "$in/rosequartz-ca/crt" \
+      -ca-key "$in/rosequartz-ca/key" \
+      -config ${signingConfigFile} \
+      -profile ${profile} \
+      ${csrFile} | cfssljson -bare cert
+    mv cert.pem "$out/crt"
+    mv cert-key.pem "$out/key"
+    rm -f cert.csr
   '';
 
-  mkCert = share: subj: ext: owner: {
+  mkCert = share: csrFile: profile: owner: {
     inherit share;
-    runtimeInputs = [ pkgs.openssl ];
+    runtimeInputs = [ pkgs.cfssl ];
     dependencies = [ "rosequartz-ca" ];
     files."crt".secret = false;
     files."key" = {
       secret = true;
       inherit owner;
     };
-    script = sign subj ext;
+    script = gencert profile csrFile;
   };
 
   mkSharedCert = mkCert true;
   mkNodeCert = mkCert false;
 in
 {
-  inherit clientExt serverExt peerExt sign mkCert mkSharedCert mkNodeCert;
+  inherit
+    mkCert
+    mkSharedCert
+    mkNodeCert
+    mkCsrFile
+    ;
 
   caGenerator = {
     "rosequartz-ca" = {
@@ -77,76 +131,110 @@ in
     }:
     let
       nodeIps = map (n: n.ip) nodes;
-      nodeSANs = lib.concatMapStringsSep "," (ip: "IP:${ip}") nodeIps;
-      apiserverSANs = lib.concatStringsSep "," [
-        "IP:${vip}"
-        nodeSANs
-        "IP:${serviceClusterIP}"
-        "IP:127.0.0.1"
-        "DNS:kubernetes"
-        "DNS:kubernetes.default"
-        "DNS:kubernetes.default.svc"
-        "DNS:kubernetes.default.svc.cluster.local"
-        "DNS:localhost"
+      apiserverHosts = [
+        vip
+      ]
+      ++ nodeIps
+      ++ [
+        serviceClusterIP
+        "127.0.0.1"
+        "kubernetes"
+        "kubernetes.default"
+        "kubernetes.default.svc"
+        "kubernetes.default.svc.cluster.local"
+        "localhost"
       ];
-      localSANs = "IP:${advertiseAddress},IP:127.0.0.1";
+      localHosts = [
+        advertiseAddress
+        "127.0.0.1"
+      ];
+
+      # --- CSR config ---
+      saCsr = mkCsrFile "rosequartz-sa" { cn = "service-accounts"; };
+      apiserverCsr = mkCsrFile "rosequartz-apiserver-cert" {
+        cn = "kube-apiserver";
+        hosts = apiserverHosts;
+      };
+      apiserverKubeletClientCsr = mkCsrFile "rosequartz-apiserver-kubelet-client-cert" {
+        cn = "kube-apiserver-kubelet-client";
+        org = "system:masters";
+      };
+      controllerManagerCsr = mkCsrFile "rosequartz-controller-manager-cert" {
+        cn = "system:kube-controller-manager";
+        org = "system:kube-controller-manager";
+      };
+      schedulerCsr = mkCsrFile "rosequartz-scheduler-cert" {
+        cn = "system:kube-scheduler";
+        org = "system:kube-scheduler";
+      };
+      etcdClientCsr = mkCsrFile "rosequartz-etcd-client-cert" {
+        cn = "kube-apiserver-etcd-client";
+        org = "system:masters";
+      };
+      adminCsr = mkCsrFile "rosequartz-admin-cert" {
+        cn = "kubernetes-admin";
+        org = "system:masters";
+      };
+      etcdServerCsr = mkCsrFile "rosequartz-etcd-server-cert" {
+        cn = "etcd-server";
+        hosts = localHosts;
+      };
+      etcdPeerCsr = mkCsrFile "rosequartz-etcd-peer-cert" {
+        cn = "etcd-peer";
+        hosts = localHosts;
+      };
+      kubeletCsr = mkCsrFile "rosequartz-kubelet-cert" {
+        cn = "system:node:${localNode.name}";
+        org = "system:nodes";
+        hosts = [ advertiseAddress ];
+      };
+      kubeletClientCsr = mkCsrFile "rosequartz-kubelet-client-cert" {
+        cn = "system:node:${localNode.name}";
+        org = "system:nodes";
+      };
     in
     {
-      "rosequartz-sa" = {
-        share = true;
-        runtimeInputs = [ pkgs.openssl ];
-        files."key" = {
-          secret = true;
-          owner = "kubernetes";
-        };
-        files."pub".secret = false;
-        script = ''
-          set -euo pipefail
-          openssl genrsa -out "$out/key" ${toString keyBits} 2>/dev/null
-          openssl rsa -in "$out/key" -pubout -out "$out/pub" 2>/dev/null
-        '';
-      };
-
-      "rosequartz-apiserver-cert" =
-        mkSharedCert "/CN=kube-apiserver" (serverExt apiserverSANs) "kubernetes";
-
+      "rosequartz-sa" = mkSharedCert saCsr "client" "kubernetes";
+      "rosequartz-apiserver-cert" = mkSharedCert apiserverCsr "server" "kubernetes";
       "rosequartz-apiserver-kubelet-client-cert" =
-        mkSharedCert "/CN=kube-apiserver-kubelet-client/O=system:masters" clientExt "kubernetes";
-
-      "rosequartz-controller-manager-cert" =
-        mkSharedCert "/CN=system:kube-controller-manager/O=system:kube-controller-manager" clientExt "kubernetes";
-
-      "rosequartz-scheduler-cert" =
-        mkSharedCert "/CN=system:kube-scheduler/O=system:kube-scheduler" clientExt "kubernetes";
-
-      "rosequartz-etcd-client-cert" =
-        mkSharedCert "/CN=kube-apiserver-etcd-client/O=system:masters" clientExt "kubernetes";
-
-      "rosequartz-admin-cert" =
-        mkSharedCert "/CN=kubernetes-admin/O=system:masters" clientExt "kubernetes";
-
-      "rosequartz-etcd-server-cert" = mkNodeCert "/CN=etcd-server" (peerExt localSANs) "etcd";
-
-      "rosequartz-etcd-peer-cert" = mkNodeCert "/CN=etcd-peer" (peerExt localSANs) "etcd";
-
-      "rosequartz-kubelet-cert" =
-        mkNodeCert "/CN=system:node:${localNode.name}/O=system:nodes" (peerExt "IP:${advertiseAddress}") "root";
-
-      "rosequartz-kubelet-client-cert" =
-        mkNodeCert "/CN=system:node:${localNode.name}/O=system:nodes" clientExt "root";
+        mkSharedCert apiserverKubeletClientCsr "client"
+          "kubernetes";
+      "rosequartz-controller-manager-cert" = mkSharedCert controllerManagerCsr "client" "kubernetes";
+      "rosequartz-scheduler-cert" = mkSharedCert schedulerCsr "client" "kubernetes";
+      "rosequartz-etcd-client-cert" = mkSharedCert etcdClientCsr "client" "kubernetes";
+      "rosequartz-admin-cert" = mkSharedCert adminCsr "client" "kubernetes";
+      "rosequartz-etcd-server-cert" = mkNodeCert etcdServerCsr "peer" "etcd";
+      "rosequartz-etcd-peer-cert" = mkNodeCert etcdPeerCsr "peer" "etcd";
+      "rosequartz-kubelet-cert" = mkNodeCert kubeletCsr "peer" "root";
+      "rosequartz-kubelet-client-cert" = mkNodeCert kubeletClientCsr "client" "root";
     };
 
   mkWorkerGenerators =
     { advertiseAddress, hostName }:
+    let
+      workerKubeletCsr = mkCsrFile "rosequartz-worker-kubelet-cert" {
+        cn = "system:node:${hostName}";
+        org = "system:nodes";
+        hosts = [ advertiseAddress ];
+      };
+      workerKubeletClientCsr = mkCsrFile "rosequartz-worker-kubelet-client-cert" {
+        cn = "system:node:${hostName}";
+        org = "system:nodes";
+      };
+    in
     {
-      "rosequartz-worker-kubelet-cert" =
-        mkNodeCert "/CN=system:node:${hostName}/O=system:nodes" (peerExt "IP:${advertiseAddress}") "root";
-
-      "rosequartz-worker-kubelet-client-cert" =
-        mkNodeCert "/CN=system:node:${hostName}/O=system:nodes" clientExt "root";
+      "rosequartz-worker-kubelet-cert" = mkNodeCert workerKubeletCsr "peer" "root";
+      "rosequartz-worker-kubelet-client-cert" = mkNodeCert workerKubeletClientCsr "client" "root";
     };
 
-  flannelGenerator = {
-    "rosequartz-flannel-cert" = mkSharedCert "/CN=flannel/O=system:masters" clientExt "root";
-  };
+  flannelGenerator =
+    let
+      flannelCsr = mkCsrFile "rosequartz-flannel-cert" {
+        cn = "flannel";
+        org = "system:masters";
+      };
+    in
+    {
+      "rosequartz-flannel-cert" = mkSharedCert flannelCsr "client" "root";
+    };
 }

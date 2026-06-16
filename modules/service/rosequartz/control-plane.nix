@@ -108,7 +108,12 @@ in
     clan.core.vars.generators =
       pki.caGenerator
       // pki.mkControlPlaneGenerators {
-        inherit (cfg) nodes vip advertiseAddress serviceClusterIP;
+        inherit (cfg)
+          nodes
+          vip
+          advertiseAddress
+          serviceClusterIP
+          ;
         inherit localNode;
       };
 
@@ -128,7 +133,7 @@ in
         clientCaFile = (cert "ca")."crt".path;
         tlsCertFile = (cert "apiserver-cert")."crt".path;
         tlsKeyFile = (cert "apiserver-cert")."key".path;
-        serviceAccountKeyFile = (cert "sa")."pub".path;
+        serviceAccountKeyFile = (cert "sa")."crt".path;
         serviceAccountSigningKeyFile = (cert "sa")."key".path;
         kubeletClientCertFile = (cert "apiserver-kubelet-client-cert")."crt".path;
         kubeletClientKeyFile = (cert "apiserver-kubelet-client-cert")."key".path;
