@@ -90,15 +90,19 @@ let
   };
 in
 {
-  options.cluster.rosequartz.fluxBootstrap.manifests = lib.mkOption {
-    type = lib.types.package;
-    readOnly = true;
-    internal = true;
-    description = "Generated gotk manifest bundle, for inspection or copying into the-cluster repo.";
-    default = manifests;
+  options.cluster.rosequartz.fluxBootstrap = {
+    enable = lib.mkEnableOption "flux bootstrap static pod";
+
+    manifests = lib.mkOption {
+      type = lib.types.package;
+      readOnly = true;
+      internal = true;
+      description = "Generated gotk manifest bundle, for inspection or copying into the-cluster repo.";
+      default = manifests;
+    };
   };
 
-  config = {
+  config = lib.mkIf config.cluster.rosequartz.fluxBootstrap.enable {
     clan.core.vars.generators = {
       "rosequartz-admin-cert" = lib.mkDefault (
         config.cluster.rosequartz.pki.lib.mkSharedCert "/CN=kubernetes-admin/O=system:masters"
