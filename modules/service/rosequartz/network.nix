@@ -6,7 +6,7 @@
 }:
 let
   cfg = config.cluster.rosequartz;
-  inherit (cfg.pki.lib) clientExt mkCert;
+  pki = import ./pki.nix { inherit lib pkgs; };
 
   cert = name: config.clan.core.vars.generators."rosequartz-${name}".files;
 
@@ -32,13 +32,8 @@ let
   '';
 in
 {
-  imports = [ ./pki.nix ];
-
   config = {
-    clan.core.vars.generators = {
-      # Flannel uses system:masters for now; restrict via ClusterRole/ClusterRoleBinding once cluster is bootstrapped.
-      "rosequartz-flannel-cert" = mkCert true "/CN=flannel/O=system:masters" clientExt "root";
-    };
+    clan.core.vars.generators = pki.flannelGenerator;
 
     services.kubernetes.flannel.enable = lib.mkForce false;
     services.flannel = {

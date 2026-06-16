@@ -7,6 +7,7 @@
 }:
 let
   cfg = config.cluster.rosequartz;
+  pki = import ./pki.nix { inherit lib pkgs; };
   cert = name: config.clan.core.vars.generators."rosequartz-${name}".files;
 
   flux = inputs.a2b.legacyPackages.${pkgs.system}.lib.flux;
@@ -105,9 +106,7 @@ in
   config = lib.mkIf config.cluster.rosequartz.fluxBootstrap.enable {
     clan.core.vars.generators = {
       "rosequartz-admin-cert" = lib.mkDefault (
-        config.cluster.rosequartz.pki.lib.mkSharedCert "/CN=kubernetes-admin/O=system:masters"
-          config.cluster.rosequartz.pki.lib.clientExt
-          "kubernetes"
+        pki.mkSharedCert "/CN=kubernetes-admin/O=system:masters" pki.clientExt "kubernetes"
       );
     };
 

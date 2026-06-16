@@ -4,16 +4,13 @@
   ...
 }:
 let
-  inherit (cfg.pki.lib) clientExt peerExt mkNodeCert;
   cfg = config.cluster.rosequartz;
+  pki = import ./pki.nix { inherit lib pkgs; };
 
   cert = name: config.clan.core.vars.generators."rosequartz-${name}".files;
 in
 {
-  imports = [
-    ./pki.nix
-    ./network.nix
-  ];
+  imports = [ ./network.nix ];
 
   options.cluster.rosequartz = {
     vip = lib.mkOption {
@@ -33,16 +30,12 @@ in
   };
 
   config = {
-    clan.core.vars.generators = {
-      "rosequartz-worker-kubelet-cert" =
-        mkNodeCert "/CN=system:node:${config.networking.hostName}/O=system:nodes"
-          (peerExt "IP:${cfg.advertiseAddress}")
-          "root";
-
-      "rosequartz-worker-kubelet-client-cert" =
-        mkNodeCert "/CN=system:node:${config.networking.hostName}/O=system:nodes" clientExt
-          "root";
-    };
+    clan.core.vars.generators =
+      pki.caGenerator
+      // pki.mkWorkerGenerators {
+        inherit (cfg) advertiseAddress;
+        hostName = config.networking.hostName;
+      };
 
     # -------------------------------------------------------------------------
     # Kubernetes worker

@@ -6,13 +6,7 @@
 }:
 let
   cfg = config.cluster.rosequartz;
-  inherit (cfg.pki.lib)
-    clientExt
-    serverExt
-    peerExt
-    mkSharedCert
-    mkNodeCert
-    ;
+  pki = import ./pki.nix { inherit lib pkgs; };
 
   cert = name: config.clan.core.vars.generators."rosequartz-${name}".files;
 
@@ -22,29 +16,9 @@ let
   localNode = lib.findFirst (
     n: n.ip == cfg.advertiseAddress
   ) (throw "no rosequartz node matches advertiseAddress ${cfg.advertiseAddress}") cfg.nodes;
-
-  nodeIps = map (n: n.ip) cfg.nodes;
-
-  nodeSANs = lib.concatMapStringsSep "," (ip: "IP:${ip}") nodeIps;
-  apiserverSANs = lib.concatStringsSep "," [
-    "IP:${cfg.vip}"
-    nodeSANs
-    "IP:${cfg.serviceClusterIP}"
-    "IP:127.0.0.1"
-    "DNS:kubernetes"
-    "DNS:kubernetes.default"
-    "DNS:kubernetes.default.svc"
-    "DNS:kubernetes.default.svc.cluster.local"
-    "DNS:localhost"
-  ];
-
-  localSANs = "IP:${cfg.advertiseAddress},IP:127.0.0.1";
 in
 {
-  imports = [
-    ./pki.nix
-    ./network.nix
-  ];
+  imports = [ ./network.nix ];
 
   options.cluster.rosequartz = {
     nodes = lib.mkOption {
@@ -131,66 +105,12 @@ in
   config = {
     cluster.rosequartz.etcd.initialCluster = lib.mkDefault etcdPeerEndpoints;
 
-    clan.core.vars.generators = {
-      # Service account signing key pair — must be identical on all
-      # control-plane nodes so tokens issued by any node are valid on all
-      "rosequartz-sa" = {
-        share = true;
-        runtimeInputs = [ pkgs.openssl ];
-        files."key" = {
-          secret = true;
-          owner = "kubernetes";
-        };
-        files."pub".secret = false;
-        script = ''
-          set -euo pipefail
-          openssl genrsa -out "$out/key" ${toString cfg.pki.keyBits} 2>/dev/null
-          openssl rsa -in "$out/key" -pubout -out "$out/pub" 2>/dev/null
-        '';
+    clan.core.vars.generators =
+      pki.caGenerator
+      // pki.mkControlPlaneGenerators {
+        inherit (cfg) nodes vip advertiseAddress serviceClusterIP;
+        inherit localNode;
       };
-
-      # Shared certs — same cert on every control-plane node.
-      # apiserver SANs cover all node IPs + VIP so the cert is valid regardless
-      # of which node serves a given request.
-      "rosequartz-apiserver-cert" =
-        mkSharedCert "/CN=kube-apiserver" (serverExt apiserverSANs)
-          "kubernetes";
-
-      "rosequartz-apiserver-kubelet-client-cert" =
-        mkSharedCert "/CN=kube-apiserver-kubelet-client/O=system:masters" clientExt
-          "kubernetes";
-
-      "rosequartz-controller-manager-cert" =
-        mkSharedCert "/CN=system:kube-controller-manager/O=system:kube-controller-manager" clientExt
-          "kubernetes";
-
-      "rosequartz-scheduler-cert" =
-        mkSharedCert "/CN=system:kube-scheduler/O=system:kube-scheduler" clientExt
-          "kubernetes";
-
-      "rosequartz-etcd-client-cert" =
-        mkSharedCert "/CN=kube-apiserver-etcd-client/O=system:masters" clientExt
-          "kubernetes";
-
-      "rosequartz-admin-cert" =
-        mkSharedCert "/CN=kubernetes-admin/O=system:masters" clientExt
-          "kubernetes";
-
-      # Per-node certs — unique key per node, SANs/CN scoped to this node.
-      # etcd-server + etcd-peer include localhost so etcd can loopback.
-      # kubelet CN encodes the node name for the Node authorizer.
-      "rosequartz-etcd-server-cert" = mkNodeCert "/CN=etcd-server" (peerExt localSANs) "etcd";
-
-      "rosequartz-etcd-peer-cert" = mkNodeCert "/CN=etcd-peer" (peerExt localSANs) "etcd";
-
-      "rosequartz-kubelet-cert" =
-        mkNodeCert "/CN=system:node:${localNode.name}/O=system:nodes" (peerExt "IP:${cfg.advertiseAddress}")
-          "root";
-
-      "rosequartz-kubelet-client-cert" =
-        mkNodeCert "/CN=system:node:${localNode.name}/O=system:nodes" clientExt
-          "root";
-    };
 
     # -------------------------------------------------------------------------
     # Kubernetes control plane
