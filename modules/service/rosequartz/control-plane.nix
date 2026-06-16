@@ -270,38 +270,6 @@ in
       peerTrustedCaFile = (cert "ca")."crt".path;
     };
 
-    # services.kubernetes.roles auto-enables the kubernetes flannel integration,
-    # which uses in-cluster config and breaks when flannel runs as a systemd
-    # service outside a pod. Force etcd backend with manual PKI instead.
-    services.kubernetes.flannel.enable = lib.mkForce false;
-    services.flannel = {
-      enable = true;
-      storageBackend = "etcd";
-      network = config.services.kubernetes.clusterCidr;
-      etcd = {
-        endpoints = etcdClientEndpoints;
-        caFile = (cert "ca")."crt".path;
-        certFile = (cert "etcd-client-cert")."crt".path;
-        keyFile = (cert "etcd-client-cert")."key".path;
-      };
-    };
-    services.kubernetes.kubelet.cni.config = lib.mkDefault [
-      {
-        name = "cni0";
-        type = "flannel";
-        cniVersion = "0.3.1";
-        delegate = {
-          isDefaultGateway = true;
-          hairpinMode = true;
-          bridge = "cni0";
-        };
-      }
-    ];
-    networking.dhcpcd.denyInterfaces = [
-      "cni0*"
-      "flannel*"
-    ];
-
     # -------------------------------------------------------------------------
     # keepalived — floating VIP
     # -------------------------------------------------------------------------

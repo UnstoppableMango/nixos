@@ -167,51 +167,23 @@
       module.input = "self";
 
       roles.control-plane = {
-        tags.rosequartz = { };
-        tags.control-plane = { };
-
         settings = {
-          nodes = [
-            {
-              name = "pik8s4";
-              ip = "192.168.1.104";
-            }
-            {
-              name = "pik8s5";
-              ip = "192.168.1.105";
-            }
-            {
-              name = "pik8s6";
-              ip = "192.168.1.106";
-            }
-          ];
           vip = "192.168.1.100";
           clusterName = "rosequartz";
         };
+
+        machines.pik8s4.settings.ip = "192.168.1.104";
+        machines.pik8s5.settings.ip = "192.168.1.105";
+        machines.pik8s6.settings.ip = "192.168.1.106";
       };
 
       roles.worker = {
-        tags.rosequartz = { };
-        tags.worker = { };
-
         settings = {
-          nodes = [
-            {
-              name = "pik8s4";
-              ip = "192.168.1.104";
-            }
-            {
-              name = "pik8s5";
-              ip = "192.168.1.105";
-            }
-            {
-              name = "pik8s6";
-              ip = "192.168.1.106";
-            }
-          ];
           vip = "192.168.1.100";
           clusterName = "rosequartz";
         };
+
+        machines.agreus.settings.ip = "192.168.1.187";
       };
     };
   };

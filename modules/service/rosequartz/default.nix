@@ -1,3 +1,7 @@
+let
+  controlPlaneNodes = lib: roles:
+    lib.mapAttrsToList (name: m: { inherit name; ip = m.settings.ip; }) roles.control-plane.machines;
+in
 {
   _class = "clan.service";
   manifest.name = "rosequartz";
@@ -9,16 +13,9 @@
     interface =
       { lib, ... }:
       {
-        options.nodes = lib.mkOption {
-          type = lib.types.listOf (
-            lib.types.submodule {
-              options = {
-                name = lib.mkOption { type = lib.types.str; };
-                ip = lib.mkOption { type = lib.types.str; };
-              };
-            }
-          );
-          description = "All control plane nodes with their names and IPs.";
+        options.ip = lib.mkOption {
+          type = lib.types.str;
+          description = "IP address of this control plane node.";
         };
 
         options.vip = lib.mkOption {
@@ -33,12 +30,13 @@
       };
 
     perInstance =
-      { settings, ... }:
+      { lib, settings, roles, ... }:
       {
         nixosModule = {
           imports = [ ./control-plane.nix ];
           cluster.rosequartz = {
-            inherit (settings) nodes vip clusterName;
+            nodes = controlPlaneNodes lib roles;
+            inherit (settings) vip clusterName;
           };
         };
       };
@@ -50,16 +48,9 @@
     interface =
       { lib, ... }:
       {
-        options.nodes = lib.mkOption {
-          type = lib.types.listOf (
-            lib.types.submodule {
-              options = {
-                name = lib.mkOption { type = lib.types.str; };
-                ip = lib.mkOption { type = lib.types.str; };
-              };
-            }
-          );
-          description = "Control plane nodes; used to derive etcd endpoints for flannel.";
+        options.ip = lib.mkOption {
+          type = lib.types.str;
+          description = "IP address of this worker node.";
         };
 
         options.vip = lib.mkOption {
@@ -79,7 +70,8 @@
         nixosModule = {
           imports = [ ./worker.nix ];
           cluster.rosequartz = {
-            inherit (settings) nodes vip clusterName;
+            advertiseAddress = settings.ip;
+            inherit (settings) vip clusterName;
           };
         };
       };

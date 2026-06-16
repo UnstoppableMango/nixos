@@ -6,6 +6,7 @@
 }:
 let
   cfg = config.cluster.rosequartz;
+  cert = name: config.clan.core.vars.generators."rosequartz-${name}".files;
 
   clientExt = ''
     keyUsage=critical,digitalSignature,keyEncipherment
@@ -42,6 +43,27 @@ let
     files."key" = { secret = true; inherit owner; };
     script = sign subj ext;
   };
+
+  flannelKubeconfig = pkgs.writeText "flannel.kubeconfig" ''
+    apiVersion: v1
+    kind: Config
+    clusters:
+    - cluster:
+        certificate-authority: ${(cert "ca")."crt".path}
+        server: https://${cfg.vip}:6443
+      name: ${cfg.clusterName}
+    contexts:
+    - context:
+        cluster: ${cfg.clusterName}
+        user: flannel
+      name: flannel@${cfg.clusterName}
+    current-context: flannel@${cfg.clusterName}
+    users:
+    - name: flannel
+      user:
+        client-certificate: ${(cert "flannel-cert")."crt".path}
+        client-key: ${(cert "flannel-cert")."key".path}
+  '';
 in
 {
   options.cluster.rosequartz.pki = {
@@ -70,25 +92,56 @@ in
     };
   };
 
-  config.clan.core.vars.generators."rosequartz-ca" = {
-    share = true;
-    prompts."ca-crt" = {
-      description = "Cluster CA certificate (PEM)";
-      type = "multiline";
+  config = {
+    clan.core.vars.generators = {
+      "rosequartz-ca" = {
+        share = true;
+        prompts."ca-crt" = {
+          description = "Cluster CA certificate (PEM)";
+          type = "multiline";
+        };
+        prompts."ca-key" = {
+          description = "Cluster CA private key (PEM)";
+          type = "multiline-hidden";
+        };
+        files."crt".secret = false;
+        files."key" = {
+          secret = true;
+          deploy = false;
+        };
+        script = ''
+          set -euo pipefail
+          cp "$prompts/ca-crt" "$out/crt"
+          cp "$prompts/ca-key" "$out/key"
+        '';
+      };
+
+      # Flannel uses system:masters for now; restrict via ClusterRole/ClusterRoleBinding once cluster is bootstrapped.
+      "rosequartz-flannel-cert" = mkCert true "/CN=flannel/O=system:masters" clientExt "root";
     };
-    prompts."ca-key" = {
-      description = "Cluster CA private key (PEM)";
-      type = "multiline-hidden";
+
+    services.kubernetes.flannel.enable = lib.mkForce false;
+    services.flannel = {
+      enable = true;
+      storageBackend = "kubernetes";
+      network = config.services.kubernetes.clusterCidr;
+      kubeconfig = flannelKubeconfig;
     };
-    files."crt".secret = false;
-    files."key" = {
-      secret = true;
-      deploy = false;
-    };
-    script = ''
-      set -euo pipefail
-      cp "$prompts/ca-crt" "$out/crt"
-      cp "$prompts/ca-key" "$out/key"
-    '';
+    services.kubernetes.kubelet.cni.config = lib.mkDefault [
+      {
+        name = "cni0";
+        type = "flannel";
+        cniVersion = "0.3.1";
+        delegate = {
+          isDefaultGateway = true;
+          hairpinMode = true;
+          bridge = "cni0";
+        };
+      }
+    ];
+    networking.dhcpcd.denyInterfaces = [
+      "cni0*"
+      "flannel*"
+    ];
   };
 }
