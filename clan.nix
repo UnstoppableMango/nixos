@@ -45,6 +45,7 @@
           "worker"
           "mini"
           "server"
+          "rosequartz-worker"
         ];
       };
 
@@ -168,6 +169,32 @@
       roles.control-plane = {
         tags = [
           "control-plane"
+          "rosequartz"
+        ];
+
+        settings = {
+          nodes = [
+            {
+              name = "pik8s4";
+              ip = "192.168.1.104";
+            }
+            {
+              name = "pik8s5";
+              ip = "192.168.1.105";
+            }
+            {
+              name = "pik8s6";
+              ip = "192.168.1.106";
+            }
+          ];
+          vip = "192.168.1.100";
+          clusterName = "rosequartz";
+        };
+      };
+
+      roles.worker = {
+        tags = [
+          "worker"
           "rosequartz"
         ];
 

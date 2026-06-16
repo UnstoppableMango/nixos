@@ -45,6 +45,8 @@
     AllowSuspendThenHibernate = "no";
   };
 
+  cluster.rosequartz.advertiseAddress = "192.168.1.187";
+
   networking = {
     hostName = "agreus";
     useDHCP = false;
