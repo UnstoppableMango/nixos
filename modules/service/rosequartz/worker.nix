@@ -1,18 +1,19 @@
 {
   config,
   lib,
-  pkgs,
   ...
 }:
 let
   cfg = config.cluster.rosequartz;
-  certs = config.clan.core.vars.generators."rosequartz-worker-certs".files;
+  inherit (cfg.pki.lib) clientExt peerExt mkNodeCert;
+
+  cert = name: config.clan.core.vars.generators."rosequartz-${name}".files;
 
   etcdClientEndpoints = map (n: "https://${n.ip}:2379") cfg.nodes;
-
-  workerSAN = "IP:${cfg.advertiseAddress}";
 in
 {
+  imports = [ ./pki.nix ];
+
   options.cluster.rosequartz = {
     nodes = lib.mkOption {
       type = lib.types.listOf (
@@ -40,89 +41,27 @@ in
       type = lib.types.str;
       description = "IP address this worker node advertises (included in kubelet server cert SAN).";
     };
-
-    pki.keyBits = lib.mkOption {
-      type = lib.types.int;
-      default = 2048;
-      description = "RSA key size in bits for all generated certificates.";
-    };
-
-    pki.certValidityDays = lib.mkOption {
-      type = lib.types.int;
-      default = 3650;
-      description = "Validity period in days for all generated certificates.";
-    };
   };
 
   config = {
-    clan.core.vars.generators."rosequartz-worker-certs" = {
-      share = false;
+    clan.core.vars.generators = {
+      # Per-worker certs — unique key per worker node.
+      # kubelet CN encodes the hostname for the Node authorizer.
+      # etcd-client cert lets flannel connect directly to the etcd cluster.
+      "rosequartz-worker-kubelet-cert" = mkNodeCert
+        "/CN=system:node:${config.networking.hostName}/O=system:nodes"
+        (peerExt "IP:${cfg.advertiseAddress}")
+        "root";
 
-      runtimeInputs = [ pkgs.openssl ];
+      "rosequartz-worker-kubelet-client-cert" = mkNodeCert
+        "/CN=system:node:${config.networking.hostName}/O=system:nodes"
+        clientExt
+        "root";
 
-      prompts = {
-        "ca-crt" = {
-          description = "Cluster CA certificate (PEM)";
-          type = "multiline";
-        };
-        "ca-key" = {
-          description = "Cluster CA private key (PEM)";
-          type = "multiline";
-        };
-      };
-
-      files = {
-        "ca-crt".secret = false;
-        "kubelet-crt".secret = false;
-        "kubelet-key".secret = true;
-        "kubelet-client-crt".secret = false;
-        "kubelet-client-key".secret = true;
-        "etcd-client-crt".secret = false;
-        "etcd-client-key".secret = true;
-      };
-
-      script =
-        let
-          signFn = ''
-            sign() {
-              local name="$1" subj="$2" ext="$3"
-              openssl req -newkey rsa:${toString cfg.pki.keyBits} -nodes \
-                -keyout "$out/$name-key" -subj "$subj" -out "$name.csr" 2>/dev/null
-              openssl x509 -req -in "$name.csr" \
-                -CA "$prompts/ca-crt" -CAkey "$prompts/ca-key" -CAcreateserial \
-                -days ${toString cfg.pki.certValidityDays} -sha256 \
-                -extfile <(printf '%s' "$ext") \
-                -out "$out/$name-crt" 2>/dev/null
-            }
-          '';
-
-          clientExt = ''
-            keyUsage=critical,digitalSignature,keyEncipherment
-            extendedKeyUsage=clientAuth'';
-
-          peerExt = sans: ''
-            keyUsage=critical,digitalSignature,keyEncipherment
-            extendedKeyUsage=serverAuth,clientAuth
-            subjectAltName=${sans}'';
-        in
-        ''
-          set -euo pipefail
-          ${signFn}
-
-          cp "$prompts/ca-crt" "$out/ca-crt"
-
-          sign kubelet \
-            "/CN=system:node:${config.networking.hostName}/O=system:nodes" \
-            "${peerExt workerSAN}"
-
-          sign kubelet-client \
-            "/CN=system:node:${config.networking.hostName}/O=system:nodes" \
-            "${clientExt}"
-
-          sign etcd-client \
-            "/CN=kube-apiserver-etcd-client/O=system:masters" \
-            "${clientExt}"
-        '';
+      "rosequartz-worker-etcd-client-cert" = mkNodeCert
+        "/CN=flannel-etcd-client/O=system:masters"
+        clientExt
+        "root";
     };
 
     # -------------------------------------------------------------------------
@@ -133,15 +72,15 @@ in
       masterAddress = cfg.vip;
       apiserverAddress = "https://${cfg.vip}:6443";
       easyCerts = false;
-      caFile = certs."ca-crt".path;
+      caFile = (cert "ca")."crt".path;
 
       kubelet = {
-        clientCaFile = certs."ca-crt".path;
-        tlsCertFile = certs."kubelet-crt".path;
-        tlsKeyFile = certs."kubelet-key".path;
+        clientCaFile = (cert "ca")."crt".path;
+        tlsCertFile = (cert "worker-kubelet-cert")."crt".path;
+        tlsKeyFile = (cert "worker-kubelet-cert")."key".path;
         kubeconfig = {
-          certFile = certs."kubelet-client-crt".path;
-          keyFile = certs."kubelet-client-key".path;
+          certFile = (cert "worker-kubelet-client-cert")."crt".path;
+          keyFile = (cert "worker-kubelet-client-cert")."key".path;
         };
       };
     };
@@ -153,9 +92,9 @@ in
       network = config.services.kubernetes.clusterCidr;
       etcd = {
         endpoints = etcdClientEndpoints;
-        caFile = certs."ca-crt".path;
-        certFile = certs."etcd-client-crt".path;
-        keyFile = certs."etcd-client-key".path;
+        caFile = (cert "ca")."crt".path;
+        certFile = (cert "worker-etcd-client-cert")."crt".path;
+        keyFile = (cert "worker-etcd-client-cert")."key".path;
       };
     };
     services.kubernetes.kubelet.cni.config = lib.mkDefault [
