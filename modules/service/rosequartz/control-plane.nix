@@ -6,7 +6,8 @@
 }:
 let
   cfg = config.cluster.rosequartz;
-  certs = config.clan.core.vars.generators."rosequartz-certs".files;
+  sharedCerts = config.clan.core.vars.generators."rosequartz-certs".files;
+  nodeCerts = config.clan.core.vars.generators."rosequartz-node-certs".files;
 
   etcdClientEndpoints = map (n: "https://${n.ip}:2379") cfg.nodes;
   etcdPeerEndpoints = map (n: "${n.name}=https://${n.ip}:2380") cfg.nodes;
@@ -29,6 +30,8 @@ let
     "DNS:kubernetes.default.svc.cluster.local"
     "DNS:localhost"
   ];
+
+  localSANs = "IP:${cfg.advertiseAddress},IP:127.0.0.1";
 in
 {
   options.cluster.rosequartz = {
@@ -128,6 +131,9 @@ in
   config = {
     cluster.rosequartz.etcd.initialCluster = lib.mkDefault etcdPeerEndpoints;
 
+    # -------------------------------------------------------------------------
+    # Shared PKI — identical on every control-plane node
+    # -------------------------------------------------------------------------
     clan.core.vars.generators."rosequartz-certs" = {
       share = true;
 
@@ -166,21 +172,7 @@ in
           secret = true;
           owner = "kubernetes";
         };
-        "kubelet-crt".secret = false;
-        "kubelet-key".secret = true;
-        "kubelet-client-crt".secret = false;
-        "kubelet-client-key".secret = true;
         "etcd-ca-crt".secret = false;
-        "etcd-server-crt".secret = false;
-        "etcd-server-key" = {
-          secret = true;
-          owner = "etcd";
-        };
-        "etcd-peer-crt".secret = false;
-        "etcd-peer-key" = {
-          secret = true;
-          owner = "etcd";
-        };
         "etcd-client-crt".secret = false;
         "etcd-client-key" = {
           secret = true;
@@ -200,8 +192,6 @@ in
 
       script =
         let
-          # sign <name> <subject> <ext>
-          # Generates key + CSR, signs with prompts/ca-crt + ca-key, writes to $out/
           signFn = ''
             sign() {
               local name="$1" subj="$2" ext="$3"
@@ -223,11 +213,6 @@ in
           clientExt = ''
             keyUsage=critical,digitalSignature,keyEncipherment
             extendedKeyUsage=clientAuth'';
-
-          peerExt = sans: ''
-            keyUsage=critical,digitalSignature,keyEncipherment
-            extendedKeyUsage=serverAuth,clientAuth
-            subjectAltName=${sans}'';
         in
         ''
           set -euo pipefail
@@ -252,22 +237,6 @@ in
             "/CN=system:kube-scheduler/O=system:kube-scheduler" \
             "${clientExt}"
 
-          sign kubelet \
-            "/CN=system:node/O=system:nodes" \
-            "${peerExt nodeSANs}"
-
-          sign kubelet-client \
-            "/CN=system:node:${cfg.clusterName}/O=system:nodes" \
-            "${clientExt}"
-
-          sign etcd-server \
-            "/CN=etcd-server" \
-            "${peerExt nodeSANs}"
-
-          sign etcd-peer \
-            "/CN=etcd-peer" \
-            "${peerExt nodeSANs}"
-
           sign etcd-client \
             "/CN=kube-apiserver-etcd-client/O=system:masters" \
             "${clientExt}"
@@ -276,9 +245,91 @@ in
             "/CN=kubernetes-admin/O=system:masters" \
             "${clientExt}"
 
-          # Service account key pair — shared generator ensures identical keys on all nodes
+          # Service account key pair — shared so tokens signed by any node are valid on all nodes
           openssl genrsa -out "$out/sa-key" ${toString cfg.pki.keyBits} 2>/dev/null
           openssl rsa -in "$out/sa-key" -pubout -out "$out/sa-pub" 2>/dev/null
+        '';
+    };
+
+    # -------------------------------------------------------------------------
+    # Per-node PKI — node-specific CNs and SANs, one key pair per node
+    # -------------------------------------------------------------------------
+    clan.core.vars.generators."rosequartz-node-certs" = {
+      share = false;
+
+      runtimeInputs = [ pkgs.openssl ];
+
+      prompts = {
+        "ca-crt" = {
+          description = "Cluster CA certificate (PEM)";
+          type = "multiline";
+        };
+        "ca-key" = {
+          description = "Cluster CA private key (PEM)";
+          type = "multiline";
+        };
+      };
+
+      files = {
+        "etcd-server-crt".secret = false;
+        "etcd-server-key" = {
+          secret = true;
+          owner = "etcd";
+        };
+        "etcd-peer-crt".secret = false;
+        "etcd-peer-key" = {
+          secret = true;
+          owner = "etcd";
+        };
+        "kubelet-crt".secret = false;
+        "kubelet-key".secret = true;
+        "kubelet-client-crt".secret = false;
+        "kubelet-client-key".secret = true;
+      };
+
+      script =
+        let
+          signFn = ''
+            sign() {
+              local name="$1" subj="$2" ext="$3"
+              openssl req -newkey rsa:${toString cfg.pki.keyBits} -nodes \
+                -keyout "$out/$name-key" -subj "$subj" -out "$name.csr" 2>/dev/null
+              openssl x509 -req -in "$name.csr" \
+                -CA "$prompts/ca-crt" -CAkey "$prompts/ca-key" -CAcreateserial \
+                -days ${toString cfg.pki.certValidityDays} -sha256 \
+                -extfile <(printf '%s' "$ext") \
+                -out "$out/$name-crt" 2>/dev/null
+            }
+          '';
+
+          clientExt = ''
+            keyUsage=critical,digitalSignature,keyEncipherment
+            extendedKeyUsage=clientAuth'';
+
+          peerExt = sans: ''
+            keyUsage=critical,digitalSignature,keyEncipherment
+            extendedKeyUsage=serverAuth,clientAuth
+            subjectAltName=${sans}'';
+        in
+        ''
+          set -euo pipefail
+          ${signFn}
+
+          sign etcd-server \
+            "/CN=etcd-server" \
+            "${peerExt localSANs}"
+
+          sign etcd-peer \
+            "/CN=etcd-peer" \
+            "${peerExt localSANs}"
+
+          sign kubelet \
+            "/CN=system:node:${localNode.name}/O=system:nodes" \
+            "${peerExt "IP:${cfg.advertiseAddress}"}"
+
+          sign kubelet-client \
+            "/CN=system:node:${localNode.name}/O=system:nodes" \
+            "${clientExt}"
         '';
     };
 
@@ -290,46 +341,46 @@ in
       masterAddress = cfg.vip;
       apiserverAddress = "https://${cfg.vip}:6443";
       easyCerts = false;
-      caFile = certs."ca-crt".path;
+      caFile = sharedCerts."ca-crt".path;
 
       apiserver = {
         advertiseAddress = cfg.advertiseAddress;
         securePort = cfg.apiserverPort;
-        clientCaFile = certs."ca-crt".path;
-        tlsCertFile = certs."apiserver-crt".path;
-        tlsKeyFile = certs."apiserver-key".path;
-        serviceAccountKeyFile = certs."sa-pub".path;
-        serviceAccountSigningKeyFile = certs."sa-key".path;
-        kubeletClientCertFile = certs."apiserver-kubelet-client-crt".path;
-        kubeletClientKeyFile = certs."apiserver-kubelet-client-key".path;
+        clientCaFile = sharedCerts."ca-crt".path;
+        tlsCertFile = sharedCerts."apiserver-crt".path;
+        tlsKeyFile = sharedCerts."apiserver-key".path;
+        serviceAccountKeyFile = sharedCerts."sa-pub".path;
+        serviceAccountSigningKeyFile = sharedCerts."sa-key".path;
+        kubeletClientCertFile = sharedCerts."apiserver-kubelet-client-crt".path;
+        kubeletClientKeyFile = sharedCerts."apiserver-kubelet-client-key".path;
         etcd = {
           servers = etcdClientEndpoints;
-          caFile = certs."etcd-ca-crt".path;
-          certFile = certs."etcd-client-crt".path;
-          keyFile = certs."etcd-client-key".path;
+          caFile = sharedCerts."etcd-ca-crt".path;
+          certFile = sharedCerts."etcd-client-crt".path;
+          keyFile = sharedCerts."etcd-client-key".path;
         };
       };
 
       controllerManager = {
-        serviceAccountKeyFile = certs."sa-key".path;
+        serviceAccountKeyFile = sharedCerts."sa-key".path;
         kubeconfig = {
-          certFile = certs."controller-manager-crt".path;
-          keyFile = certs."controller-manager-key".path;
+          certFile = sharedCerts."controller-manager-crt".path;
+          keyFile = sharedCerts."controller-manager-key".path;
         };
       };
 
       scheduler.kubeconfig = {
-        certFile = certs."scheduler-crt".path;
-        keyFile = certs."scheduler-key".path;
+        certFile = sharedCerts."scheduler-crt".path;
+        keyFile = sharedCerts."scheduler-key".path;
       };
 
       kubelet = {
-        clientCaFile = certs."ca-crt".path;
-        tlsCertFile = certs."kubelet-crt".path;
-        tlsKeyFile = certs."kubelet-key".path;
+        clientCaFile = sharedCerts."ca-crt".path;
+        tlsCertFile = nodeCerts."kubelet-crt".path;
+        tlsKeyFile = nodeCerts."kubelet-key".path;
         kubeconfig = {
-          certFile = certs."kubelet-client-crt".path;
-          keyFile = certs."kubelet-client-key".path;
+          certFile = nodeCerts."kubelet-client-crt".path;
+          keyFile = nodeCerts."kubelet-client-key".path;
         };
       };
     };
@@ -347,12 +398,12 @@ in
       initialClusterState = cfg.etcd.initialClusterState;
       clientCertAuth = true;
       peerClientCertAuth = true;
-      trustedCaFile = certs."etcd-ca-crt".path;
-      certFile = certs."etcd-server-crt".path;
-      keyFile = certs."etcd-server-key".path;
-      peerCertFile = certs."etcd-peer-crt".path;
-      peerKeyFile = certs."etcd-peer-key".path;
-      peerTrustedCaFile = certs."etcd-ca-crt".path;
+      trustedCaFile = sharedCerts."etcd-ca-crt".path;
+      certFile = nodeCerts."etcd-server-crt".path;
+      keyFile = nodeCerts."etcd-server-key".path;
+      peerCertFile = nodeCerts."etcd-peer-crt".path;
+      peerKeyFile = nodeCerts."etcd-peer-key".path;
+      peerTrustedCaFile = sharedCerts."etcd-ca-crt".path;
     };
 
     # services.kubernetes.roles auto-enables the kubernetes flannel integration,
@@ -365,9 +416,9 @@ in
       network = config.services.kubernetes.clusterCidr;
       etcd = {
         endpoints = etcdClientEndpoints;
-        caFile = certs."etcd-ca-crt".path;
-        certFile = certs."etcd-client-crt".path;
-        keyFile = certs."etcd-client-key".path;
+        caFile = sharedCerts."etcd-ca-crt".path;
+        certFile = sharedCerts."etcd-client-crt".path;
+        keyFile = sharedCerts."etcd-client-key".path;
       };
     };
     services.kubernetes.kubelet.cni.config = lib.mkDefault [

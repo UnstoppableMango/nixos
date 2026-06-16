@@ -112,11 +112,11 @@ in
           cp "$prompts/ca-crt" "$out/ca-crt"
 
           sign kubelet \
-            "/CN=system:node:${cfg.clusterName}/O=system:nodes" \
+            "/CN=system:node:${config.networking.hostName}/O=system:nodes" \
             "${peerExt workerSAN}"
 
           sign kubelet-client \
-            "/CN=system:node:${cfg.clusterName}/O=system:nodes" \
+            "/CN=system:node:${config.networking.hostName}/O=system:nodes" \
             "${clientExt}"
 
           sign etcd-client \
