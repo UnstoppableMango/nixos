@@ -39,7 +39,10 @@ let
     runtimeInputs = [ pkgs.openssl ];
     dependencies = [ "rosequartz-ca" ];
     files."crt".secret = false;
-    files."key" = { secret = true; inherit owner; };
+    files."key" = {
+      secret = true;
+      inherit owner;
+    };
     script = sign subj ext;
   };
 
@@ -64,7 +67,13 @@ in
       internal = true;
       description = "Certificate signing helpers derived from pki options; access via inherit.";
       default = {
-        inherit clientExt serverExt peerExt sign mkCert;
+        inherit
+          clientExt
+          serverExt
+          peerExt
+          sign
+          mkCert
+          ;
         mkSharedCert = mkCert true;
         mkNodeCert = mkCert false;
       };

@@ -1,6 +1,10 @@
 let
-  controlPlaneNodes = lib: roles:
-    lib.mapAttrsToList (name: m: { inherit name; ip = m.settings.ip; }) roles.control-plane.machines;
+  controlPlaneNodes =
+    lib: roles:
+    lib.mapAttrsToList (name: m: {
+      inherit name;
+      ip = m.settings.ip;
+    }) roles.control-plane.machines;
 in
 {
   _class = "clan.service";
@@ -30,7 +34,12 @@ in
       };
 
     perInstance =
-      { lib, settings, roles, ... }:
+      {
+        lib,
+        settings,
+        roles,
+        ...
+      }:
       {
         nixosModule = {
           imports = [ ./control-plane.nix ];

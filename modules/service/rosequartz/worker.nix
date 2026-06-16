@@ -4,8 +4,8 @@
   ...
 }:
 let
-  cfg = config.cluster.rosequartz;
   inherit (cfg.pki.lib) clientExt peerExt mkNodeCert;
+  cfg = config.cluster.rosequartz;
 
   cert = name: config.clan.core.vars.generators."rosequartz-${name}".files;
 in
@@ -34,15 +34,14 @@ in
 
   config = {
     clan.core.vars.generators = {
-      "rosequartz-worker-kubelet-cert" = mkNodeCert
-        "/CN=system:node:${config.networking.hostName}/O=system:nodes"
-        (peerExt "IP:${cfg.advertiseAddress}")
-        "root";
+      "rosequartz-worker-kubelet-cert" =
+        mkNodeCert "/CN=system:node:${config.networking.hostName}/O=system:nodes"
+          (peerExt "IP:${cfg.advertiseAddress}")
+          "root";
 
-      "rosequartz-worker-kubelet-client-cert" = mkNodeCert
-        "/CN=system:node:${config.networking.hostName}/O=system:nodes"
-        clientExt
-        "root";
+      "rosequartz-worker-kubelet-client-cert" =
+        mkNodeCert "/CN=system:node:${config.networking.hostName}/O=system:nodes" clientExt
+          "root";
     };
 
     # -------------------------------------------------------------------------

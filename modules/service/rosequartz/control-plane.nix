@@ -6,16 +6,22 @@
 }:
 let
   cfg = config.cluster.rosequartz;
-  inherit (cfg.pki.lib) clientExt serverExt peerExt mkSharedCert mkNodeCert;
+  inherit (cfg.pki.lib)
+    clientExt
+    serverExt
+    peerExt
+    mkSharedCert
+    mkNodeCert
+    ;
 
   cert = name: config.clan.core.vars.generators."rosequartz-${name}".files;
 
   etcdClientEndpoints = map (n: "https://${n.ip}:2379") cfg.nodes;
   etcdPeerEndpoints = map (n: "${n.name}=https://${n.ip}:2380") cfg.nodes;
 
-  localNode = lib.findFirst (n: n.ip == cfg.advertiseAddress)
-    (throw "no rosequartz node matches advertiseAddress ${cfg.advertiseAddress}")
-    cfg.nodes;
+  localNode = lib.findFirst (
+    n: n.ip == cfg.advertiseAddress
+  ) (throw "no rosequartz node matches advertiseAddress ${cfg.advertiseAddress}") cfg.nodes;
 
   nodeIps = map (n: n.ip) cfg.nodes;
 
@@ -146,58 +152,44 @@ in
       # Shared certs — same cert on every control-plane node.
       # apiserver SANs cover all node IPs + VIP so the cert is valid regardless
       # of which node serves a given request.
-      "rosequartz-apiserver-cert" = mkSharedCert
-        "/CN=kube-apiserver"
-        (serverExt apiserverSANs)
-        "kubernetes";
+      "rosequartz-apiserver-cert" =
+        mkSharedCert "/CN=kube-apiserver" (serverExt apiserverSANs)
+          "kubernetes";
 
-      "rosequartz-apiserver-kubelet-client-cert" = mkSharedCert
-        "/CN=kube-apiserver-kubelet-client/O=system:masters"
-        clientExt
-        "kubernetes";
+      "rosequartz-apiserver-kubelet-client-cert" =
+        mkSharedCert "/CN=kube-apiserver-kubelet-client/O=system:masters" clientExt
+          "kubernetes";
 
-      "rosequartz-controller-manager-cert" = mkSharedCert
-        "/CN=system:kube-controller-manager/O=system:kube-controller-manager"
-        clientExt
-        "kubernetes";
+      "rosequartz-controller-manager-cert" =
+        mkSharedCert "/CN=system:kube-controller-manager/O=system:kube-controller-manager" clientExt
+          "kubernetes";
 
-      "rosequartz-scheduler-cert" = mkSharedCert
-        "/CN=system:kube-scheduler/O=system:kube-scheduler"
-        clientExt
-        "kubernetes";
+      "rosequartz-scheduler-cert" =
+        mkSharedCert "/CN=system:kube-scheduler/O=system:kube-scheduler" clientExt
+          "kubernetes";
 
-      "rosequartz-etcd-client-cert" = mkSharedCert
-        "/CN=kube-apiserver-etcd-client/O=system:masters"
-        clientExt
-        "kubernetes";
+      "rosequartz-etcd-client-cert" =
+        mkSharedCert "/CN=kube-apiserver-etcd-client/O=system:masters" clientExt
+          "kubernetes";
 
-      "rosequartz-admin-cert" = mkSharedCert
-        "/CN=kubernetes-admin/O=system:masters"
-        clientExt
-        "kubernetes";
+      "rosequartz-admin-cert" =
+        mkSharedCert "/CN=kubernetes-admin/O=system:masters" clientExt
+          "kubernetes";
 
       # Per-node certs — unique key per node, SANs/CN scoped to this node.
       # etcd-server + etcd-peer include localhost so etcd can loopback.
       # kubelet CN encodes the node name for the Node authorizer.
-      "rosequartz-etcd-server-cert" = mkNodeCert
-        "/CN=etcd-server"
-        (peerExt localSANs)
-        "etcd";
+      "rosequartz-etcd-server-cert" = mkNodeCert "/CN=etcd-server" (peerExt localSANs) "etcd";
 
-      "rosequartz-etcd-peer-cert" = mkNodeCert
-        "/CN=etcd-peer"
-        (peerExt localSANs)
-        "etcd";
+      "rosequartz-etcd-peer-cert" = mkNodeCert "/CN=etcd-peer" (peerExt localSANs) "etcd";
 
-      "rosequartz-kubelet-cert" = mkNodeCert
-        "/CN=system:node:${localNode.name}/O=system:nodes"
-        (peerExt "IP:${cfg.advertiseAddress}")
-        "root";
+      "rosequartz-kubelet-cert" =
+        mkNodeCert "/CN=system:node:${localNode.name}/O=system:nodes" (peerExt "IP:${cfg.advertiseAddress}")
+          "root";
 
-      "rosequartz-kubelet-client-cert" = mkNodeCert
-        "/CN=system:node:${localNode.name}/O=system:nodes"
-        clientExt
-        "root";
+      "rosequartz-kubelet-client-cert" =
+        mkNodeCert "/CN=system:node:${localNode.name}/O=system:nodes" clientExt
+          "root";
     };
 
     # -------------------------------------------------------------------------
