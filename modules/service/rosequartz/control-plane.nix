@@ -35,7 +35,10 @@ let
   localSANs = "IP:${cfg.advertiseAddress},IP:127.0.0.1";
 in
 {
-  imports = [ ./pki.nix ];
+  imports = [
+    ./pki.nix
+    ./network.nix
+  ];
 
   options.cluster.rosequartz = {
     nodes = lib.mkOption {
@@ -327,10 +330,6 @@ in
         10250 # kubelet API
         10257 # kube-controller-manager
         10259 # kube-scheduler
-      ];
-      allowedUDPPorts = [
-        8285 # flannel udp
-        8472 # flannel VXLAN
       ];
     };
 

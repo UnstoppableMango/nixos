@@ -6,7 +6,6 @@
 }:
 let
   cfg = config.cluster.rosequartz;
-  cert = name: config.clan.core.vars.generators."rosequartz-${name}".files;
 
   clientExt = ''
     keyUsage=critical,digitalSignature,keyEncipherment
@@ -44,26 +43,6 @@ let
     script = sign subj ext;
   };
 
-  flannelKubeconfig = pkgs.writeText "flannel.kubeconfig" ''
-    apiVersion: v1
-    kind: Config
-    clusters:
-    - cluster:
-        certificate-authority: ${(cert "ca")."crt".path}
-        server: https://${cfg.vip}:6443
-      name: ${cfg.clusterName}
-    contexts:
-    - context:
-        cluster: ${cfg.clusterName}
-        user: flannel
-      name: flannel@${cfg.clusterName}
-    current-context: flannel@${cfg.clusterName}
-    users:
-    - name: flannel
-      user:
-        client-certificate: ${(cert "flannel-cert")."crt".path}
-        client-key: ${(cert "flannel-cert")."key".path}
-  '';
 in
 {
   options.cluster.rosequartz.pki = {
@@ -115,33 +94,6 @@ in
           cp "$prompts/ca-key" "$out/key"
         '';
       };
-
-      # Flannel uses system:masters for now; restrict via ClusterRole/ClusterRoleBinding once cluster is bootstrapped.
-      "rosequartz-flannel-cert" = mkCert true "/CN=flannel/O=system:masters" clientExt "root";
     };
-
-    services.kubernetes.flannel.enable = lib.mkForce false;
-    services.flannel = {
-      enable = true;
-      storageBackend = "kubernetes";
-      network = config.services.kubernetes.clusterCidr;
-      kubeconfig = flannelKubeconfig;
-    };
-    services.kubernetes.kubelet.cni.config = lib.mkDefault [
-      {
-        name = "cni0";
-        type = "flannel";
-        cniVersion = "0.3.1";
-        delegate = {
-          isDefaultGateway = true;
-          hairpinMode = true;
-          bridge = "cni0";
-        };
-      }
-    ];
-    networking.dhcpcd.denyInterfaces = [
-      "cni0*"
-      "flannel*"
-    ];
   };
 }

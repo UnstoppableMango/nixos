@@ -10,7 +10,10 @@ let
   cert = name: config.clan.core.vars.generators."rosequartz-${name}".files;
 in
 {
-  imports = [ ./pki.nix ];
+  imports = [
+    ./pki.nix
+    ./network.nix
+  ];
 
   options.cluster.rosequartz = {
     vip = lib.mkOption {
@@ -69,10 +72,6 @@ in
     networking.firewall = {
       allowedTCPPorts = [
         10250 # kubelet API
-      ];
-      allowedUDPPorts = [
-        8285 # flannel udp
-        8472 # flannel VXLAN
       ];
     };
 
