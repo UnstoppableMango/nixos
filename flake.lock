@@ -1,5 +1,41 @@
 {
   "nodes": {
+    "a2b": {
+      "inputs": {
+        "flake-parts": [
+          "flake-parts"
+        ],
+        "gomod2nix": [
+          "gomod2nix"
+        ],
+        "mangonix": [
+          "mynix"
+        ],
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "systems": [
+          "systems"
+        ],
+        "treefmt-nix": [
+          "treefmt-nix"
+        ],
+        "ux": "ux"
+      },
+      "locked": {
+        "lastModified": 1781586353,
+        "narHash": "sha256-C8xoKGD6zpss9/3lfkq6JGWiqulkG6cSTlyHLLxIWcs=",
+        "owner": "UnstoppableMango",
+        "repo": "a2b",
+        "rev": "8432dc982ff88563c6e6bdb84cbee23dce7c34e9",
+        "type": "github"
+      },
+      "original": {
+        "owner": "UnstoppableMango",
+        "repo": "a2b",
+        "type": "github"
+      }
+    },
     "blueprint": {
       "inputs": {
         "nixpkgs": [
@@ -231,7 +267,7 @@
         "treefmt-nix": [
           "treefmt-nix"
         ],
-        "ux": "ux",
+        "ux": "ux_2",
         "zed": "zed"
       },
       "locked": {
@@ -886,6 +922,7 @@
     },
     "root": {
       "inputs": {
+        "a2b": "a2b",
         "clan-core": "clan-core",
         "disko": "disko",
         "dotfiles": "dotfiles",
@@ -984,6 +1021,43 @@
       }
     },
     "ux": {
+      "inputs": {
+        "flake-parts": [
+          "a2b",
+          "flake-parts"
+        ],
+        "gomod2nix": [
+          "a2b",
+          "gomod2nix"
+        ],
+        "nixpkgs": [
+          "a2b",
+          "nixpkgs"
+        ],
+        "systems": [
+          "a2b",
+          "systems"
+        ],
+        "treefmt-nix": [
+          "a2b",
+          "treefmt-nix"
+        ]
+      },
+      "locked": {
+        "lastModified": 1780304788,
+        "narHash": "sha256-PZ73GkRxUhbl6whitztVgdI/RsdyEmYXJeJUNdZhHv0=",
+        "owner": "unstoppablemango",
+        "repo": "ux",
+        "rev": "92709ae1ea157b685d949fb48560d8983085988a",
+        "type": "github"
+      },
+      "original": {
+        "owner": "unstoppablemango",
+        "repo": "ux",
+        "type": "github"
+      }
+    },
+    "ux_2": {
       "inputs": {
         "flake-parts": [
           "dotfiles",

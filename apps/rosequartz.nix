@@ -42,39 +42,14 @@
           echo "Wrote $OUTPUT"
         '';
       };
-
-      fluxBootstrapScript = pkgs.writeShellApplication {
-        name = "rosequartz-flux-bootstrap";
-        runtimeInputs = [
-          pkgs.fluxcd
-          kubeconfigScript
-        ];
-        text = ''
-          FLAKE_DIR=''${FLAKE_DIR:-.}
-          KUBECONFIG_FILE=$(mktemp --suffix=.kubeconfig)
-          trap 'rm -f $KUBECONFIG_FILE' EXIT
-
-          FLAKE_DIR="$FLAKE_DIR" ROSEQUARTZ_KUBECONFIG="$KUBECONFIG_FILE" \
-            rosequartz-kubeconfig
-
-          flux bootstrap github \
-            --kubeconfig="$KUBECONFIG_FILE" \
-            --owner=UnstoppableMango \
-            --repository=the-cluster \
-            --path=clusters/rosequartz \
-            --personal
-        '';
-      };
     in
     {
+      packages.rosequartz-kubeconfig = kubeconfigScript;
+
       apps.rosequartz-kubeconfig = {
         type = "app";
         program = "${kubeconfigScript}/bin/rosequartz-kubeconfig";
-      };
-
-      apps.rosequartz-flux-bootstrap = {
-        type = "app";
-        program = "${fluxBootstrapScript}/bin/rosequartz-flux-bootstrap";
+        meta.description = "Generate an admin kubeconfig for the rosequartz cluster";
       };
     };
 }

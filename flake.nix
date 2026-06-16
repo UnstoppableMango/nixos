@@ -92,6 +92,18 @@
       };
     };
 
+    a2b = {
+      url = "github:UnstoppableMango/a2b";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+        systems.follows = "systems";
+        flake-parts.follows = "flake-parts";
+        gomod2nix.follows = "gomod2nix";
+        treefmt-nix.follows = "treefmt-nix";
+        mangonix.follows = "mynix";
+      };
+    };
+
     dotfiles = {
       url = "github:unstoppablemango/dotfiles";
       inputs = {
