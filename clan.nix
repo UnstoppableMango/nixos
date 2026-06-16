@@ -45,7 +45,7 @@
           "worker"
           "mini"
           "server"
-          "rosequartz-worker"
+          "rosequartz"
         ];
       };
 
@@ -167,10 +167,8 @@
       module.input = "self";
 
       roles.control-plane = {
-        tags = [
-          "control-plane"
-          "rosequartz"
-        ];
+        tags.rosequartz = { };
+        tags.control-plane = { };
 
         settings = {
           nodes = [
@@ -193,10 +191,8 @@
       };
 
       roles.worker = {
-        tags = [
-          "worker"
-          "rosequartz"
-        ];
+        tags.rosequartz = { };
+        tags.worker = { };
 
         settings = {
           nodes = [
