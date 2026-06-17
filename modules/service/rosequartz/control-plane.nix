@@ -156,7 +156,6 @@ in
         };
         etcd-client-cert = {
           cn = "kube-apiserver-etcd-client";
-          org = "system:masters";
           profile = "client";
           owner = "kubernetes";
         };
