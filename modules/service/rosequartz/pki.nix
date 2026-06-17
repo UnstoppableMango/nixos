@@ -1,12 +1,16 @@
 {
+  config,
   lib,
   pkgs,
-  certValidityDays ? 3650,
+  ...
 }:
 let
+  topConfig = config;
+  cfg = config.cluster.rosequartz;
+
   # ─── Config (JSON) ───────────────────────────────────────────────────────────
 
-  expiryHours = certValidityDays * 24;
+  expiryHours = cfg.pki.certValidityDays * 24;
 
   signingConfigFile = pkgs.writeText "cfssl-signing-config.json" (
     builtins.toJSON {
@@ -41,21 +45,16 @@ let
   );
 
   mkCsrFile =
-    name:
-    {
-      cn,
-      org ? null,
-      hosts ? [ ],
-    }:
+    name: cert:
     pkgs.writeText "${name}-csr.json" (
       builtins.toJSON {
-        CN = cn;
+        CN = cert.cn;
         key = {
           algo = "ecdsa";
           size = 256;
         };
-        hosts = hosts;
-        names = lib.optional (org != null) { O = org; };
+        hosts = cert.hosts;
+        names = lib.optional (cert.org != null) { O = cert.org; };
       }
     );
 
@@ -74,167 +73,130 @@ let
     rm -f cert.csr
   '';
 
-  mkCert = share: csrFile: profile: owner: {
-    inherit share;
+  mkGenerator = name: cert: {
+    inherit (cert) share;
     runtimeInputs = [ pkgs.cfssl ];
     dependencies = [ "rosequartz-ca" ];
     files."crt".secret = false;
     files."key" = {
       secret = true;
-      inherit owner;
+      owner = cert.owner;
     };
-    script = gencert profile csrFile;
+    script = gencert cert.profile (mkCsrFile "rosequartz-${name}" cert);
   };
-
-  mkSharedCert = mkCert true;
-  mkNodeCert = mkCert false;
-in
-{
-  inherit
-    mkCert
-    mkSharedCert
-    mkNodeCert
-    mkCsrFile
-    ;
 
   caGenerator = {
-    "rosequartz-ca" = {
-      share = true;
-      prompts."ca-crt" = {
-        description = "Cluster CA certificate (PEM)";
-        type = "multiline";
-      };
-      prompts."ca-key" = {
-        description = "Cluster CA private key (PEM)";
-        type = "multiline-hidden";
-      };
-      files."crt".secret = false;
-      files."key" = {
-        secret = true;
-        deploy = false;
-      };
-      script = ''
-        set -euo pipefail
-        cp "$prompts/ca-crt" "$out/crt"
-        cp "$prompts/ca-key" "$out/key"
-      '';
+    share = true;
+
+    prompts."ca-crt" = {
+      description = "Cluster CA certificate (PEM)";
+      type = "multiline";
+    };
+    prompts."ca-key" = {
+      description = "Cluster CA private key (PEM)";
+      type = "multiline-hidden";
+    };
+
+    files."crt".secret = false;
+    files."key" = {
+      secret = true;
+      deploy = false;
+    };
+
+    script = ''
+      set -euo pipefail
+      cp "$prompts/ca-crt" "$out/crt"
+      cp "$prompts/ca-key" "$out/key"
+    '';
+  };
+in
+{
+  ###### interface
+
+  options.cluster.rosequartz.pki = {
+    certValidityDays = lib.mkOption {
+      type = lib.types.int;
+      default = 3650;
+      description = "Validity period for generated certificates in days.";
+    };
+
+    certs = lib.mkOption {
+      default = { };
+      description = "Certificate definitions; each entry produces a clan var generator named rosequartz-<name>.";
+      type = lib.types.attrsOf (
+        lib.types.submodule (
+          { name, ... }: {
+            options = {
+              cn = lib.mkOption {
+                type = lib.types.str;
+                description = "Certificate CN.";
+              };
+              org = lib.mkOption {
+                type = lib.types.nullOr lib.types.str;
+                default = null;
+                description = "Certificate O field (organization).";
+              };
+              hosts = lib.mkOption {
+                type = lib.types.listOf lib.types.str;
+                default = [ ];
+                description = "SANs; cfssl auto-detects IP vs DNS.";
+              };
+              profile = lib.mkOption {
+                type = lib.types.enum [
+                  "server"
+                  "client"
+                  "peer"
+                ];
+                description = "cfssl signing profile.";
+              };
+              owner = lib.mkOption {
+                type = lib.types.str;
+                description = "Owner of the private key file.";
+              };
+              share = lib.mkOption {
+                type = lib.types.bool;
+                default = true;
+                description = "Shared across machines (true) or per-machine (false).";
+              };
+              cert = lib.mkOption {
+                type = lib.types.str;
+                readOnly = true;
+                description = "Resolved path to the certificate file.";
+              };
+              key = lib.mkOption {
+                type = lib.types.str;
+                readOnly = true;
+                description = "Resolved path to the private key file.";
+              };
+            };
+
+            config = {
+              cert = topConfig.clan.core.vars.generators."rosequartz-${name}".files."crt".path;
+              key = topConfig.clan.core.vars.generators."rosequartz-${name}".files."key".path;
+            };
+          }
+        )
+      );
+    };
+
+    ca.cert = lib.mkOption {
+      type = lib.types.str;
+      readOnly = true;
+      description = "Resolved path to the CA certificate.";
     };
   };
 
-  mkControlPlaneGenerators =
-    {
-      nodes,
-      vip,
-      advertiseAddress,
-      serviceClusterIP,
-      localNode,
-    }:
-    let
-      nodeIps = map (n: n.ip) nodes;
-      apiserverHosts = [
-        vip
-      ]
-      ++ nodeIps
-      ++ [
-        serviceClusterIP
-        "127.0.0.1"
-        "kubernetes"
-        "kubernetes.default"
-        "kubernetes.default.svc"
-        "kubernetes.default.svc.cluster.local"
-        "localhost"
-      ];
-      localHosts = [
-        advertiseAddress
-        "127.0.0.1"
-      ];
+  ###### implementation
 
-      # --- CSR config ---
-      saCsr = mkCsrFile "rosequartz-sa" { cn = "service-accounts"; };
-      apiserverCsr = mkCsrFile "rosequartz-apiserver-cert" {
-        cn = "kube-apiserver";
-        hosts = apiserverHosts;
-      };
-      apiserverKubeletClientCsr = mkCsrFile "rosequartz-apiserver-kubelet-client-cert" {
-        cn = "kube-apiserver-kubelet-client";
-        org = "system:masters";
-      };
-      controllerManagerCsr = mkCsrFile "rosequartz-controller-manager-cert" {
-        cn = "system:kube-controller-manager";
-        org = "system:kube-controller-manager";
-      };
-      schedulerCsr = mkCsrFile "rosequartz-scheduler-cert" {
-        cn = "system:kube-scheduler";
-        org = "system:kube-scheduler";
-      };
-      etcdClientCsr = mkCsrFile "rosequartz-etcd-client-cert" {
-        cn = "kube-apiserver-etcd-client";
-        org = "system:masters";
-      };
-      adminCsr = mkCsrFile "rosequartz-admin-cert" {
-        cn = "kubernetes-admin";
-        org = "system:masters";
-      };
-      etcdServerCsr = mkCsrFile "rosequartz-etcd-server-cert" {
-        cn = "etcd-server";
-        hosts = localHosts;
-      };
-      etcdPeerCsr = mkCsrFile "rosequartz-etcd-peer-cert" {
-        cn = "etcd-peer";
-        hosts = localHosts;
-      };
-      kubeletCsr = mkCsrFile "rosequartz-kubelet-cert" {
-        cn = "system:node:${localNode.name}";
-        org = "system:nodes";
-        hosts = [ advertiseAddress ];
-      };
-      kubeletClientCsr = mkCsrFile "rosequartz-kubelet-client-cert" {
-        cn = "system:node:${localNode.name}";
-        org = "system:nodes";
-      };
-    in
-    {
-      "rosequartz-sa" = mkSharedCert saCsr "client" "kubernetes";
-      "rosequartz-apiserver-cert" = mkSharedCert apiserverCsr "server" "kubernetes";
-      "rosequartz-apiserver-kubelet-client-cert" =
-        mkSharedCert apiserverKubeletClientCsr "client"
-          "kubernetes";
-      "rosequartz-controller-manager-cert" = mkSharedCert controllerManagerCsr "client" "kubernetes";
-      "rosequartz-scheduler-cert" = mkSharedCert schedulerCsr "client" "kubernetes";
-      "rosequartz-etcd-client-cert" = mkSharedCert etcdClientCsr "client" "kubernetes";
-      "rosequartz-admin-cert" = mkSharedCert adminCsr "client" "kubernetes";
-      "rosequartz-etcd-server-cert" = mkNodeCert etcdServerCsr "peer" "etcd";
-      "rosequartz-etcd-peer-cert" = mkNodeCert etcdPeerCsr "peer" "etcd";
-      "rosequartz-kubelet-cert" = mkNodeCert kubeletCsr "peer" "root";
-      "rosequartz-kubelet-client-cert" = mkNodeCert kubeletClientCsr "client" "root";
-    };
+  config = {
+    clan.core.vars.generators = {
+      "rosequartz-ca" = caGenerator;
+    }
+    // lib.mapAttrs' (
+      name: cert: lib.nameValuePair "rosequartz-${name}" (mkGenerator name cert)
+    ) cfg.pki.certs;
 
-  mkWorkerGenerators =
-    { advertiseAddress, hostName }:
-    let
-      workerKubeletCsr = mkCsrFile "rosequartz-worker-kubelet-cert" {
-        cn = "system:node:${hostName}";
-        org = "system:nodes";
-        hosts = [ advertiseAddress ];
-      };
-      workerKubeletClientCsr = mkCsrFile "rosequartz-worker-kubelet-client-cert" {
-        cn = "system:node:${hostName}";
-        org = "system:nodes";
-      };
-    in
-    {
-      "rosequartz-worker-kubelet-cert" = mkNodeCert workerKubeletCsr "peer" "root";
-      "rosequartz-worker-kubelet-client-cert" = mkNodeCert workerKubeletClientCsr "client" "root";
-    };
-
-  flannelGenerator =
-    let
-      flannelCsr = mkCsrFile "rosequartz-flannel-cert" {
-        cn = "flannel";
-        org = "system:masters";
-      };
-    in
-    {
-      "rosequartz-flannel-cert" = mkSharedCert flannelCsr "client" "root";
-    };
+    cluster.rosequartz.pki.ca.cert =
+      topConfig.clan.core.vars.generators."rosequartz-ca".files."crt".path;
+  };
 }

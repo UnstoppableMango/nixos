@@ -1,14 +1,29 @@
 {
   config,
   lib,
-  pkgs,
   ...
 }:
 let
   cfg = config.cluster.rosequartz;
-  pki = import ./pki.nix { inherit lib pkgs; };
 
-  cert = name: config.clan.core.vars.generators."rosequartz-${name}".files;
+  nodeIps = map (n: n.ip) cfg.nodes;
+  apiserverHosts = [
+    cfg.vip
+  ]
+  ++ nodeIps
+  ++ [
+    cfg.serviceClusterIP
+    "127.0.0.1"
+    "kubernetes"
+    "kubernetes.default"
+    "kubernetes.default.svc"
+    "kubernetes.default.svc.cluster.local"
+    "localhost"
+  ];
+  localHosts = [
+    cfg.advertiseAddress
+    "127.0.0.1"
+  ];
 
   etcdClientEndpoints = map (n: "https://${n.ip}:2379") cfg.nodes;
   etcdPeerEndpoints = map (n: "${n.name}=https://${n.ip}:2380") cfg.nodes;
@@ -18,7 +33,10 @@ let
   ) (throw "no rosequartz node matches advertiseAddress ${cfg.advertiseAddress}") cfg.nodes;
 in
 {
-  imports = [ ./network.nix ];
+  imports = [
+    ./network.nix
+    ./pki.nix
+  ];
 
   options.cluster.rosequartz = {
     nodes = lib.mkOption {
@@ -103,19 +121,82 @@ in
   };
 
   config = {
-    cluster.rosequartz.etcd.initialCluster = lib.mkDefault etcdPeerEndpoints;
+    cluster.rosequartz = {
+      etcd.initialCluster = lib.mkDefault etcdPeerEndpoints;
 
-    clan.core.vars.generators =
-      pki.caGenerator
-      // pki.mkControlPlaneGenerators {
-        inherit (cfg)
-          nodes
-          vip
-          advertiseAddress
-          serviceClusterIP
-          ;
-        inherit localNode;
+      pki.certs = {
+        sa = {
+          cn = "service-accounts";
+          profile = "client";
+          owner = "kubernetes";
+        };
+        apiserver-cert = {
+          cn = "kube-apiserver";
+          hosts = apiserverHosts;
+          profile = "server";
+          owner = "kubernetes";
+        };
+        apiserver-kubelet-client-cert = {
+          cn = "kube-apiserver-kubelet-client";
+          org = "system:masters";
+          profile = "client";
+          owner = "kubernetes";
+        };
+        controller-manager-cert = {
+          cn = "system:kube-controller-manager";
+          org = "system:kube-controller-manager";
+          profile = "client";
+          owner = "kubernetes";
+        };
+        scheduler-cert = {
+          cn = "system:kube-scheduler";
+          org = "system:kube-scheduler";
+          profile = "client";
+          owner = "kubernetes";
+        };
+        etcd-client-cert = {
+          cn = "kube-apiserver-etcd-client";
+          org = "system:masters";
+          profile = "client";
+          owner = "kubernetes";
+        };
+        admin-cert = {
+          cn = "kubernetes-admin";
+          org = "system:masters";
+          profile = "client";
+          owner = "kubernetes";
+        };
+        etcd-server-cert = {
+          cn = "etcd-server";
+          hosts = localHosts;
+          share = false;
+          profile = "peer";
+          owner = "etcd";
+        };
+        etcd-peer-cert = {
+          cn = "etcd-peer";
+          hosts = localHosts;
+          share = false;
+          profile = "peer";
+          owner = "etcd";
+        };
+        kubelet-cert = {
+          cn = "system:node:${localNode.name}";
+          org = "system:nodes";
+          hosts = [ cfg.advertiseAddress ];
+          share = false;
+          profile = "peer";
+          owner = "root";
+        };
+        kubelet-client-cert = {
+          cn = "system:node:${localNode.name}";
+          org = "system:nodes";
+          share = false;
+          profile = "client";
+          owner = "root";
+        };
       };
+    };
 
     # -------------------------------------------------------------------------
     # Kubernetes control plane
@@ -125,46 +206,46 @@ in
       masterAddress = cfg.vip;
       apiserverAddress = "https://${cfg.vip}:6443";
       easyCerts = false;
-      caFile = (cert "ca")."crt".path;
+      caFile = cfg.pki.ca.cert;
 
       apiserver = {
         advertiseAddress = cfg.advertiseAddress;
         securePort = cfg.apiserverPort;
-        clientCaFile = (cert "ca")."crt".path;
-        tlsCertFile = (cert "apiserver-cert")."crt".path;
-        tlsKeyFile = (cert "apiserver-cert")."key".path;
-        serviceAccountKeyFile = (cert "sa")."crt".path;
-        serviceAccountSigningKeyFile = (cert "sa")."key".path;
-        kubeletClientCertFile = (cert "apiserver-kubelet-client-cert")."crt".path;
-        kubeletClientKeyFile = (cert "apiserver-kubelet-client-cert")."key".path;
+        clientCaFile = cfg.pki.ca.cert;
+        tlsCertFile = cfg.pki.certs."apiserver-cert".cert;
+        tlsKeyFile = cfg.pki.certs."apiserver-cert".key;
+        serviceAccountKeyFile = cfg.pki.certs."sa".cert;
+        serviceAccountSigningKeyFile = cfg.pki.certs."sa".key;
+        kubeletClientCertFile = cfg.pki.certs."apiserver-kubelet-client-cert".cert;
+        kubeletClientKeyFile = cfg.pki.certs."apiserver-kubelet-client-cert".key;
         etcd = {
           servers = etcdClientEndpoints;
-          caFile = (cert "ca")."crt".path;
-          certFile = (cert "etcd-client-cert")."crt".path;
-          keyFile = (cert "etcd-client-cert")."key".path;
+          caFile = cfg.pki.ca.cert;
+          certFile = cfg.pki.certs."etcd-client-cert".cert;
+          keyFile = cfg.pki.certs."etcd-client-cert".key;
         };
       };
 
       controllerManager = {
-        serviceAccountKeyFile = (cert "sa")."key".path;
+        serviceAccountKeyFile = cfg.pki.certs."sa".key;
         kubeconfig = {
-          certFile = (cert "controller-manager-cert")."crt".path;
-          keyFile = (cert "controller-manager-cert")."key".path;
+          certFile = cfg.pki.certs."controller-manager-cert".cert;
+          keyFile = cfg.pki.certs."controller-manager-cert".key;
         };
       };
 
       scheduler.kubeconfig = {
-        certFile = (cert "scheduler-cert")."crt".path;
-        keyFile = (cert "scheduler-cert")."key".path;
+        certFile = cfg.pki.certs."scheduler-cert".cert;
+        keyFile = cfg.pki.certs."scheduler-cert".key;
       };
 
       kubelet = {
-        clientCaFile = (cert "ca")."crt".path;
-        tlsCertFile = (cert "kubelet-cert")."crt".path;
-        tlsKeyFile = (cert "kubelet-cert")."key".path;
+        clientCaFile = cfg.pki.ca.cert;
+        tlsCertFile = cfg.pki.certs."kubelet-cert".cert;
+        tlsKeyFile = cfg.pki.certs."kubelet-cert".key;
         kubeconfig = {
-          certFile = (cert "kubelet-client-cert")."crt".path;
-          keyFile = (cert "kubelet-client-cert")."key".path;
+          certFile = cfg.pki.certs."kubelet-client-cert".cert;
+          keyFile = cfg.pki.certs."kubelet-client-cert".key;
         };
       };
     };
@@ -182,12 +263,12 @@ in
       initialClusterState = cfg.etcd.initialClusterState;
       clientCertAuth = true;
       peerClientCertAuth = true;
-      trustedCaFile = (cert "ca")."crt".path;
-      certFile = (cert "etcd-server-cert")."crt".path;
-      keyFile = (cert "etcd-server-cert")."key".path;
-      peerCertFile = (cert "etcd-peer-cert")."crt".path;
-      peerKeyFile = (cert "etcd-peer-cert")."key".path;
-      peerTrustedCaFile = (cert "ca")."crt".path;
+      trustedCaFile = cfg.pki.ca.cert;
+      certFile = cfg.pki.certs."etcd-server-cert".cert;
+      keyFile = cfg.pki.certs."etcd-server-cert".key;
+      peerCertFile = cfg.pki.certs."etcd-peer-cert".cert;
+      peerKeyFile = cfg.pki.certs."etcd-peer-cert".key;
+      peerTrustedCaFile = cfg.pki.ca.cert;
     };
 
     # -------------------------------------------------------------------------

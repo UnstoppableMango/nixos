@@ -1,17 +1,16 @@
 {
   config,
   lib,
-  pkgs,
   ...
 }:
 let
   cfg = config.cluster.rosequartz;
-  pki = import ./pki.nix { inherit lib pkgs; };
-
-  cert = name: config.clan.core.vars.generators."rosequartz-${name}".files;
 in
 {
-  imports = [ ./network.nix ];
+  imports = [
+    ./network.nix
+    ./pki.nix
+  ];
 
   options.cluster.rosequartz = {
     vip = lib.mkOption {
@@ -31,12 +30,23 @@ in
   };
 
   config = {
-    clan.core.vars.generators =
-      pki.caGenerator
-      // pki.mkWorkerGenerators {
-        inherit (cfg) advertiseAddress;
-        hostName = config.networking.hostName;
+    cluster.rosequartz.pki.certs = {
+      worker-kubelet-cert = {
+        cn = "system:node:${config.networking.hostName}";
+        org = "system:nodes";
+        hosts = [ cfg.advertiseAddress ];
+        share = false;
+        profile = "peer";
+        owner = "root";
       };
+      worker-kubelet-client-cert = {
+        cn = "system:node:${config.networking.hostName}";
+        org = "system:nodes";
+        share = false;
+        profile = "client";
+        owner = "root";
+      };
+    };
 
     # -------------------------------------------------------------------------
     # Kubernetes worker
@@ -46,15 +56,15 @@ in
       masterAddress = cfg.vip;
       apiserverAddress = "https://${cfg.vip}:6443";
       easyCerts = false;
-      caFile = (cert "ca")."crt".path;
+      caFile = cfg.pki.ca.cert;
 
       kubelet = {
-        clientCaFile = (cert "ca")."crt".path;
-        tlsCertFile = (cert "worker-kubelet-cert")."crt".path;
-        tlsKeyFile = (cert "worker-kubelet-cert")."key".path;
+        clientCaFile = cfg.pki.ca.cert;
+        tlsCertFile = cfg.pki.certs."worker-kubelet-cert".cert;
+        tlsKeyFile = cfg.pki.certs."worker-kubelet-cert".key;
         kubeconfig = {
-          certFile = (cert "worker-kubelet-client-cert")."crt".path;
-          keyFile = (cert "worker-kubelet-client-cert")."key".path;
+          certFile = cfg.pki.certs."worker-kubelet-client-cert".cert;
+          keyFile = cfg.pki.certs."worker-kubelet-client-cert".key;
         };
       };
     };

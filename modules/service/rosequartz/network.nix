@@ -6,16 +6,13 @@
 }:
 let
   cfg = config.cluster.rosequartz;
-  pki = import ./pki.nix { inherit lib pkgs; };
-
-  cert = name: config.clan.core.vars.generators."rosequartz-${name}".files;
 
   flannelKubeconfig = pkgs.writeText "flannel.kubeconfig" ''
     apiVersion: v1
     kind: Config
     clusters:
     - cluster:
-        certificate-authority: ${(cert "ca")."crt".path}
+        certificate-authority: ${cfg.pki.ca.cert}
         server: https://${cfg.vip}:6443
       name: ${cfg.clusterName}
     contexts:
@@ -27,13 +24,18 @@ let
     users:
     - name: flannel
       user:
-        client-certificate: ${(cert "flannel-cert")."crt".path}
-        client-key: ${(cert "flannel-cert")."key".path}
+        client-certificate: ${cfg.pki.certs."flannel-cert".cert}
+        client-key: ${cfg.pki.certs."flannel-cert".key}
   '';
 in
 {
   config = {
-    clan.core.vars.generators = pki.flannelGenerator;
+    cluster.rosequartz.pki.certs."flannel-cert" = {
+      cn = "flannel";
+      org = "system:masters";
+      profile = "client";
+      owner = "root";
+    };
 
     services.kubernetes.flannel.enable = lib.mkForce false;
     services.flannel = {

@@ -7,8 +7,6 @@
 }:
 let
   cfg = config.cluster.rosequartz;
-  pki = import ./pki.nix { inherit lib pkgs; };
-  cert = name: config.clan.core.vars.generators."rosequartz-${name}".files;
 
   flux = inputs.a2b.legacyPackages.${pkgs.system}.lib.flux;
 
@@ -153,21 +151,21 @@ in
           {
             name = "ca-crt";
             hostPath = {
-              path = (cert "ca")."crt".path;
+              path = cfg.pki.ca.cert;
               type = "File";
             };
           }
           {
             name = "admin-crt";
             hostPath = {
-              path = (cert "admin-cert")."crt".path;
+              path = cfg.pki.certs."admin-cert".cert;
               type = "File";
             };
           }
           {
             name = "admin-key";
             hostPath = {
-              path = (cert "admin-cert")."key".path;
+              path = cfg.pki.certs."admin-cert".key;
               type = "File";
             };
           }
