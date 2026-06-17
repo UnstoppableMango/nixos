@@ -1,10 +1,10 @@
 let
-  controlPlaneNodes =
-    lib: roles:
+  machineNodes =
+    lib: machines:
     lib.mapAttrsToList (name: m: {
       inherit name;
       ip = m.settings.ip;
-    }) roles.control-plane.machines;
+    }) machines;
 in
 {
   _class = "clan.service";
@@ -44,7 +44,7 @@ in
         nixosModule = {
           imports = [ ./control-plane.nix ];
           cluster.rosequartz = {
-            nodes = controlPlaneNodes lib roles;
+            nodes = machineNodes lib roles.control-plane.machines;
             inherit (settings) vip clusterName;
           };
         };
