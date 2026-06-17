@@ -178,11 +178,6 @@
       };
 
       roles.worker = {
-        settings = {
-          vip = "192.168.1.100";
-          clusterName = "rosequartz";
-        };
-
         machines.agreus.settings.ip = "192.168.1.187";
       };
     };

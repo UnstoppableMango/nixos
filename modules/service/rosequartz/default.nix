@@ -1,11 +1,3 @@
-let
-  machineNodes =
-    lib: machines:
-    lib.mapAttrsToList (name: m: {
-      inherit name;
-      ip = m.settings.ip;
-    }) machines;
-in
 {
   _class = "clan.service";
   manifest.name = "rosequartz";
@@ -44,8 +36,11 @@ in
         nixosModule = {
           imports = [ ./control-plane.nix ];
           cluster.rosequartz = {
-            nodes = machineNodes lib roles.control-plane.machines;
             inherit (settings) vip clusterName;
+            nodes = lib.mapAttrsToList (name: m: {
+              inherit name;
+              ip = m.settings.ip;
+            }) roles.control-plane.machines;
           };
         };
       };
@@ -61,26 +56,24 @@ in
           type = lib.types.str;
           description = "IP address of this worker node.";
         };
-
-        options.vip = lib.mkOption {
-          type = lib.types.str;
-          description = "Keepalived virtual IP (VIP) for the cluster.";
-        };
-
-        options.clusterName = lib.mkOption {
-          type = lib.types.str;
-          description = "Cluster name; used in TLS certificate subject names.";
-        };
       };
 
     perInstance =
-      { settings, ... }:
+      {
+        lib,
+        settings,
+        roles,
+        ...
+      }:
+      let
+        controlPlane = (lib.head (lib.attrValues roles.control-plane.machines)).settings;
+      in
       {
         nixosModule = {
           imports = [ ./worker.nix ];
           cluster.rosequartz = {
+            inherit (controlPlane) vip clusterName;
             advertiseAddress = settings.ip;
-            inherit (settings) vip clusterName;
           };
         };
       };
