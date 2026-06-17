@@ -1,5 +1,5 @@
 {
-  # imports = [ ./disk-config.nix ];
+  imports = [ ./disk-config.nix ];
 
   hardware.facter.reportPath = ./facter.json;
 
@@ -25,5 +25,4 @@
     etcd.advertiseClientUrls = [ "https://192.168.1.104:2379" ];
     etcd.initialAdvertisePeerUrls = [ "https://192.168.1.104:2380" ];
   };
-
 }
