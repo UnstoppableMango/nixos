@@ -123,6 +123,20 @@ in
   };
 
   config = {
+    # Go 1.26.x ARM64 linker bug: -trimpath emits invalid file indices in the
+    # pclntab v4 format, causing runtime.funcfile to panic at startup.
+    # Build without -trimpath to work around this.
+    nixpkgs.overlays = [
+      (_: prev: {
+        kubernetes = prev.kubernetes.overrideAttrs (old: {
+          env = (old.env or { }) // {
+            GOFLAGS = builtins.replaceStrings [ " -trimpath" ] [ "" ] (old.env.GOFLAGS or "-mod=vendor -trimpath");
+          };
+          disallowedReferences = [ ];
+        });
+      })
+    ];
+
     cluster.rosequartz = {
       etcd.initialCluster = lib.mkDefault etcdPeerEndpoints;
 
