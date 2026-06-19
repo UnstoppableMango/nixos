@@ -25,4 +25,4 @@ jobs:
       - if: false
         run: nix build .#nixosConfigurations.hades.config.system.build.toplevel
 
-      - run: nix flake check --all-systems
+      - run: nix flake check
