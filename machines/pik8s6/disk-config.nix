@@ -27,10 +27,11 @@
   # so we must declare fileSystems explicitly here too. Use the same lib.mkDefault
   # wrapping pattern so priority matches and the SD card entries in disk-config.nix
   # are not superseded.
-  fileSystems = lib.mkDefault {
+  fileSystems = {
     "/var" = {
       device = "/dev/disk/by-label/VAR";
       fsType = "xfs";
+      options = [ "nofail" ];
     };
   };
 }
