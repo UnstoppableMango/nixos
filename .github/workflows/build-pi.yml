@@ -7,6 +7,8 @@ on:
         description: Machine to build (leave empty for all)
         required: false
         type: string
+  push:
+    branches: [k8s]
 
 jobs:
   setup:
