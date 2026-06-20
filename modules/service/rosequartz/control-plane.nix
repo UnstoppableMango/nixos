@@ -169,7 +169,7 @@ in
           cn = "etcd-server";
           hosts = localHosts;
           share = false;
-          profile = "peer";
+          profile = "server";
           owner = "etcd";
         };
         etcd-peer-cert = {
@@ -260,6 +260,7 @@ in
       initialAdvertisePeerUrls = cfg.etcd.initialAdvertisePeerUrls;
       initialCluster = cfg.etcd.initialCluster;
       initialClusterState = cfg.etcd.initialClusterState;
+      initialClusterToken = cfg.clusterName;
       clientCertAuth = true;
       peerClientCertAuth = true;
       trustedCaFile = cfg.pki.ca.cert;
@@ -299,8 +300,9 @@ in
           log global
           mode tcp
           timeout connect 5s
-          timeout client 30s
-          timeout server 30s
+          timeout client 1h
+          timeout server 1h
+          timeout tunnel 1h
 
         frontend k8s-api
           bind *:6443
