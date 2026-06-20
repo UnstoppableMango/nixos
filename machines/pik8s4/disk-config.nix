@@ -30,6 +30,7 @@
     "/var" = {
       device = "/dev/disk/by-label/VAR";
       fsType = "xfs";
+      options = [ "nofail" ];
     };
   };
 }
