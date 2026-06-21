@@ -44,8 +44,9 @@ bin/%-sd-card: | bin
 ${PIS:%=%-flash}: %-flash: bin/%-sd-card.img
 	sudo dd if=$< of=$(DISK) bs=4M status=progress conv=fsync
 
-rosequartz-kubeconfig:
-	$(NIX) run .#rosequartz-kubeconfig
+.kube/rosequartz/config:
+	@mkdir -p ${@D}
+	$(NIX) run .#rosequartz-kubeconfig $@
 
 .PHONY: build hades agreus check format fmt update system sd-images \
         pik8s1-sd pik8s2-sd pik8s3-sd pik8s4-sd pik8s5-sd pik8s6-sd \

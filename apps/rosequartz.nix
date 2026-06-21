@@ -13,7 +13,7 @@
         ];
         text = ''
           FLAKE_DIR=''${FLAKE_DIR:-.}
-          OUTPUT=''${ROSEQUARTZ_KUBECONFIG:-rosequartz.kubeconfig}
+          OUTPUT=''${1:-rosequartz.kubeconfig}
 
           CA=$(mktemp)
           CRT=$(mktemp)
