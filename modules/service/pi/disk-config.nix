@@ -1,4 +1,4 @@
-{ lib, ... }:
+{ ... }:
 {
   # Disable disko's automatic fileSystems generation so we can set them explicitly using
   # by-label device paths below. disko still uses the disk layout for `clan machines install`
@@ -44,22 +44,20 @@
     };
   };
 
-  # Explicitly declare fileSystems using by-label paths matching the labels written above
-  # (FIRMWARE, NIXOS_SD) and the same labels sd-image-aarch64 expects. This ensures the
+  # fileSystems using by-label paths matching the labels written above (FIRMWARE,
+  # NIXOS_SD) and the same labels sd-image-aarch64 expects. This ensures the
   # nixos-anywhere-installed system and the sd-card image use identical device references.
-  # lib.mkDefault lets sd-image's own fileSystems definitions take precedence without conflict.
-  fileSystems = lib.mkDefault {
-    "/boot/firmware" = {
-      device = "/dev/disk/by-label/FIRMWARE";
-      fsType = "vfat";
-      options = [
-        "fmask=0022"
-        "dmask=0022"
-      ];
-    };
-    "/" = {
-      device = "/dev/disk/by-label/NIXOS_SD";
-      fsType = "ext4";
-    };
+  fileSystems."/boot/firmware" = {
+    device = "/dev/disk/by-label/FIRMWARE";
+    fsType = "vfat";
+    options = [
+      "fmask=0022"
+      "dmask=0022"
+      "nofail"
+    ];
+  };
+  fileSystems."/" = {
+    device = "/dev/disk/by-label/NIXOS_SD";
+    fsType = "ext4";
   };
 }

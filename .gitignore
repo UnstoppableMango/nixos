@@ -4,3 +4,6 @@
 *.img
 *.zst
 .claude/
+bin/
+.kube/
+*kubeconfig

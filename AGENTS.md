@@ -96,6 +96,13 @@ Clan-managed machines (agreus, pik8s nodes) are configured in `clan.nix` via the
 | agreus         | Generic x86_64        | Office mini PC; clan-managed; facter hardware config |
 | pik8s1–3, 5–6  | Raspberry Pi 4B       | k8s cluster nodes; clan-managed; aarch64             |
 
+## Sub-Agent Guidance
+
+Read additional AGENTS.md files when working in these areas:
+
+- **Clan services** (`modules/service/`): read `./modules/service/AGENTS.md`
+- **Rosequartz / Kubernetes**: read `./modules/service/rosequartz/AGENTS.md`
+
 ## CI
 
 GitHub Actions runs `nix flake check --all-systems` on nixos-runners with Cachix caching (`unstoppablemango`). The hades build is excluded from CI (too large).

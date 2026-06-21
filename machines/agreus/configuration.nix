@@ -45,14 +45,31 @@
     AllowSuspendThenHibernate = "no";
   };
 
+  cluster.rosequartz.advertiseAddress = "192.168.1.187";
+
   networking = {
     hostName = "agreus";
     useDHCP = false;
+
+    defaultGateway = {
+      address = "192.168.1.1";
+      interface = "enp0s31f6";
+    };
 
     nameservers = [
       "192.168.1.46"
       "192.168.1.47"
     ];
+
+    interfaces.enp0s31f6 = {
+      useDHCP = false;
+      ipv4.addresses = [
+        {
+          address = "192.168.1.187";
+          prefixLength = 24;
+        }
+      ];
+    };
   };
 
   # TODO: Confirm this is working via clan
@@ -61,6 +78,8 @@
   environment.systemPackages = with pkgs; [
     curl
     gitMinimal
+    kubectl
+    kubernetes-helm
     ldns
   ];
 

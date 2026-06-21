@@ -1,4 +1,4 @@
-{ inputs, ... }:
+{ ... }:
 {
   meta = {
     name = "thecluster";
@@ -8,21 +8,23 @@
 
   modules."@UnstoppableMango/k3s" = import ./modules/service/k3s;
   modules."@UnstoppableMango/pi" = import ./modules/service/pi;
+  modules."@UnstoppableMango/rosequartz" = import ./modules/service/rosequartz;
   modules."@UnstoppableMango/trouble" = import ./modules/service/trouble;
 
   inventory.machines =
     let
+      piTags = [
+        "basement"
+        "pi4b"
+        "k8s"
+        "control-plane"
+        "server"
+        "headless"
+      ];
+
       pik8s = idx: {
         deploy.targetHost = "root@192.168.1.10${toString idx}";
-        tags = [
-          "basement"
-          "pi4b" # They're all 4bs right now
-          "k8s"
-          "control-plane"
-          "rack"
-          "server"
-          "headless"
-        ];
+        tags = piTags;
       };
     in
     {
@@ -43,6 +45,7 @@
           "worker"
           "mini"
           "server"
+          "rosequartz"
         ];
       };
 
@@ -95,9 +98,21 @@
       pik8s1 = pik8s 1;
       pik8s2 = pik8s 2;
       pik8s3 = pik8s 3;
-      pik8s4 = pik8s 4;
-      pik8s5 = pik8s 5;
-      pik8s6 = pik8s 6;
+
+      pik8s4 = {
+        deploy.targetHost = "root@192.168.1.104";
+        tags = piTags ++ [ "rosequartz" ];
+      };
+
+      pik8s5 = {
+        deploy.targetHost = "root@192.168.1.105";
+        tags = piTags ++ [ "rosequartz" ];
+      };
+
+      pik8s6 = {
+        deploy.targetHost = "root@192.168.1.106";
+        tags = piTags ++ [ "rosequartz" ];
+      };
     };
 
   inventory.instances = {
@@ -137,17 +152,7 @@
     raspberry-pi = {
       module.name = "@UnstoppableMango/pi";
       module.input = "self";
-
-      # This makes me feel like I'm doing something wrong
       roles.pi4b.tags.pi4b = { };
-    };
-
-    k3s = {
-      module.name = "@UnstoppableMango/k3s";
-      module.input = "self";
-
-      roles.control-plane.tags.control-plane = { };
-      roles.worker.tags.worker = { };
     };
 
     trouble = {
@@ -155,6 +160,26 @@
       module.input = "self";
 
       roles.server.tags.server = { };
+    };
+
+    rosequartz = {
+      module.name = "@UnstoppableMango/rosequartz";
+      module.input = "self";
+
+      roles.control-plane = {
+        settings = {
+          vip = "192.168.1.100";
+          clusterName = "rosequartz";
+        };
+
+        machines.pik8s4.settings.ip = "192.168.1.104";
+        machines.pik8s5.settings.ip = "192.168.1.105";
+        machines.pik8s6.settings.ip = "192.168.1.106";
+      };
+
+      roles.worker = {
+        machines.agreus.settings.ip = "192.168.1.187";
+      };
     };
   };
 

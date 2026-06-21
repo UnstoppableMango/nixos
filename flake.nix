@@ -3,6 +3,7 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
+    nixpkgs-stable.url = "github:nixos/nixpkgs?ref=nixos-25.11";
     systems.url = "github:nix-systems/default";
     nixos-hardware.url = "github:nixos/nixos-hardware?ref=master";
     flake-parts.url = "github:hercules-ci/flake-parts";
@@ -29,7 +30,7 @@
     clan-core = {
       url = "https://git.clan.lol/clan/clan-core/archive/25.11.tar.gz";
       inputs = {
-        nixpkgs.follows = "nixpkgs";
+        nixpkgs.follows = "nixpkgs-stable";
         systems.follows = "systems";
         flake-parts.follows = "flake-parts";
         disko.follows = "disko";
@@ -91,6 +92,18 @@
       };
     };
 
+    a2b = {
+      url = "github:UnstoppableMango/a2b";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+        systems.follows = "systems";
+        flake-parts.follows = "flake-parts";
+        gomod2nix.follows = "gomod2nix";
+        treefmt-nix.follows = "treefmt-nix";
+        mangonix.follows = "mynix";
+      };
+    };
+
     dotfiles = {
       url = "github:unstoppablemango/dotfiles";
       inputs = {
@@ -122,6 +135,7 @@
         clan-core.flakeModules.default
 
         ./hosts
+        ./apps/rosequartz.nix
       ];
 
       clan = {
