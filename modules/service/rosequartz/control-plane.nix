@@ -202,6 +202,7 @@ in
       apiserverAddress = "https://${cfg.vip}:6443";
       easyCerts = false;
       caFile = cfg.pki.ca.cert;
+      addonManager.enable = false;
 
       apiserver = {
         advertiseAddress = cfg.advertiseAddress;
