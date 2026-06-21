@@ -235,6 +235,11 @@ in
       };
 
       kubelet = {
+        # clan sets meta.domain = "thecluster.io", which causes networking.fqdnOrHostName
+        # to return "pik8s4.thecluster.io". The NixOS kubelet default uses fqdnOrHostName,
+        # but cert CNs are generated from the short inventory name ("system:node:pik8s4").
+        # Node Authorizer rejects: cert subject "pik8s4" cannot read node "pik8s4.thecluster.io".
+        hostname = config.networking.hostName;
         clientCaFile = cfg.pki.ca.cert;
         tlsCertFile = cfg.pki.certs."kubelet-cert".cert;
         tlsKeyFile = cfg.pki.certs."kubelet-cert".key;

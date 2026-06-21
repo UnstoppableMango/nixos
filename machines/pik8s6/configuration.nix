@@ -24,5 +24,6 @@
     keepalivedPriority = 80;
     etcd.advertiseClientUrls = [ "https://192.168.1.106:2379" ];
     etcd.initialAdvertisePeerUrls = [ "https://192.168.1.106:2380" ];
+    etcd.initialClusterState = "existing";
   };
 }

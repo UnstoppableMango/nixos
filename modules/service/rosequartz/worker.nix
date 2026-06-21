@@ -60,6 +60,8 @@ in
       caFile = cfg.pki.ca.cert;
 
       kubelet = {
+        # See control-plane.nix kubelet.hostname comment — same FQDN/cert CN mismatch applies.
+        hostname = config.networking.hostName;
         clientCaFile = cfg.pki.ca.cert;
         tlsCertFile = cfg.pki.certs."worker-kubelet-cert".cert;
         tlsKeyFile = cfg.pki.certs."worker-kubelet-cert".key;
