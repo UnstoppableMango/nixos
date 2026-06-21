@@ -8,6 +8,7 @@ let
 in
 {
   imports = [
+    ./kubeconfig.nix
     ./network.nix
     ./pki.nix
   ];

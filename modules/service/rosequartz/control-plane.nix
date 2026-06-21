@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  pkgs,
   ...
 }:
 let
@@ -34,6 +35,7 @@ let
 in
 {
   imports = [
+    ./kubeconfig.nix
     ./network.nix
     ./pki.nix
   ];
@@ -156,12 +158,6 @@ in
         };
         etcd-client-cert = {
           cn = "kube-apiserver-etcd-client";
-          profile = "client";
-          owner = "kubernetes";
-        };
-        admin-cert = {
-          cn = "kubernetes-admin";
-          org = "system:masters";
           profile = "client";
           owner = "kubernetes";
         };
@@ -341,6 +337,15 @@ in
       "net.bridge.bridge-nf-call-iptables" = lib.mkDefault 1;
       "net.bridge.bridge-nf-call-ip6tables" = lib.mkDefault 1;
       "net.ipv4.ip_forward" = lib.mkDefault 1;
+    };
+
+    environment.systemPackages = [ pkgs.etcd ];
+
+    environment.variables = {
+      ETCDCTL_ENDPOINTS = "https://127.0.0.1:2379";
+      ETCDCTL_CACERT = cfg.pki.ca.cert;
+      ETCDCTL_CERT = cfg.pki.certs."etcd-client-cert".cert;
+      ETCDCTL_KEY = cfg.pki.certs."etcd-client-cert".key;
     };
   };
 }
