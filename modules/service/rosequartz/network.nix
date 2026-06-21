@@ -6,27 +6,17 @@
 }:
 let
   cfg = config.cluster.rosequartz;
+  rosLib = import ./lib.nix;
 
-  flannelKubeconfig = pkgs.writeText "flannel.kubeconfig" ''
-    apiVersion: v1
-    kind: Config
-    clusters:
-    - cluster:
-        certificate-authority: ${cfg.pki.ca.cert}
-        server: https://${cfg.vip}:6443
-      name: ${cfg.clusterName}
-    contexts:
-    - context:
-        cluster: ${cfg.clusterName}
-        user: flannel
-      name: flannel@${cfg.clusterName}
-    current-context: flannel@${cfg.clusterName}
-    users:
-    - name: flannel
-      user:
-        client-certificate: ${cfg.pki.certs."flannel-cert".cert}
-        client-key: ${cfg.pki.certs."flannel-cert".key}
-  '';
+  flannelKubeconfig = pkgs.writeText "flannel.kubeconfig" (rosLib.mkKubeconfig {
+    ca = cfg.pki.ca.cert;
+    server = "https://${cfg.vip}:6443";
+    clusterName = cfg.clusterName;
+    userName = "flannel";
+    contextName = "flannel@${cfg.clusterName}";
+    certFile = cfg.pki.certs."flannel-cert".cert;
+    keyFile = cfg.pki.certs."flannel-cert".key;
+  });
 in
 {
   config = {

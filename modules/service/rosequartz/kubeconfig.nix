@@ -5,6 +5,7 @@
 }:
 let
   cfg = config.cluster.rosequartz;
+  rosLib = import ./lib.nix;
   kubeconfigPath = "/etc/kubernetes/admin.kubeconfig";
 in
 {
@@ -18,26 +19,14 @@ in
 
     environment.etc."kubernetes/admin.kubeconfig" = {
       mode = "0600";
-      text = ''
-        apiVersion: v1
-        kind: Config
-        clusters:
-        - cluster:
-            certificate-authority: ${cfg.pki.ca.cert}
-            server: https://${cfg.vip}:6443
-          name: ${cfg.clusterName}
-        contexts:
-        - context:
-            cluster: ${cfg.clusterName}
-            user: kubernetes-admin
-          name: ${cfg.clusterName}
-        current-context: ${cfg.clusterName}
-        users:
-        - name: kubernetes-admin
-          user:
-            client-certificate: ${cfg.pki.certs."admin-cert".cert}
-            client-key: ${cfg.pki.certs."admin-cert".key}
-      '';
+      text = rosLib.mkKubeconfig {
+        ca = cfg.pki.ca.cert;
+        server = "https://${cfg.vip}:6443";
+        clusterName = cfg.clusterName;
+        userName = "kubernetes-admin";
+        certFile = cfg.pki.certs."admin-cert".cert;
+        keyFile = cfg.pki.certs."admin-cert".key;
+      };
     };
 
     environment.systemPackages = [ pkgs.kubectl ];
