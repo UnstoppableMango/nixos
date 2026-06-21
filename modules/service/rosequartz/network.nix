@@ -8,15 +8,17 @@ let
   cfg = config.cluster.rosequartz;
   rosLib = import ./lib.nix;
 
-  flannelKubeconfig = pkgs.writeText "flannel.kubeconfig" (rosLib.mkKubeconfig {
-    ca = cfg.pki.ca.cert;
-    server = "https://${cfg.vip}:6443";
-    clusterName = cfg.clusterName;
-    userName = "flannel";
-    contextName = "flannel@${cfg.clusterName}";
-    certFile = cfg.pki.certs."flannel-cert".cert;
-    keyFile = cfg.pki.certs."flannel-cert".key;
-  });
+  flannelKubeconfig = pkgs.writeText "flannel.kubeconfig" (
+    rosLib.mkKubeconfig {
+      ca = cfg.pki.ca.cert;
+      server = "https://${cfg.vip}:6443";
+      clusterName = cfg.clusterName;
+      userName = "flannel";
+      contextName = "flannel@${cfg.clusterName}";
+      certFile = cfg.pki.certs."flannel-cert".cert;
+      keyFile = cfg.pki.certs."flannel-cert".key;
+    }
+  );
 in
 {
   config = {
