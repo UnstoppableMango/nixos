@@ -98,7 +98,6 @@
         nixpkgs.follows = "nixpkgs";
         systems.follows = "systems";
         flake-parts.follows = "flake-parts";
-        gomod2nix.follows = "gomod2nix";
         treefmt-nix.follows = "treefmt-nix";
         mangonix.follows = "mynix";
       };
