@@ -98,7 +98,6 @@
         systems.follows = "systems";
         flake-parts.follows = "flake-parts";
         treefmt-nix.follows = "treefmt-nix";
-        mangonix.follows = "mynix";
       };
     };
 
