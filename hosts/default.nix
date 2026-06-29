@@ -33,6 +33,7 @@
 
         ../modules/desktops
         ../modules/shells
+        ../modules/unifi
         ../modules/users/erik
         ./hades/configuration.nix
       ];
