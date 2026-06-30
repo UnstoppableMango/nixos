@@ -266,11 +266,11 @@
         "zed": "zed"
       },
       "locked": {
-        "lastModified": 1782761388,
-        "narHash": "sha256-pxXZVbgZfChkzTbPWMlUKp6t9kivdt5gbVR3S83UPZA=",
+        "lastModified": 1782781104,
+        "narHash": "sha256-gS+0AuuVHLMoEmv1ruLxcYJE1yBt96VOOJUT7sMVmvk=",
         "owner": "unstoppablemango",
         "repo": "dotfiles",
-        "rev": "a1c5c9790d4356e67680668d106d1820df142aeb",
+        "rev": "3ded0fb8eccff0850a642c896b1106b8aec79d4f",
         "type": "github"
       },
       "original": {
