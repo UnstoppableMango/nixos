@@ -144,8 +144,3 @@ Verify after each node before proceeding to next. Deploy pik8s4 → pik8s5 → p
 2. `ssh root@10.0.69.104` — confirms SSH accessible from personal VLAN
 3. `curl -k https://10.0.69.100:6443` — confirms VIP reachable after full cluster deploy
 4. `nix flake check` — confirm config builds clean
-
-## Open Questions
-
-- **agreus interface name**: Check `machines/agreus/facter.json` for the ethernet NIC name (likely `enp*` or `eth0`).
-- **etcd-client-cert fix**: Unstaged change from previous session; commit alongside these changes or separately first.
