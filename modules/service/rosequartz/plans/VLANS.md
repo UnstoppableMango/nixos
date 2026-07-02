@@ -121,11 +121,37 @@ roles.worker.machines.agreus.settings.ip = "10.0.69.187";
 
 ## Phase 3: Cert Regen
 
-All rosequartz certs include node IPs in SANs. After IP changes, regenerate:
+Some rosequartz certs include node IPs in their SANs. After IP changes, these must be
+regenerated. Note two gotchas:
+
+- `clan vars generate`'s positional argument is a **machine** name, not a service instance
+  (`rosequartz` is not a machine).
+- By default clan only generates **missing** vars; existing cert files are skipped. Pass
+  `--regenerate`/`-r` to force overwrite.
+
+Only these generators embed IPs and need regenerating (the CA uses interactive prompts and
+must NOT be regenerated, or it will ask for the CA PEM again):
+
+- shared: `rosequartz-apiserver-cert` (VIP + all node IPs)
+- pik8s4/5/6: `rosequartz-etcd-server-cert`, `rosequartz-etcd-peer-cert`, `rosequartz-kubelet-cert`
+- agreus: `rosequartz-worker-kubelet-cert`
+
+Regenerate just those (targeting with `-g` avoids re-prompting the CA — dependencies are used,
+not regenerated):
 ```
-clan vars generate rosequartz
+# shared apiserver cert (run once, on any control-plane machine)
+clan vars generate -r -g rosequartz-apiserver-cert pik8s4
+
+# per-machine etcd + kubelet certs
+for m in pik8s4 pik8s5 pik8s6; do
+  clan vars generate -r -g rosequartz-etcd-server-cert "$m"
+  clan vars generate -r -g rosequartz-etcd-peer-cert  "$m"
+  clan vars generate -r -g rosequartz-kubelet-cert    "$m"
+done
+
+# agreus worker kubelet cert
+clan vars generate -r -g rosequartz-worker-kubelet-cert agreus
 ```
-This re-runs all cert generators. Existing cert files are replaced.
 
 ## Deploy Order (avoid losing SSH access)
 
