@@ -46,7 +46,6 @@ in
 
   networking = {
     useDHCP = false;
-    defaultGateway.address = "192.168.1.1";
     nameservers = [
       "192.168.1.46"
       "192.168.1.47"

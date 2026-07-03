@@ -100,17 +100,17 @@
       pik8s3 = pik8s 3;
 
       pik8s4 = {
-        deploy.targetHost = "root@10.0.69.104";
+        deploy.targetHost = "root@192.168.1.104";
         tags = piTags ++ [ "rosequartz" ];
       };
 
       pik8s5 = {
-        deploy.targetHost = "root@10.0.69.105";
+        deploy.targetHost = "root@192.168.1.105";
         tags = piTags ++ [ "rosequartz" ];
       };
 
       pik8s6 = {
-        deploy.targetHost = "root@10.0.69.106";
+        deploy.targetHost = "root@192.168.1.106";
         tags = piTags ++ [ "rosequartz" ];
       };
     };
