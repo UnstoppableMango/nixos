@@ -1,11 +1,40 @@
-{ ... }:
+{ lib, ... }:
 {
   # SSD layout: firmware + root only. /var lives on root (no separate partition
   # needed since the full OS is on the SSD).
-  # Labels differ from the SD card (FIRMWARE→USB_BOOT, NIXOS_SD→NIXOS_USB) to
-  # prevent by-label conflicts when the SD card is present as a fallback device.
-  # The Pi EEPROM ignores FAT32 partition labels — it finds firmware files by content.
+  # Custom labels (USB_BOOT / NIXOS_USB) prevent by-label mount ambiguity when the
+  # SD card (labeled FIRMWARE / NIXOS_SD) is present as a fallback device.
+  # disko.enableConfig = false: prevents disko from generating conflicting fileSystems.
+  # fileSystems are declared here for the runtime deployed system; in the sd-card image
+  # sub-evaluation sd-image.nix generates identical entries after the sdImage options
+  # in image.modules.sd-card take effect (mergeEqualOption allows same-value dedup).
   disko.enableConfig = false;
+
+  fileSystems = {
+    "/boot/firmware" = {
+      device = "/dev/disk/by-label/USB_BOOT";
+      fsType = "vfat";
+      # mkDefault yields to sd-image.nix's [ "nofail" "noauto" ] in image builds;
+      # applied as-is for the deployed runtime system.
+      options = lib.mkDefault [
+        "fmask=0022"
+        "dmask=0022"
+        "nofail"
+      ];
+    };
+    "/" = {
+      device = "/dev/disk/by-label/NIXOS_USB";
+      fsType = "ext4";
+    };
+  };
+
+  # image.modules uses deferredModule — option names are not validated until the
+  # sd-card sub-evaluation runs (where sd-image.nix has loaded sdImage options).
+  image.modules.sd-card = {
+    sdImage.rootVolumeLabel = "NIXOS_USB";
+    sdImage.firmwarePartitionName = "USB_BOOT";
+    sdImage.firmwareSize = 256;
+  };
 
   disko.devices.disk.sda = {
     device = "/dev/sda";
@@ -34,9 +63,8 @@
           size = "100%";
           content = {
             type = "filesystem";
-            format = "xfs";
+            format = "ext4";
             extraArgs = [
-              "-f"
               "-L"
               "NIXOS_USB"
             ];
@@ -44,22 +72,6 @@
           };
         };
       };
-    };
-  };
-
-  fileSystems = {
-    "/boot/firmware" = {
-      device = "/dev/disk/by-label/USB_BOOT";
-      fsType = "vfat";
-      options = [
-        "fmask=0022"
-        "dmask=0022"
-        "nofail"
-      ];
-    };
-    "/" = {
-      device = "/dev/disk/by-label/NIXOS_USB";
-      fsType = "xfs";
     };
   };
 }

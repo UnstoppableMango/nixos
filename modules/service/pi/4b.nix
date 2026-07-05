@@ -17,7 +17,6 @@ in
       "xhci_pci"
       "usbhid"
       "usb_storage"
-      "xfs"
     ];
 
     loader = {
