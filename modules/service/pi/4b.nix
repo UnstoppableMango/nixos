@@ -43,7 +43,6 @@ in
   environment.systemPackages = with pkgs; [
     libraspberrypi
     raspberrypi-eeprom
-    xfsprogs
   ];
 
   networking = {
