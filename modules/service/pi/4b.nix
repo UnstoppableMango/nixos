@@ -23,6 +23,8 @@ in
       grub.enable = false;
       generic-extlinux-compatible.enable = true;
     };
+
+    zfs.forceImportRoot = false;
   };
 
   nixpkgs.buildPlatform = "aarch64-linux";
