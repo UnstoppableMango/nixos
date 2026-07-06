@@ -7,7 +7,6 @@ in
     # Not confident about mixing facter + nixos-hardware, but it
     # doesn't seem like facter does any rpi configuration at the moment?
     nixos-hardware.nixosModules.raspberry-pi-4
-    ./disk-config.nix
   ];
 
   boot = {
@@ -23,6 +22,8 @@ in
       grub.enable = false;
       generic-extlinux-compatible.enable = true;
     };
+
+    zfs.forceImportRoot = false;
   };
 
   nixpkgs.buildPlatform = "aarch64-linux";
@@ -41,12 +42,10 @@ in
   environment.systemPackages = with pkgs; [
     libraspberrypi
     raspberrypi-eeprom
-    xfsprogs
   ];
 
   networking = {
     useDHCP = false;
-    defaultGateway.address = "192.168.1.1";
     nameservers = [
       "192.168.1.46"
       "192.168.1.47"

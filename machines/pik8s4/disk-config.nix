@@ -1,36 +1,15 @@
+{ ... }:
 {
-  disko.devices.disk.sda = {
-    device = "/dev/sda";
-    type = "disk";
-    content = {
-      type = "gpt";
-      partitions = {
-        var = {
-          size = "100%";
-          content = {
-            type = "filesystem";
-            format = "xfs";
-            extraArgs = [
-              "-f"
-              "-L"
-              "VAR"
-            ];
-            mountpoint = "/var";
-          };
-        };
-      };
-    };
+  fileSystems."/boot/firmware" = {
+    device = "/dev/disk/by-label/FIRMWARE";
+    fsType = "vfat";
+    options = [
+      "fmask=0022"
+      "dmask=0022"
+    ];
   };
-
-  # disko.enableConfig = false is set in modules/service/pi/disk-config.nix,
-  # so we must declare fileSystems explicitly here too. Use the same lib.mkDefault
-  # wrapping pattern so priority matches and the SD card entries in disk-config.nix
-  # are not superseded.
-  fileSystems = {
-    "/var" = {
-      device = "/dev/disk/by-label/VAR";
-      fsType = "xfs";
-      options = [ "nofail" ];
-    };
+  fileSystems."/" = {
+    device = "/dev/disk/by-label/NIXOS_SD";
+    fsType = "ext4";
   };
 }

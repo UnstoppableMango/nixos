@@ -26,15 +26,69 @@ No CIDR conflicts: k8s service CIDR defaults to 10.0.0.0/24, pod CIDR to 10.244.
 ## Phase 1: Switch/Router Config (manual, out-of-band)
 
 ### pfSense SBC
-1. Add VLAN 20 sub-interface on the Unifi uplink NIC
-2. Assign 10.0.69.1/24 to VLAN 20 interface
-3. Enable DHCP for 10.0.69.0/24 (optional; nodes use static)
-4. Firewall rules:
-   - Homelab → internet: allow
-   - Personal → homelab port 22 (SSH): allow
-   - Personal → homelab port 6443 (kubectl): allow
-   - Homelab → personal: block (or restrict to specific services)
-   - Storage traffic stays intra-VLAN 20 (Ceph replication doesn't route)
+
+#### Interface assignment
+1. `Interfaces > Assignments > VLANs > Add`: Parent = Unifi uplink NIC, VLAN Tag = `20`,
+   Description = `Homelab`.
+2. `Interfaces > Assignments`: assign the new VLAN, then open it and:
+   - Enable interface, name it `HOMELAB`.
+   - IPv4 Configuration Type = `Static IPv4`, address `10.0.69.1/24`.
+   - IPv6 Configuration Type = `None` (this VLAN is IPv4-only; leave RA/DHCPv6 off).
+3. (Optional) `Services > DHCP Server > HOMELAB`: enable, range e.g. `10.0.69.150–.199`.
+   Nodes use static IPs outside this range, so DHCP is only for convenience.
+
+#### Firewall rules — important gotchas
+
+pfSense evaluates rules on a tab **top-to-bottom, first match wins**, and rules filter
+traffic **entering** that interface (i.e. sourced from that VLAN). A brand-new interface tab
+is empty and has an implicit *deny-all*, so all traffic is dropped until you add pass rules
+(this is why ping failed initially). Key consequences:
+
+- Put **specific block rules ABOVE broad allow rules**. An "allow Homelab → any" rule placed
+  first will match and permit traffic to the Personal VLAN before a later "block → Personal"
+  rule is ever evaluated. Order is: allow-to-firewall → block-to-other-RFC1918 → allow-internet.
+- "Homelab → internet: allow" really means "allow to *any*". To keep it from also reaching
+  Personal (192.168.1.0/24) and other private ranges, block those **first**.
+- Rules for **Personal → Homelab** (SSH/kubectl) live on the **LAN/Personal interface tab**,
+  not the HOMELAB tab, because that traffic enters pfSense from the Personal VLAN.
+- `HOMELAB net` = the 10.0.69.0/24 subnet. `HOMELAB address` / `This Firewall` = the gateway
+  itself (10.0.69.1); use the latter to scope DNS/ping to the firewall.
+
+#### Rules on the HOMELAB tab (`Firewall > Rules > HOMELAB`), in order
+
+| # | Action | Proto | Source | Destination | Port | Purpose |
+|---|--------|-------|--------|-------------|------|---------|
+| 1 | Pass | ICMP (echoreq) | HOMELAB net | This Firewall | — | Ping the gateway (troubleshooting) |
+| 2 | Pass | TCP/UDP | HOMELAB net | This Firewall | 53 | DNS to pfSense resolver |
+| 3 | Pass | UDP | HOMELAB net | This Firewall | 123 | NTP (optional) |
+| 4 | Block | any | HOMELAB net | This Firewall | — | Deny all other access to pfSense (web UI/SSH) |
+| 5 | Block | any | HOMELAB net | Personal net (192.168.1.0/24) | — | Homelab → Personal isolation |
+| 6 | Block | any | HOMELAB net | RFC1918 alias (10/8, 172.16/12, 192.168/16) | — | Block other private ranges, keep internet |
+| 7 | Pass | any | HOMELAB net | any | — | Homelab → internet |
+
+Notes:
+- Rules 5/6 overlap; a single **block to an `RFC1918` alias** (defining 10.0.0.0/8,
+  172.16.0.0/12, 192.168.0.0/16) covers both. Exclude `HOMELAB net` from that alias, or add a
+  pass rule for intra-VLAN 20 traffic above it, so Ceph/k8s replication inside 10.0.69.0/24 is
+  not blocked (intra-subnet traffic doesn't route through pfSense anyway, but the alias-based
+  block is a footgun if you later add a second homelab subnet).
+- If DNS/ping to the gateway isn't needed, rules 1–4 collapse to a single "block to This
+  Firewall" — but then hades can't `ping 10.0.69.1` as a reachability test.
+
+#### Rules on the Personal/LAN tab (`Firewall > Rules > LAN`)
+
+Add these **above** the default "allow LAN to any" rule (or they'll never be evaluated
+differently — allow-any already permits them, but list them explicitly if you later tighten
+the Personal tab):
+
+| Action | Proto | Source | Destination | Port | Purpose |
+|--------|-------|--------|-------------|------|---------|
+| Pass | TCP | Personal net | HOMELAB net | 22 | SSH to nodes |
+| Pass | TCP | Personal net | 10.0.69.100 (VIP) | 6443 | kubectl to rosequartz API |
+
+- Storage/Ceph replication traffic stays intra-VLAN 20 and never hits pfSense, so no rule is
+  needed for it.
+- Remember to **Apply Changes** after editing rules; pfSense stages them until applied.
 
 ### Unifi 24p (via UniFi Controller)
 1. Create Network: "Homelab", VLAN 20
@@ -121,11 +175,37 @@ roles.worker.machines.agreus.settings.ip = "10.0.69.187";
 
 ## Phase 3: Cert Regen
 
-All rosequartz certs include node IPs in SANs. After IP changes, regenerate:
+Some rosequartz certs include node IPs in their SANs. After IP changes, these must be
+regenerated. Note two gotchas:
+
+- `clan vars generate`'s positional argument is a **machine** name, not a service instance
+  (`rosequartz` is not a machine).
+- By default clan only generates **missing** vars; existing cert files are skipped. Pass
+  `--regenerate`/`-r` to force overwrite.
+
+Only these generators embed IPs and need regenerating (the CA uses interactive prompts and
+must NOT be regenerated, or it will ask for the CA PEM again):
+
+- shared: `rosequartz-apiserver-cert` (VIP + all node IPs)
+- pik8s4/5/6: `rosequartz-etcd-server-cert`, `rosequartz-etcd-peer-cert`, `rosequartz-kubelet-cert`
+- agreus: `rosequartz-worker-kubelet-cert`
+
+Regenerate just those (targeting with `-g` avoids re-prompting the CA — dependencies are used,
+not regenerated):
 ```
-clan vars generate rosequartz
+# shared apiserver cert (run once, on any control-plane machine)
+clan vars generate -r -g rosequartz-apiserver-cert pik8s4
+
+# per-machine etcd + kubelet certs
+for m in pik8s4 pik8s5 pik8s6; do
+  clan vars generate -r -g rosequartz-etcd-server-cert "$m"
+  clan vars generate -r -g rosequartz-etcd-peer-cert  "$m"
+  clan vars generate -r -g rosequartz-kubelet-cert    "$m"
+done
+
+# agreus worker kubelet cert
+clan vars generate -r -g rosequartz-worker-kubelet-cert agreus
 ```
-This re-runs all cert generators. Existing cert files are replaced.
 
 ## Deploy Order (avoid losing SSH access)
 

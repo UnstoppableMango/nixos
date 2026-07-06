@@ -38,7 +38,7 @@
       # };
 
       agreus = {
-        deploy.targetHost = "root@192.168.1.187";
+        deploy.targetHost = "root@10.0.69.187";
         tags = [
           "office"
           "k8s"
@@ -100,17 +100,17 @@
       pik8s3 = pik8s 3;
 
       pik8s4 = {
-        deploy.targetHost = "root@192.168.1.104";
+        deploy.targetHost = "root@10.0.69.104";
         tags = piTags ++ [ "rosequartz" ];
       };
 
       pik8s5 = {
-        deploy.targetHost = "root@192.168.1.105";
+        deploy.targetHost = "root@10.0.69.105";
         tags = piTags ++ [ "rosequartz" ];
       };
 
       pik8s6 = {
-        deploy.targetHost = "root@192.168.1.106";
+        deploy.targetHost = "root@10.0.69.106";
         tags = piTags ++ [ "rosequartz" ];
       };
     };
@@ -168,17 +168,17 @@
 
       roles.control-plane = {
         settings = {
-          vip = "192.168.1.100";
+          vip = "10.0.69.100";
           clusterName = "rosequartz";
         };
 
-        machines.pik8s4.settings.ip = "192.168.1.104";
-        machines.pik8s5.settings.ip = "192.168.1.105";
-        machines.pik8s6.settings.ip = "192.168.1.106";
+        machines.pik8s4.settings.ip = "10.0.69.104";
+        machines.pik8s5.settings.ip = "10.0.69.105";
+        machines.pik8s6.settings.ip = "10.0.69.106";
       };
 
       roles.worker = {
-        machines.agreus.settings.ip = "192.168.1.187";
+        machines.agreus.settings.ip = "10.0.69.187";
       };
     };
   };

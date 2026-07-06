@@ -45,27 +45,24 @@
     AllowSuspendThenHibernate = "no";
   };
 
-  cluster.rosequartz.advertiseAddress = "192.168.1.187";
+  cluster.rosequartz.advertiseAddress = "10.0.69.187";
 
   networking = {
     hostName = "agreus";
     useDHCP = false;
 
     defaultGateway = {
-      address = "192.168.1.1";
+      address = "10.0.69.1";
       interface = "enp0s31f6";
     };
 
-    nameservers = [
-      "192.168.1.46"
-      "192.168.1.47"
-    ];
+    nameservers = [ "10.0.69.1" ];
 
     interfaces.enp0s31f6 = {
       useDHCP = false;
       ipv4.addresses = [
         {
-          address = "192.168.1.187";
+          address = "10.0.69.187";
           prefixLength = 24;
         }
       ];
