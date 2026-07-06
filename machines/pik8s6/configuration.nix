@@ -2,7 +2,6 @@
   imports = [ ./disk-config.nix ];
 
   hardware.facter.reportPath = ./facter.json;
-  hardware.raspberry-pi."4".usbBoot.enable = true;
 
   networking = {
     hostName = "pik8s6";
