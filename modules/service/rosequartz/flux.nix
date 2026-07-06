@@ -4,50 +4,29 @@
   config,
   lib,
   pkgs,
-  inputs,
+  fluxFor,
   ...
 }:
 let
   cfg = config.cluster.rosequartz;
 
-  flux = inputs.a2b.legacyPackages.${pkgs.system}.lib.flux;
+  flux = fluxFor pkgs.system;
 
-  # gotk-components.yaml — Flux controller manifests, built at eval time via
-  # `flux install --export` (no cluster access needed to generate this).
-  componentsManifest = flux.install { namespace = "flux-system"; };
-
-  # gotk-sync.yaml — GitRepository + Kustomization pointing Flux at itself.
-  # the-cluster is public, so no deploy-key/secretRef is needed here.
-  sourceManifest = flux.createSourceGit {
-    name = "flux-system";
-    namespace = "flux-system";
+  # gotk-components.yaml + gotk-sync.yaml + kustomization.yaml — the full Flux
+  # bootstrap bundle, laid out exactly like `flux bootstrap`, built at eval time
+  # (no cluster access needed). the-cluster is public, so no deploy-key/secretRef
+  # is needed. This directory can be copied verbatim into the-cluster's
+  # clusters/rosequartz/flux-system once the cluster is self-managing.
+  manifests = flux.gotkComponents {
     url = "https://github.com/UnstoppableMango/the-cluster";
     branch = "main";
-  };
-
-  kustomizationManifest = flux.createKustomization {
-    name = "flux-system";
     namespace = "flux-system";
-    source = "flux-system";
     path = "./clusters/rosequartz";
-    prune = true;
+    # a2b's callPackage injects pkgs.semver into the `semver` arg, which would
+    # override the branch ref with a nix store path. Pin it to null so the
+    # GitRepository tracks `branch: main`.
+    semver = null;
   };
-
-  # Bundled the way `flux bootstrap` lays them out, so this directory can be
-  # copied verbatim into the-cluster's clusters/rosequartz/flux-system once
-  # the cluster is self-managing.
-  manifests = pkgs.runCommand "rosequartz-flux-manifests" { } ''
-    mkdir -p $out
-    cp ${componentsManifest} $out/gotk-components.yaml
-    cat ${sourceManifest} ${kustomizationManifest} > $out/gotk-sync.yaml
-    cat > $out/kustomization.yaml <<'EOF'
-    apiVersion: kustomize.config.k8s.io/v1beta1
-    kind: Kustomization
-    resources:
-      - gotk-components.yaml
-      - gotk-sync.yaml
-    EOF
-  '';
 
   imageName = "rosequartz-flux-bootstrap";
   imageTag = "latest";
@@ -63,15 +42,7 @@ let
     ];
     extraCommands = ''
       mkdir -p manifests
-      cp ${componentsManifest} manifests/gotk-components.yaml
-      cat ${sourceManifest} ${kustomizationManifest} > manifests/gotk-sync.yaml
-      cat > manifests/kustomization.yaml <<'EOF'
-      apiVersion: kustomize.config.k8s.io/v1beta1
-      kind: Kustomization
-      resources:
-        - gotk-components.yaml
-        - gotk-sync.yaml
-      EOF
+      cp -r ${manifests}/. manifests/
     '';
     config.Entrypoint = [
       "/bin/sh"
@@ -104,10 +75,11 @@ in
   };
 
   config = lib.mkIf config.cluster.rosequartz.fluxBootstrap.enable {
-    clan.core.vars.generators = {
-      "rosequartz-admin-cert" = lib.mkDefault (
-        pki.mkSharedCert "/CN=kubernetes-admin/O=system:masters" pki.clientExt "kubernetes"
-      );
+    cluster.rosequartz.pki.certs.admin-cert = {
+      cn = "kubernetes-admin";
+      org = "system:masters";
+      profile = "client";
+      owner = "kubernetes";
     };
 
     services.kubernetes.kubelet.seedDockerImages = [ image ];
@@ -116,11 +88,11 @@ in
     # own controllers are up they reconcile from the-cluster on their own;
     # this pod just keeps drift-correcting (e.g. if flux-system is deleted)
     # for free, with no manual bootstrap step required after deploy.
-    services.kubernetes.kubelet.manifests."rosequartz-flux-bootstrap" = {
+    services.kubernetes.kubelet.manifests."flux-bootstrap" = {
       apiVersion = "v1";
       kind = "Pod";
       metadata = {
-        name = "rosequartz-flux-bootstrap";
+        name = "flux-bootstrap";
         namespace = "kube-system";
       };
       spec = {

@@ -1,3 +1,4 @@
+{ fluxFor }:
 {
   _class = "clan.service";
   manifest.name = "rosequartz";
@@ -35,6 +36,7 @@
       {
         nixosModule = {
           imports = [ ./control-plane.nix ];
+          _module.args.fluxFor = fluxFor;
           cluster.rosequartz = {
             inherit (settings) vip clusterName;
             nodes = lib.mapAttrsToList (name: m: {

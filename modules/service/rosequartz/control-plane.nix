@@ -38,6 +38,7 @@ in
     ./kubeconfig.nix
     ./network.nix
     ./pki.nix
+    ./flux.nix
   ];
 
   options.cluster.rosequartz = {

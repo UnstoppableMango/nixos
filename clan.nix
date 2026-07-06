@@ -1,4 +1,4 @@
-{ ... }:
+{ inputs }:
 {
   meta = {
     name = "thecluster";
@@ -8,7 +8,9 @@
 
   modules."@UnstoppableMango/k3s" = import ./modules/service/k3s;
   modules."@UnstoppableMango/pi" = import ./modules/service/pi;
-  modules."@UnstoppableMango/rosequartz" = import ./modules/service/rosequartz;
+  modules."@UnstoppableMango/rosequartz" = import ./modules/service/rosequartz {
+    fluxFor = system: inputs.a2b.legacyPackages.${system}.lib.flux;
+  };
   modules."@UnstoppableMango/trouble" = import ./modules/service/trouble;
 
   inventory.machines =

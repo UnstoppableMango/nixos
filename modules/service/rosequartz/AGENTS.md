@@ -241,5 +241,5 @@ All under `cluster.rosequartz.*` (set in the `nixosModule` by the clan service):
 - `localNode` in `control-plane.nix` is derived via `findFirst` matching `advertiseAddress`. If IP mismatches the node list, evaluation throws.
 - `etcd.initialCluster` defaults to all nodes. Override when replacing a member (`initialClusterState = "existing"`).
 - Keepalived `state = "BACKUP"` on all nodes — no `MASTER`; highest `priority` wins. Adjust `keepalivedPriority` per machine in inventory if needed.
-- `flux.nix` depends on `inputs.a2b` (not in this flake yet). WIP — do not import without that input.
+- `flux.nix` builds the Flux bootstrap bundle (`gotk-components.yaml` + `gotk-sync.yaml` + `kustomization.yaml`) via a2b's `flux.gotkComponents`. The a2b flux lib is threaded in from `clan.nix` as `fluxFor` (a `system -> lib.flux` function) via `_module.args`, not `inputs`. It is imported by `control-plane.nix` but gated behind `cluster.rosequartz.fluxBootstrap.enable` (default `false`, opt-in).
 - Shared certs (`share = true`) are generated once and deployed to all machines. Per-machine certs (`share = false`) are generated separately per machine.
