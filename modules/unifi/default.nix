@@ -1,4 +1,9 @@
-{ lib, config, ... }:
+{
+  pkgs,
+  lib,
+  config,
+  ...
+}:
 {
   options.dotfiles.unifi.enable = lib.mkEnableOption "unifi controller";
 
@@ -6,6 +11,7 @@
     services.unifi = {
       enable = true;
       openFirewall = true;
+      mongodbPackage = pkgs.mongodb-ce;
     };
 
     # Prevent autostart at boot; manage manually with systemctl start/stop unifi
