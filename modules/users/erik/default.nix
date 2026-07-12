@@ -8,8 +8,7 @@
 
     users.erik = {
       programs = {
-        # https://github.com/NixOS/nixpkgs/issues/513245
-        # lutris.enable = true;
+        lutris.enable = true;
         git.signing = {
           format = "openpgp";
           key = "264283BBFDC491BC";
