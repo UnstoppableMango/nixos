@@ -69,10 +69,6 @@ in
           certFile = cfg.pki.certs."worker-kubelet-client-cert".cert;
           keyFile = cfg.pki.certs."worker-kubelet-client-cert".key;
         };
-
-        # --node-labels is intentionally excluded from KubeletConfiguration (must be
-        # set before node registration), so it stays on the command line.
-        extraOpts = "--node-labels=node-role.kubernetes.io/worker=";
       };
     };
 

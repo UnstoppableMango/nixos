@@ -248,10 +248,6 @@ in
           certFile = cfg.pki.certs."kubelet-client-cert".cert;
           keyFile = cfg.pki.certs."kubelet-client-cert".key;
         };
-
-        # --node-labels is intentionally excluded from KubeletConfiguration (must be
-        # set before node registration), so it stays on the command line.
-        extraOpts = "--node-labels=node-role.kubernetes.io/control-plane=";
       };
     };
 
