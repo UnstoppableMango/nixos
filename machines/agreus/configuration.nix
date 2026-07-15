@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 {
   nix.settings = {
     extra-substituters = [
@@ -36,6 +36,10 @@
   };
 
   hardware.facter.reportPath = ./facter.json;
+
+  # Kubelet refuses to start w/ swap on. Disko still makes swapfile on
+  # disk, just don't activate it.
+  swapDevices = lib.mkForce [ ];
 
   # https://nixos.wiki/wiki/Power_Management#systemd_sleep
   systemd.sleep.settings.Sleep = {
