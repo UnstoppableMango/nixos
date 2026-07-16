@@ -328,8 +328,7 @@
     zlib
   ];
 
-  # https://github.com/NixOS/nixpkgs/issues/540364
-  programs.firefox.enable = true; # Only blue fox
+  programs.firefox.enable = false; # Only blue fox
   programs.steam.enable = true;
 
   # List packages installed in system profile. To search, run:
@@ -377,9 +376,7 @@
     gnome-tweaks
     gimp3
 
-    # https://github.com/NixOS/nixpkgs/issues/540364
-    # firefox-devedition
-
+    firefox-devedition
     google-chrome
     vlc
   ];
