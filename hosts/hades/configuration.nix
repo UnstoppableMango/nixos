@@ -210,9 +210,7 @@
   programs.zsh.enable = true;
   users.defaultUserShell = pkgs.bash;
 
-  dotfiles = {
-    gnome.enable = true;
-  };
+  host.gnome.enable = true;
 
   home-manager.users.erik = {
     dotfiles = {
@@ -245,53 +243,6 @@
       "libvirt" # crc wants `libvirt` not `libvirtd`
       "docker" # for kind, hopefully
       "podman"
-    ];
-
-    packages = with pkgs; [
-      vim
-      micro
-      gnumake
-      dprint
-      buf
-
-      ## Maybe eventually
-      # jetbrains.webstorm
-      # jetbrains.rust-rover
-      # jetbrains.ruby-mine
-      # jetbrains.rider
-      # (pkgs.jetbrains.plugins.addPlugins pkgs.jetbrains.rider ["github-copilot"])
-      # jetbrains.idea-ultimate
-      # jetbrains.pycharm-professional
-      # jetbrains.goland
-      # jetbrains.datagrip
-      # jetbrains.clion
-      jetbrains-toolbox
-
-      gitkraken
-      # bitwarden-desktop # electron 39 EOL: https://github.com/NixOS/nixpkgs/issues/526914
-      bitwarden-cli
-      cachix
-      github-desktop
-      seabird
-
-      # Broken ATM
-      # chiaki-ng
-
-      spotify
-      discord
-      tutanota-desktop
-      slack
-      webex
-      signal-desktop
-      claude-monitor
-      omnissa-horizon-client
-      xmage
-
-      (wineWow64Packages.full.override {
-        wineRelease = "staging";
-        mingwSupport = true;
-      })
-      winetricks
     ];
   };
 
@@ -358,27 +309,17 @@
     rsync
     tmux
     ldns
+    gnumake
+    dprint
 
     jetbrains-mono
     openrazer-daemon
     polychromatic
 
-    # I'll pick one eventually...
-    kdePackages.breeze
-    kdePackages.breeze-icons
-    paper-icon-theme
-    vimix-icon-theme
-    papirus-icon-theme
-
     gnome-browser-connector
     gnome-shell-extensions
     gnome-settings-daemon
     gnome-tweaks
-    gimp3
-
-    firefox-devedition
-    google-chrome
-    vlc
   ];
 
   environment.pathsToLink = [ "/share/zsh" ];
