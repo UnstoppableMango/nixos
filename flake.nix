@@ -74,18 +74,12 @@
       inputs.flake-utils.follows = "flake-utils";
     };
 
-    nil = {
-      url = "github:oxalica/nil";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     mynix = {
       url = "github:unstoppablemango/nix";
       inputs = {
         nixpkgs.follows = "nixpkgs";
         flake-parts.follows = "flake-parts";
         gomod2nix.follows = "gomod2nix";
-        nil.follows = "nil";
         systems.follows = "systems";
         treefmt-nix.follows = "treefmt-nix";
       };
@@ -111,7 +105,6 @@
         gomod2nix.follows = "gomod2nix";
         home-manager.follows = "home-manager";
         mynix.follows = "mynix";
-        nil.follows = "nil";
         nixvim.follows = "nixvim";
         systems.follows = "systems";
         treefmt-nix.follows = "treefmt-nix";
