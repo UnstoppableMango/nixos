@@ -5,9 +5,9 @@
   ...
 }:
 {
-  options.dotfiles.gnome.enable = lib.mkEnableOption "gnome";
+  options.host.gnome.enable = lib.mkEnableOption "gnome";
 
-  config = lib.mkIf config.dotfiles.gnome.enable {
+  config = lib.mkIf config.host.gnome.enable {
     services.displayManager.gdm.enable = true;
     services.desktopManager.gnome.enable = true;
 
