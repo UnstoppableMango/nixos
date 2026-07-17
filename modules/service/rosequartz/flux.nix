@@ -1,5 +1,3 @@
-# WIP
-
 {
   config,
   lib,
@@ -35,144 +33,54 @@ let
 
   # Bundled the way `flux bootstrap` lays them out, so this directory can be
   # copied verbatim into the-cluster's clusters/rosequartz/flux-system once
-  # the cluster is self-managing.
-  manifests = pkgs.runCommand "rosequartz-flux-manifests" { } ''
+  # the cluster is self-managing. inoculant applies raw manifest files
+  # directly, so this is handed to it via `manifestFiles` rather than being
+  # re-encoded as Nix attrs.
+  fluxManifests = pkgs.runCommand "rosequartz-flux-manifests" { } ''
     mkdir -p $out
     cp ${componentsManifest} $out/gotk-components.yaml
     cat ${sourceManifest} ${kustomizationManifest} > $out/gotk-sync.yaml
-    cat > $out/kustomization.yaml <<'EOF'
-    apiVersion: kustomize.config.k8s.io/v1beta1
-    kind: Kustomization
-    resources:
-      - gotk-components.yaml
-      - gotk-sync.yaml
-    EOF
   '';
 
-  imageName = "rosequartz-flux-bootstrap";
-  imageTag = "latest";
-
-  # Image is built and preloaded locally (services.kubernetes.kubelet.seedDockerImages
-  # below) — no registry, no internet access needed on the node at runtime.
-  image = pkgs.dockerTools.buildLayeredImage {
-    name = imageName;
-    tag = imageTag;
-    contents = [
-      pkgs.kubectl
-      pkgs.busybox
-    ];
-    extraCommands = ''
-      mkdir -p manifests
-      cp ${componentsManifest} manifests/gotk-components.yaml
-      cat ${sourceManifest} ${kustomizationManifest} > manifests/gotk-sync.yaml
-      cat > manifests/kustomization.yaml <<'EOF'
-      apiVersion: kustomize.config.k8s.io/v1beta1
-      kind: Kustomization
-      resources:
-        - gotk-components.yaml
-        - gotk-sync.yaml
-      EOF
-    '';
-    config.Entrypoint = [
-      "/bin/sh"
-      "-c"
-      ''
-        while true; do
-          kubectl \
-            --server=https://${cfg.vip}:6443 \
-            --certificate-authority=/pki/ca.crt \
-            --client-certificate=/pki/admin.crt \
-            --client-key=/pki/admin.key \
-            apply -k /manifests
-          sleep 300
-        done
-      ''
-    ];
-  };
+  # nixpkgs computes these attrs (coredns, RBAC bootstrap) regardless of
+  # addonManager.enable, which rosequartz keeps false. Hand them to
+  # inoculant instead of running kube-addon-manager.
+  addonManifests =
+    config.services.kubernetes.addonManager.addons
+    // config.services.kubernetes.addonManager.bootstrapAddons;
 in
 {
-  options.cluster.rosequartz.fluxBootstrap = {
-    enable = lib.mkEnableOption "flux bootstrap static pod";
+  imports = [ inputs.inoculant.nixosModules.default ];
 
-    manifests = lib.mkOption {
-      type = lib.types.package;
-      readOnly = true;
-      internal = true;
-      description = "Generated gotk manifest bundle, for inspection or copying into the-cluster repo.";
-      default = manifests;
-    };
+  options.cluster.rosequartz.fluxBootstrap = {
+    enable = lib.mkEnableOption "coredns + flux bootstrap via inoculant";
   };
 
-  config = lib.mkIf config.cluster.rosequartz.fluxBootstrap.enable {
-    clan.core.vars.generators = {
-      "rosequartz-admin-cert" = lib.mkDefault (
-        pki.mkSharedCert "/CN=kubernetes-admin/O=system:masters" pki.clientExt "kubernetes"
-      );
+  config = lib.mkIf cfg.fluxBootstrap.enable {
+    cluster.rosequartz.pki.certs.inoculant-cert = {
+      cn = "inoculant";
+      org = "system:masters";
+      profile = "client";
+      owner = "kubernetes";
     };
 
-    services.kubernetes.kubelet.seedDockerImages = [ image ];
+    # inoculant's own module generates this cert via nixpkgs' certmgr-based
+    # easyCerts flow, which rosequartz doesn't run (easyCerts = false).
+    # Point it at our own cfssl-issued cert instead. `pki.certs` is a plain
+    # `attrs`-typed option (not attrsOf submodule), so mkForce only takes
+    # effect on the whole assignment — nested `.inoculant = mkForce {...}`
+    # doesn't get unwrapped since inoculant's module also writes this key.
+    services.kubernetes.pki.certs = lib.mkForce {
+      inoculant = {
+        cert = cfg.pki.certs."inoculant-cert".cert;
+        key = cfg.pki.certs."inoculant-cert".key;
+      };
+    };
 
-    # Idempotently re-applies the gotk manifests every 5 minutes. Once Flux's
-    # own controllers are up they reconcile from the-cluster on their own;
-    # this pod just keeps drift-correcting (e.g. if flux-system is deleted)
-    # for free, with no manual bootstrap step required after deploy.
-    services.kubernetes.kubelet.manifests."rosequartz-flux-bootstrap" = {
-      apiVersion = "v1";
-      kind = "Pod";
-      metadata = {
-        name = "rosequartz-flux-bootstrap";
-        namespace = "kube-system";
-      };
-      spec = {
-        restartPolicy = "Always";
-        containers = [
-          {
-            name = "apply";
-            image = "${imageName}:${imageTag}";
-            imagePullPolicy = "Never";
-            volumeMounts = [
-              {
-                name = "ca-crt";
-                mountPath = "/pki/ca.crt";
-                readOnly = true;
-              }
-              {
-                name = "admin-crt";
-                mountPath = "/pki/admin.crt";
-                readOnly = true;
-              }
-              {
-                name = "admin-key";
-                mountPath = "/pki/admin.key";
-                readOnly = true;
-              }
-            ];
-          }
-        ];
-        volumes = [
-          {
-            name = "ca-crt";
-            hostPath = {
-              path = cfg.pki.ca.cert;
-              type = "File";
-            };
-          }
-          {
-            name = "admin-crt";
-            hostPath = {
-              path = cfg.pki.certs."admin-cert".cert;
-              type = "File";
-            };
-          }
-          {
-            name = "admin-key";
-            hostPath = {
-              path = cfg.pki.certs."admin-cert".key;
-              type = "File";
-            };
-          }
-        ];
-      };
+    services.kubernetes.inoculant = {
+      enable = true;
+      manifests = addonManifests;
+      manifestFiles = [ fluxManifests ];
     };
   };
 }

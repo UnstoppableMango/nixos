@@ -95,6 +95,16 @@
       };
     };
 
+    inoculant = {
+      url = "github:UnstoppableMango/inoculant";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+        systems.follows = "systems";
+        flake-parts.follows = "flake-parts";
+        treefmt-nix.follows = "treefmt-nix";
+      };
+    };
+
     dotfiles = {
       url = "github:unstoppablemango/dotfiles";
       inputs = {
