@@ -27,7 +27,6 @@
         nixos-hardware.nixosModules.common-pc-ssd
         home-manager.nixosModules.home-manager
         disko.nixosModules.disko
-        sops-nix.nixosModules.sops
         dotfiles.nixosModules.erik
         { nixpkgs.overlays = [ dotfiles.overlays.default ]; }
 
