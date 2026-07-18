@@ -214,18 +214,9 @@
 
   home-manager.users.erik = {
     dotfiles = {
-      gnome.enable = true;
-      brave.enable = true;
+      hades = true;
       emacs.enable = true;
-      vscode.enable = true;
-      zed.enable = true;
-      helix.enable = true;
       ai.enable = true;
-      ghostty.enable = true;
-      kitty.enable = true;
-      containers.enable = true;
-      ocaml.enable = true;
-      dotnet.enable = true;
 
       # Not currently using and also printing annoying shell warning
       openshift.enable = false;
