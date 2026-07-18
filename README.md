@@ -4,4 +4,4 @@ My NixOS configurations.
 
 |  Host | Path                                                             |
 | ----: | :--------------------------------------------------------------- |
-| hades | [hosts/hades/configuration.nix](./hosts/hades/configuration.nix) |
+| hades | [machines/hades/configuration.nix](./machines/hades/configuration.nix) |

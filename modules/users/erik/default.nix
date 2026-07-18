@@ -4,6 +4,6 @@
     useGlobalPkgs = true;
     useUserPackages = true;
     backupFileExtension = "bak";
-    extraSpecialArgs = { inherit inputs; };
+    extraSpecialArgs = { inherit (inputs.dotfiles) inputs; };
   };
 }
