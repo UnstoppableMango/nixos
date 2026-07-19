@@ -23,13 +23,12 @@
       ];
 
       pik8s = idx: {
-        deploy.targetHost = "root@192.168.1.10${toString idx}";
         tags = piTags;
       };
     in
     {
       # hades = {
-      #   deploy.targetHost = "root@192.168.1.69";
+      #   # host: inventory.instances.internet.roles.default.machines.hades
       #   tags = [
       #     "workstation"
       #     "gaming"
@@ -38,7 +37,6 @@
       # };
 
       agreus = {
-        deploy.targetHost = "root@10.0.69.187";
         tags = [
           "office"
           "k8s"
@@ -50,7 +48,7 @@
       };
 
       # castor = {
-      #   deploy.targetHost = "root@192.168.1.13";
+      #   # host: inventory.instances.internet.roles.default.machines.castor
       #   tags = [
       #     "basement"
       #     "k8s"
@@ -62,7 +60,7 @@
       # };
 
       # pollux = {
-      #   deploy.targetHost = "root@192.168.1.14";
+      #   # host: inventory.instances.internet.roles.default.machines.pollux
       #   tags = [
       #     "basement"
       #     "k8s"
@@ -74,7 +72,7 @@
       # };
 
       # gaea = {
-      #   deploy.targetHost = "root@192.168.1.11";
+      #   # host: inventory.instances.internet.roles.default.machines.gaea
       #   tags = [
       #     "basement"
       #     "k8s"
@@ -85,7 +83,7 @@
       # };
 
       # zeus = {
-      #   deploy.targetHost = "root@192.168.1.10";
+      #   # host: inventory.instances.internet.roles.default.machines.zeus
       #   tags = [
       #     "basement"
       #     "k8s"
@@ -100,17 +98,14 @@
       pik8s3 = pik8s 3;
 
       pik8s4 = {
-        deploy.targetHost = "root@10.0.69.104";
         tags = piTags ++ [ "rosequartz" ];
       };
 
       pik8s5 = {
-        deploy.targetHost = "root@10.0.69.105";
         tags = piTags ++ [ "rosequartz" ];
       };
 
       pik8s6 = {
-        deploy.targetHost = "root@10.0.69.106";
         tags = piTags ++ [ "rosequartz" ];
       };
     };
@@ -147,6 +142,21 @@
       module.input = "clan-core";
       roles.server.tags.server = { };
       # roles.client.tags = [ "workstation" ];
+    };
+
+    internet = {
+      module.name = "internet";
+      module.input = "clan-core";
+
+      roles.default.machines = {
+        agreus.settings.host = "root@10.0.69.187";
+        pik8s1.settings.host = "root@192.168.1.101";
+        pik8s2.settings.host = "root@192.168.1.102";
+        pik8s3.settings.host = "root@192.168.1.103";
+        pik8s4.settings.host = "root@10.0.69.104";
+        pik8s5.settings.host = "root@10.0.69.105";
+        pik8s6.settings.host = "root@10.0.69.106";
+      };
     };
 
     raspberry-pi = {
