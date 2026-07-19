@@ -106,9 +106,9 @@ Tags on `inventory.machines.<name>.tags` let you bulk-assign machines to roles:
 ```nix
 # In clan.nix inventory.machines:
 myhost = {
-  deploy.targetHost = "root@192.168.1.x";
   tags = [ "server" "k8s" "pi4b" ];
 };
+# Host address goes in inventory.instances.internet.roles.default.machines.myhost.settings.host
 
 # In inventory.instances:
 roles.server.tags.server = { };  # all machines with tag "server" get this role
