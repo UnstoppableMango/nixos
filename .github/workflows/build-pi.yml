@@ -1,33 +1,11 @@
-name: Build Pi
+name: Build Pi Kernel
 
 on:
   workflow_dispatch:
-    inputs:
-      machine:
-        description: Machine to build (leave empty for all)
-        required: false
-        type: string
 
 jobs:
-  setup:
-    runs-on: ubuntu-latest
-    outputs:
-      matrix: ${{ steps.set.outputs.matrix }}
-    steps:
-      - id: set
-        run: |
-          if [ -n "${{ inputs.machine }}" ]; then
-            echo 'matrix=["${{ inputs.machine }}"]' >> $GITHUB_OUTPUT
-          else
-            echo 'matrix=["pik8s1","pik8s2","pik8s3","pik8s4","pik8s5","pik8s6"]' >> $GITHUB_OUTPUT
-          fi
-
-  build-pi:
-    needs: setup
+  build-kernel:
     runs-on: ubuntu-24.04-arm
-    strategy:
-      matrix:
-        machine: ${{ fromJson(needs.setup.outputs.matrix) }}
     steps:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
 
@@ -40,4 +18,4 @@ jobs:
           name: unstoppablemango
           authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
 
-      - run: nix build .#nixosConfigurations.${{ matrix.machine }}.config.system.build.toplevel
+      - run: nix build .#rpi-kernel
