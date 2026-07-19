@@ -134,7 +134,6 @@
         home-manager.flakeModules.home-manager
         clan-core.flakeModules.default
 
-        ./hosts
         ./apps/rosequartz.nix
       ];
 
