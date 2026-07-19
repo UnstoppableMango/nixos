@@ -204,6 +204,8 @@
     in
     {
       hades = {
+        clan.core.deployment.requireExplicitUpdate = true;
+
         imports = with inputs; [
           nixos-hardware.nixosModules.asus-rog-strix-x570e
           nixos-hardware.nixosModules.common-pc-ssd
