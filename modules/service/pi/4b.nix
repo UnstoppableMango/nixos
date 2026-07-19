@@ -6,6 +6,10 @@ in
   imports = with inputs; [
     # Not confident about mixing facter + nixos-hardware, but it
     # doesn't seem like facter does any rpi configuration at the moment?
+    #
+    # NOTE: this switches boot.kernelPackages to linux_rpi4 (RPi Foundation's
+    # downstream kernel fork), which isn't reliably cached by Hydra the way the
+    # default linuxPackages kernel is, so it tends to build from source.
     nixos-hardware.nixosModules.raspberry-pi-4
   ];
 
