@@ -39,6 +39,7 @@ in
     ./network.nix
     ./pki.nix
     ./flux.nix
+    ./inoculant.nix
   ];
 
   options.cluster.rosequartz = {
