@@ -34,7 +34,8 @@ Multi-master HA Kubernetes cluster clan service. Targets Raspberry Pi 4B control
 | `worker.nix` | NixOS config for worker nodes (kubelet only) |
 | `pki.nix` | cfssl-based PKI machinery; `cluster.rosequartz.pki.*` options |
 | `network.nix` | Flannel CNI setup |
-| `flux.nix` | Optional coredns + Flux bootstrap via `inputs.inoculant` (`cluster.rosequartz.fluxBootstrap.enable`) |
+| `flux.nix` | Older, currently-dormant coredns + Flux bootstrap via `inputs.inoculant` (`cluster.rosequartz.fluxBootstrap.enable`); targets a pre-two-phase-RBAC inoculant API and needs updating before use |
+| `inoculant.nix` | Current coredns-only bootstrap via `inputs.inoculant` (`cluster.rosequartz.coredns.enable`) |
 
 ## NixOS services.kubernetes Options
 
@@ -241,5 +242,6 @@ All under `cluster.rosequartz.*` (set in the `nixosModule` by the clan service):
 - `localNode` in `control-plane.nix` is derived via `findFirst` matching `advertiseAddress`. If IP mismatches the node list, evaluation throws.
 - `etcd.initialCluster` defaults to all nodes. Override when replacing a member (`initialClusterState = "existing"`).
 - Keepalived `state = "BACKUP"` on all nodes — no `MASTER`; highest `priority` wins. Adjust `keepalivedPriority` per machine in inventory if needed.
-- `flux.nix` bootstraps coredns + Flux via `inputs.inoculant`'s NixOS module. Inoculant's own cert generation relies on nixpkgs' certmgr/easyCerts flow, which rosequartz doesn't run — `flux.nix` force-overrides `services.kubernetes.pki.certs.inoculant` with a rosequartz-issued cert instead. CoreDNS manifests are harvested from `config.services.kubernetes.addonManager.{addons,bootstrapAddons}` (populated by nixpkgs' `addons.dns` module, which is mkDefault-enabled but never applied since `addonManager.enable = false`) rather than hand-written.
+- `flux.nix` bootstraps coredns + Flux via `inputs.inoculant`'s NixOS module, but targets an older inoculant API (pre "Two-phase RBAC", PR #18) that force-overrides `services.kubernetes.pki.certs.inoculant`. The pinned `inoculant` input has since moved past that — the module now reads `services.kubernetes.pki.certs.clusterAdmin` instead and its init container runs a `bootstrap` subcommand to mint scoped RBAC + a token kubeconfig. `flux.nix`'s `fluxBootstrap.enable` flag is never set anywhere, so this staleness is currently harmless (its `config` block never evaluates) — it needs updating before it can be turned on.
+- `inoculant.nix` is the current, working coredns-only integration (`cluster.rosequartz.coredns.enable`). It reuses `admin-cert` (already defined by `kubeconfig.nix`, `system:masters`/client profile) for `services.kubernetes.pki.certs.clusterAdmin` rather than minting a dedicated cert. `cluster.rosequartz.coredns.manifests` defaults to `config.services.kubernetes.addonManager.addons` (populated by nixpkgs' `addons.dns` module, which is mkDefault-enabled but never applied since `addonManager.enable = false`) — deliberately excludes `addonManager.bootstrapAddons`, which is RBAC for the `system:kube-addon-manager` principal (a service rosequartz never runs), not coredns. Flannel and Flux bootstrap via inoculant are planned follow-ups, likely as sibling option scopes in the same file.
 - Shared certs (`share = true`) are generated once and deployed to all machines. Per-machine certs (`share = false`) are generated separately per machine.

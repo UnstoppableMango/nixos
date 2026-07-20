@@ -37,4 +37,4 @@ Additional options (interface, ports, VRRP priority, cert validity, etcd bootstr
 
 ## Status
 
-> **Work in progress.** Flux bootstrap is not yet complete. Options and cert structure may change.
+> **Work in progress.** CoreDNS can be bootstrapped via `inoculant.nix` (`cluster.rosequartz.coredns.enable`, opt-in). Flannel and Flux bootstrap via inoculant are not yet complete. Options and cert structure may change.
