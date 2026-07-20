@@ -144,7 +144,13 @@
       };
 
       perSystem =
-        { inputs', system, ... }:
+        {
+          inputs',
+          lib,
+          pkgs,
+          system,
+          ...
+        }:
         {
           _module.args.pkgs = import inputs.nixpkgs {
             inherit system;
@@ -152,6 +158,17 @@
             overlays = [
               inputs.dotfiles.overlays.default
             ];
+          };
+
+          packages = lib.optionalAttrs (system == "aarch64-linux") {
+            rpi-kernel =
+              # Copy the kernelPackages config so we can build + cache the aarch64 kernel
+              # https://github.com/NixOS/nixos-hardware/blob/master/raspberry-pi/4/default.nix#L31-L33
+              (pkgs.linuxPackagesFor (
+                pkgs.callPackage "${inputs.nixos-hardware}/raspberry-pi/common/kernel.nix" {
+                  rpiVersion = 4;
+                }
+              )).kernel;
           };
 
           devShells = {
