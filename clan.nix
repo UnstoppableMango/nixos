@@ -149,6 +149,7 @@
 
       roles.default.machines = {
         agreus.settings.host = "root@10.0.69.187";
+        hades.settings.host = "root@192.168.1.69";
         pik8s1.settings.host = "root@192.168.1.101";
         pik8s2.settings.host = "root@192.168.1.102";
         pik8s3.settings.host = "root@192.168.1.103";
