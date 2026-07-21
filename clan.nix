@@ -28,7 +28,6 @@
     in
     {
       hades = {
-        deploy.targetHost = "root@192.168.1.69";
         tags = [
           "workstation"
           "gaming"
