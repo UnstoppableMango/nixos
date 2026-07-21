@@ -60,7 +60,7 @@ in
       caFile = cfg.pki.ca.cert;
 
       kubelet = {
-        # See control-plane.nix kubelet.hostname comment — same FQDN/cert CN mismatch applies.
+        # Same FQDN/cert CN mismatch as control-plane.nix; force short hostname.
         hostname = config.networking.hostName;
         clientCaFile = cfg.pki.ca.cert;
         tlsCertFile = cfg.pki.certs."worker-kubelet-cert".cert;

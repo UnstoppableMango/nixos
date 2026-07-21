@@ -22,9 +22,8 @@ let
 in
 {
   config = {
-    # nixpkgs' flannel-0.28.6 fixed-output derivation has a stale hash for the
-    # GitHub archive tarball (upstream archive content drifted). Pin to the
-    # actually-observed hash until nixpkgs picks up a fix.
+    # nixpkgs' flannel-0.28.6 FOD has a stale hash for the GitHub tarball.
+    # Pin the actually-observed hash until nixpkgs fixes it.
     nixpkgs.overlays = [
       (_final: prev: {
         flannel = prev.flannel.overrideAttrs (old: {
@@ -48,8 +47,7 @@ in
       storageBackend = "kubernetes";
       network = config.services.kubernetes.clusterCidr;
       kubeconfig = flannelKubeconfig;
-      # clan sets meta.domain = "thecluster.io", making fqdnOrHostName return
-      # "pik8s4.thecluster.io", but kubelet registers nodes with the short name.
+      # Kubelet registers nodes with the short name; match that here too.
       nodeName = config.networking.hostName;
     };
     services.kubernetes.kubelet.cni.config = lib.mkDefault [
