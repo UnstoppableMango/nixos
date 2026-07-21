@@ -23,10 +23,6 @@ in
   };
 
   config = lib.mkIf cfg.coredns.enable {
-    # inoculant.pkg needs the gomod2nix overlay, which its own flake applies in perSystem
-    # but doesn't reach us as a consumed NixOS module.
-    nixpkgs.overlays = [ inputs.gomod2nix.overlays.default ];
-
     # Reuses the kubernetes-admin cert from kubeconfig.nix rather than minting a dedicated
     # one; inoculant's init container uses it to mint scoped RBAC + a token kubeconfig.
     services.kubernetes.pki.certs.clusterAdmin = {
