@@ -105,4 +105,4 @@ Read additional AGENTS.md files when working in these areas:
 
 ## CI
 
-GitHub Actions runs `nix flake check --all-systems` on nixos-runners with Cachix caching (`unstoppablemango`). The hades build is excluded from CI (too large).
+GitHub Actions runs `nix flake check --all-systems` on nixos-runners with Cachix caching (`unstoppablemango`). The hades build runs too, with `max-jobs = 1` set to avoid OOM from parallel derivation builds on the runner's limited RAM.
