@@ -1,8 +1,6 @@
 {
   imports = [ ./disk-config.nix ];
 
-  hardware.facter.reportPath = ./facter.json;
-
   networking = {
     hostName = "pik8s3";
     defaultGateway.interface = "eth0";

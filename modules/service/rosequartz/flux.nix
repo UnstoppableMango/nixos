@@ -6,9 +6,11 @@
   ...
 }:
 let
+  inherit (pkgs.stdenv.hostPlatform) system;
+
   cfg = config.cluster.rosequartz;
 
-  flux = inputs.a2b.legacyPackages.${pkgs.system}.lib.flux;
+  flux = inputs.a2b.legacyPackages.${system}.lib.flux;
 
   # gotk-components.yaml — Flux controller manifests, built at eval time via
   # `flux install --export` (no cluster access needed to generate this).

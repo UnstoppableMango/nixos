@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ inputs, pkgs, ... }:
 {
   nix.settings = {
     extra-substituters = [
@@ -85,7 +85,6 @@
   swapDevices = [ ];
 
   hardware.openrazer.enable = true;
-  hardware.facter.reportPath = ./facter.json;
   hardware.facter.detected.dhcp.enable = false;
 
   # This continues to randomly stall and fail
@@ -253,7 +252,18 @@
 
   host.gnome.enable = true;
 
+  home-manager = {
+    useGlobalPkgs = true;
+    useUserPackages = true;
+    backupFileExtension = "bak";
+    extraSpecialArgs = { inherit (inputs.dotfiles) inputs; };
+  };
+
   home-manager.users.erik = {
+    imports = with inputs; [
+      dotfiles.homeModules.erik
+    ];
+
     dotfiles = {
       hades = true;
       emacs.enable = true;

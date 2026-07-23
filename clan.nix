@@ -210,9 +210,7 @@
           nixos-hardware.nixosModules.asus-rog-strix-x570e
           nixos-hardware.nixosModules.common-pc-ssd
           home-manager.nixosModules.home-manager
-          dotfiles.nixosModules.erik
           { nixpkgs.overlays = [ dotfiles.overlays.default ]; }
-          ./modules/users/erik
           ./machines/hades/configuration.nix
         ];
         # TODO: re-enable once we've reviewed the networkd/doc-stripping defaults
