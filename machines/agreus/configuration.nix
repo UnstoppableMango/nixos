@@ -35,8 +35,6 @@
     };
   };
 
-  hardware.facter.reportPath = ./facter.json;
-
   # Kubelet refuses to start w/ swap on. Disko still makes swapfile on
   # disk, just don't activate it.
   swapDevices = lib.mkForce [ ];
