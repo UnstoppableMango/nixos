@@ -1,15 +1,12 @@
 {
   config,
   lib,
-  inputs,
   ...
 }:
 let
   cfg = config.cluster.rosequartz;
 in
 {
-  # flux.nix already imports inoculant's module unconditionally; don't re-import it here.
-  # NixOS dedups imports by call site, so importing the same module from two files errors.
   options.cluster.rosequartz.coredns = {
     enable = lib.mkEnableOption "coredns bootstrap via inoculant";
 
