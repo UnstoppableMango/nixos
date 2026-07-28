@@ -21,6 +21,8 @@
     ];
 
     system-features = [ "kvm" ];
+
+    trusted-users = [ "erik" ];
   };
 
   nix = {
