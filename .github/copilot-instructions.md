@@ -63,7 +63,7 @@ This repository contains UnstoppableMango's personal NixOS configurations using 
 
 ### Overlays and Caches
 - Custom cachix cache: `unstoppablemango.cachix.org`
-- Additional caches: nix-community, zed, garnix
+- Additional caches: nix-community, zed
 - Dotfiles overlay applied in erik's configuration
 
 ## Special Considerations
