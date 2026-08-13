@@ -262,6 +262,7 @@
   home-manager.users.erik = {
     imports = with inputs; [
       dotfiles.homeModules.erik
+      sops-nix.homeManagerModules.sops
     ];
 
     dotfiles = {
@@ -272,6 +273,56 @@
       # Not currently using and also printing annoying shell warning
       openshift.enable = false;
     };
+
+    # erik's personal age key (public half tracked at sops/users/erik/key.json)
+    # is a recipient on the rosequartz-admin-cert secret, unlike hades' own
+    # machine key — this is a user secret, not a host one.
+    sops.age.keyFile = "/home/erik/.config/sops/age/keys.txt";
+    sops.secrets."rosequartz-admin-key" = {
+      sopsFile = ../../vars/shared/rosequartz-admin-cert/key/secret;
+      key = "data";
+      format = "json";
+      path = "/home/erik/.kube/rosequartz-admin.key";
+    };
+
+    home.file.".kube/config".text = ''
+      apiVersion: v1
+      kind: Config
+      clusters:
+      - cluster:
+          certificate-authority: ${../../vars/shared/rosequartz-ca/crt/value}
+          server: https://10.0.69.100:6443
+        name: rosequartz
+      contexts:
+      - context:
+          cluster: rosequartz
+          user: rosequartz-admin
+        name: rosequartz
+      - context:
+          cluster: rosequartz
+          user: rosequartz-github
+        name: rosequartz-github
+      current-context: rosequartz
+      users:
+      - name: rosequartz-admin
+        user:
+          client-certificate: ${../../vars/shared/rosequartz-admin-cert/crt/value}
+          client-key: /home/erik/.kube/rosequartz-admin.key
+      - name: rosequartz-github
+        user:
+          exec:
+            apiVersion: client.authentication.k8s.io/v1beta1
+            command: kubectl
+            args:
+              - oidc-login
+              - get-token
+              - --oidc-issuer-url=https://dex.thecluster.io
+              - --oidc-client-id=rosequartz-kubernetes
+              - --oidc-extra-scope=groups
+            installHint: |
+              kubelogin plugin not found. Install: https://github.com/int128/kubelogin
+            interactiveMode: IfAvailable
+    '';
   };
 
   users.users.erik = {
