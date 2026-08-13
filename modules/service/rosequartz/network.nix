@@ -22,13 +22,13 @@ let
 in
 {
   config = {
-    # nixpkgs' flannel-0.28.6 FOD has a stale hash for the GitHub tarball.
+    # nixpkgs' cni-plugin-flannel FOD has a stale hash for the GitHub tarball.
     # Pin the actually-observed hash until nixpkgs fixes it.
     nixpkgs.overlays = [
       (_final: prev: {
-        flannel = prev.flannel.overrideAttrs (old: {
+        cni-plugin-flannel = prev.cni-plugin-flannel.overrideAttrs (old: {
           src = old.src.overrideAttrs (_: {
-            outputHash = "sha256-sqpsUAKBza96AMQMUCG94KOht5ExnHRLR7eGna3m3Xg=";
+            outputHash = "sha256-lYn9qDmUn8g3nnD4wQqyzKjd/lPXqoER5nZuY0sVK0s=";
           });
         });
       })
