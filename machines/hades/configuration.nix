@@ -285,44 +285,48 @@
       path = "/home/erik/.kube/rosequartz-admin.key";
     };
 
-    home.file.".kube/config".text = ''
-      apiVersion: v1
-      kind: Config
-      clusters:
-      - cluster:
-          certificate-authority: ${../../vars/shared/rosequartz-ca/crt/value}
-          server: https://10.0.69.100:6443
-        name: rosequartz
-      contexts:
-      - context:
-          cluster: rosequartz
-          user: rosequartz-admin
-        name: rosequartz
-      - context:
-          cluster: rosequartz
-          user: rosequartz-github
-        name: rosequartz-github
-      current-context: rosequartz
-      users:
-      - name: rosequartz-admin
-        user:
-          client-certificate: ${../../vars/shared/rosequartz-admin-cert/crt/value}
-          client-key: /home/erik/.kube/rosequartz-admin.key
-      - name: rosequartz-github
-        user:
-          exec:
-            apiVersion: client.authentication.k8s.io/v1beta1
-            command: kubectl
-            args:
-              - oidc-login
-              - get-token
-              - --oidc-issuer-url=https://dex.thecluster.io
-              - --oidc-client-id=rosequartz-kubernetes
-              - --oidc-extra-scope=groups
-            installHint: |
-              kubelogin plugin not found. Install: https://github.com/int128/kubelogin
-            interactiveMode: IfAvailable
-    '';
+    sops.templates."kube-config" = {
+      path = "/home/erik/.kube/config";
+      mode = "0600";
+      content = ''
+        apiVersion: v1
+        kind: Config
+        clusters:
+        - cluster:
+            certificate-authority: ${../../vars/shared/rosequartz-ca/crt/value}
+            server: https://10.0.69.100:6443
+          name: rosequartz
+        contexts:
+        - context:
+            cluster: rosequartz
+            user: rosequartz-admin
+          name: rosequartz
+        - context:
+            cluster: rosequartz
+            user: rosequartz-github
+          name: rosequartz-github
+        current-context: rosequartz
+        users:
+        - name: rosequartz-admin
+          user:
+            client-certificate: ${../../vars/shared/rosequartz-admin-cert/crt/value}
+            client-key: /home/erik/.kube/rosequartz-admin.key
+        - name: rosequartz-github
+          user:
+            exec:
+              apiVersion: client.authentication.k8s.io/v1
+              command: kubectl
+              args:
+                - oidc-login
+                - get-token
+                - --oidc-issuer-url=https://dex.thecluster.io
+                - --oidc-client-id=rosequartz-kubernetes
+                - --oidc-extra-scope=groups
+              installHint: |
+                kubelogin plugin not found. Install: https://github.com/int128/kubelogin
+              interactiveMode: IfAvailable
+      '';
+    };
   };
 
   users.users.erik = {
@@ -391,6 +395,7 @@
     curl
     jq
     kubectl
+    kubelogin-oidc
     kind
     yq-go
     ripgrep
