@@ -407,7 +407,6 @@
     gnumake
     dprint
 
-    jetbrains-mono
     openrazer-daemon
     polychromatic
 
