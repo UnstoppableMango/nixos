@@ -453,6 +453,11 @@
   services.lldpd.enable = true;
   services.openssh.enable = true;
 
+  # Provide /bin/bash (and other FHS paths) so tools that hardcode /bin/bash work.
+  # Workaround for GitHub Copilot CLI's bash tool on NixOS.
+  # https://github.com/github/copilot-cli/issues/3392
+  services.envfs.enable = true;
+
   security.pki.certificates = [
     # thecluster.lan Nginx CA
     ''
