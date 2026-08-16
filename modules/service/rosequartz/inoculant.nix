@@ -20,6 +20,10 @@ in
   };
 
   config = lib.mkIf cfg.coredns.enable {
+    services.kubernetes.kubelet.seedDockerImages = [
+      config.services.kubernetes.addons.dns.corednsImage
+    ];
+
     services.kubernetes.inoculant = {
       enable = true;
       manifests = cfg.coredns.manifests;
