@@ -5,7 +5,7 @@
   ...
 }:
 let
-  topConfig = config;
+  top = config;
   cfg = config.cluster.rosequartz;
 
   # ─── Config (JSON) ───────────────────────────────────────────────────────────
@@ -171,8 +171,8 @@ in
             };
 
             config = {
-              cert = topConfig.clan.core.vars.generators."rosequartz-${name}".files."crt".path;
-              key = topConfig.clan.core.vars.generators."rosequartz-${name}".files."key".path;
+              cert = top.clan.core.vars.generators."rosequartz-${name}".files."crt".path;
+              key = top.clan.core.vars.generators."rosequartz-${name}".files."key".path;
             };
           }
         )
@@ -196,7 +196,6 @@ in
       name: cert: lib.nameValuePair "rosequartz-${name}" (mkGenerator name cert)
     ) cfg.pki.certs;
 
-    cluster.rosequartz.pki.ca.cert =
-      topConfig.clan.core.vars.generators."rosequartz-ca".files."crt".path;
+    cluster.rosequartz.pki.ca.cert = top.clan.core.vars.generators."rosequartz-ca".files."crt".path;
   };
 }

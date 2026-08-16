@@ -20,16 +20,16 @@ in
   };
 
   config = lib.mkIf cfg.coredns.enable {
-    # Reuses the kubernetes-admin cert from kubeconfig.nix rather than minting a dedicated
-    # one; inoculant's init container uses it to mint scoped RBAC + a token kubeconfig.
-    services.kubernetes.pki.certs.clusterAdmin = {
-      cert = cfg.pki.certs."admin-cert".cert;
-      key = cfg.pki.certs."admin-cert".key;
-    };
-
     services.kubernetes.inoculant = {
       enable = true;
       manifests = cfg.coredns.manifests;
+
+      # Reuses the kubernetes-admin cert from kubeconfig.nix rather than minting a dedicated
+      # one; inoculant's init container uses it to mint scoped RBAC + a token kubeconfig.
+      clusterAdmin = {
+        cert = cfg.pki.certs."admin-cert".cert;
+        key = cfg.pki.certs."admin-cert".key;
+      };
     };
   };
 }
