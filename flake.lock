@@ -17,11 +17,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1787170736,
-        "narHash": "sha256-5/xX8W47BMYVnOUiosp8iFrLYfKSOkPVj643NOCp4YI=",
+        "lastModified": 1787172644,
+        "narHash": "sha256-b5jJ9au/HO3JKIHXy5znZtCZNn3i9zVdPGHusMZ3MCQ=",
         "owner": "UnstoppableMango",
         "repo": "a2b",
-        "rev": "c75d0a99bfbf350d5e9ad4a9086f7701cc86303e",
+        "rev": "52ae49217ff5ae41dccff1a4ce9bd39484d7e07a",
         "type": "github"
       },
       "original": {
@@ -80,11 +80,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1787152997,
-        "narHash": "sha256-KUu7h61y4uL6DD8Kd/5bETk9SIoCWVNpfb5c18DxhPg=",
-        "rev": "cba6e71b5702bf8f6adf2ef60ee29a210d86d21a",
+        "lastModified": 1787170645,
+        "narHash": "sha256-NoLNo/VaXYn0uOwFy7ZaYtKLc58NEj+sb1/cpSTlYrs=",
+        "rev": "113a8c0e5bb8fc6970c7c9059f4b421c8d3df7d8",
         "type": "tarball",
-        "url": "https://git.clan.lol/api/v1/repos/clan/clan-core/archive/cba6e71b5702bf8f6adf2ef60ee29a210d86d21a.tar.gz"
+        "url": "https://git.clan.lol/api/v1/repos/clan/clan-core/archive/113a8c0e5bb8fc6970c7c9059f4b421c8d3df7d8.tar.gz"
       },
       "original": {
         "type": "tarball",
@@ -263,11 +263,11 @@
         "zed": "zed"
       },
       "locked": {
-        "lastModified": 1787166824,
-        "narHash": "sha256-5UnwQZleGZvqUnaGfRVvUqczu78H7Aputcg/QT6hE1g=",
+        "lastModified": 1787169006,
+        "narHash": "sha256-sY7PUDLrAqRwBIc3SANrokEYYKGzWcsckIm5j5uoIOo=",
         "owner": "unstoppablemango",
         "repo": "dotfiles",
-        "rev": "34298c8aa54d42d0a0569856ba42ca57af012a09",
+        "rev": "ecf5a7e18484ee2ae31679df8d9e597e6cfb30c7",
         "type": "github"
       },
       "original": {
@@ -576,11 +576,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1787166906,
-        "narHash": "sha256-3EzrgYpiOaomOUPcxmM4odEBmYP24IRrkxxpY0z7wf0=",
+        "lastModified": 1787172459,
+        "narHash": "sha256-jJTa5nwjoP8sIiDhgGAlJ6DEJM/ul0m8C9p8cunhGoU=",
         "owner": "UnstoppableMango",
         "repo": "inoculant",
-        "rev": "5fd5631376a6f9562dfac51c8d6fba67ceffb168",
+        "rev": "dac1e141727af89e4090ad4190441a1ce22e9001",
         "type": "github"
       },
       "original": {
