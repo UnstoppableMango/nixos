@@ -38,6 +38,7 @@ in
     ./kubeconfig.nix
     ./network.nix
     ./pki.nix
+    ./coredns.nix
     ./flux.nix
     ./inoculant.nix
   ];

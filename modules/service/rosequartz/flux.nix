@@ -71,24 +71,15 @@ let
   ) (builtins.fromJSON (builtins.readFile fluxManifestGVKsJson));
 in
 {
-  imports = [ inputs.inoculant.nixosModules.default ];
-
-  options.cluster.rosequartz.fluxBootstrap = {
+  options.cluster.rosequartz.flux = {
     enable = lib.mkEnableOption "flux bootstrap via inoculant";
   };
 
-  config = lib.mkIf cfg.fluxBootstrap.enable {
+  config = lib.mkIf cfg.flux.enable {
     services.kubernetes.inoculant = {
       enable = true;
       manifestFiles = [ fluxManifests ];
       additionalAllowedGVKs = fluxManifestGVKs;
-
-      # Reuses the kubernetes-admin cert from kubeconfig.nix rather than minting a dedicated
-      # one; inoculant's init container uses it to mint scoped RBAC + a token kubeconfig.
-      clusterAdmin = {
-        cert = cfg.pki.certs."admin-cert".cert;
-        key = cfg.pki.certs."admin-cert".key;
-      };
     };
   };
 }
