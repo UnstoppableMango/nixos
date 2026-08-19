@@ -576,11 +576,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1786910934,
-        "narHash": "sha256-Ptd8EGwPIRkLqjC3st750LKyNAXYiIZx3BG+teQ50XU=",
+        "lastModified": 1787112826,
+        "narHash": "sha256-R9kZiMvJKhZSevq1x53a7SrASX7GaE828u8tHO1BB1U=",
         "owner": "UnstoppableMango",
         "repo": "inoculant",
-        "rev": "c4f917b7891191b53aeee3077c1c5d5b2f966a22",
+        "rev": "7acfa0a05a9bb8f967f6dacd49f09c6ba1a6efbc",
         "type": "github"
       },
       "original": {
