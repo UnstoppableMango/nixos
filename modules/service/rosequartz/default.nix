@@ -42,7 +42,7 @@
               ip = m.settings.ip;
             }) roles.control-plane.machines;
             coredns.enable = true;
-            fluxBootstrap.enable = true;
+            flux.enable = true;
           };
         };
       };
