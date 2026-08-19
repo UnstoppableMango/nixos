@@ -40,41 +40,55 @@ let
     cat ${sourceManifest} ${kustomizationManifest} > $out/gotk-sync.yaml
   '';
 
-  # nixpkgs computes these regardless of addonManager.enable, which rosequartz
-  # keeps false. Hand them to inoculant instead of running kube-addon-manager.
-  addonManifests =
-    config.services.kubernetes.addonManager.addons
-    // config.services.kubernetes.addonManager.bootstrapAddons;
+  # manifestFiles content isn't introspectable by Nix, so the bootstrap init
+  # container's --allow GVK scoping (normally derived from `manifests`) has to
+  # be supplied explicitly. Walk every YAML document in fluxManifests with
+  # yq-go and collect the distinct apiVersion/kind pairs actually present.
+  fluxManifestGVKsJson =
+    pkgs.runCommand "rosequartz-flux-manifest-gvks.json"
+      {
+        nativeBuildInputs = [
+          pkgs.yq-go
+          pkgs.jq
+        ];
+      }
+      ''
+        yq eval-all -o=json '{"apiVersion": .apiVersion, "kind": .kind}' \
+          ${fluxManifests}/gotk-components.yaml ${fluxManifests}/gotk-sync.yaml \
+          | jq -s 'unique' > $out
+      '';
+
+  fluxManifestGVKs = map (
+    { apiVersion, kind }:
+    let
+      parts = lib.splitString "/" apiVersion;
+    in
+    {
+      group = if lib.length parts == 2 then lib.head parts else "";
+      ver = lib.last parts;
+      inherit kind;
+    }
+  ) (builtins.fromJSON (builtins.readFile fluxManifestGVKsJson));
 in
 {
   imports = [ inputs.inoculant.nixosModules.default ];
 
   options.cluster.rosequartz.fluxBootstrap = {
-    enable = lib.mkEnableOption "coredns + flux bootstrap via inoculant";
+    enable = lib.mkEnableOption "flux bootstrap via inoculant";
   };
 
   config = lib.mkIf cfg.fluxBootstrap.enable {
-    cluster.rosequartz.pki.certs.inoculant-cert = {
-      cn = "inoculant";
-      org = "system:masters";
-      profile = "client";
-      owner = "kubernetes";
-    };
-
-    # inoculant normally mints this cert via nixpkgs' easyCerts flow, which we
-    # don't run. Point it at our cfssl cert instead; mkForce the whole attrs
-    # since `pki.certs` isn't a submodule and inoculant also writes this key.
-    services.kubernetes.pki.certs = lib.mkForce {
-      inoculant = {
-        cert = cfg.pki.certs."inoculant-cert".cert;
-        key = cfg.pki.certs."inoculant-cert".key;
-      };
-    };
-
     services.kubernetes.inoculant = {
       enable = true;
-      manifests = addonManifests;
       manifestFiles = [ fluxManifests ];
+      additionalAllowedGVKs = fluxManifestGVKs;
+
+      # Reuses the kubernetes-admin cert from kubeconfig.nix rather than minting a dedicated
+      # one; inoculant's init container uses it to mint scoped RBAC + a token kubeconfig.
+      clusterAdmin = {
+        cert = cfg.pki.certs."admin-cert".cert;
+        key = cfg.pki.certs."admin-cert".key;
+      };
     };
   };
 }
