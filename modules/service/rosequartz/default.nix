@@ -41,6 +41,7 @@
               inherit name;
               ip = m.settings.ip;
             }) roles.control-plane.machines;
+            coredns.enable = true;
           };
         };
       };

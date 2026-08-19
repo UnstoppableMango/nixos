@@ -39,6 +39,7 @@ in
     ./network.nix
     ./pki.nix
     ./flux.nix
+    ./inoculant.nix
   ];
 
   options.cluster.rosequartz = {
@@ -208,6 +209,7 @@ in
       apiserver = {
         advertiseAddress = cfg.advertiseAddress;
         securePort = cfg.apiserverPort;
+        preferredAddressTypes = "InternalIP";
         clientCaFile = cfg.pki.ca.cert;
         tlsCertFile = cfg.pki.certs."apiserver-cert".cert;
         tlsKeyFile = cfg.pki.certs."apiserver-cert".key;
@@ -237,10 +239,8 @@ in
       };
 
       kubelet = {
-        # clan sets meta.domain = "thecluster.io", which causes networking.fqdnOrHostName
-        # to return "pik8s4.thecluster.io". The NixOS kubelet default uses fqdnOrHostName,
-        # but cert CNs are generated from the short inventory name ("system:node:pik8s4").
-        # Node Authorizer rejects: cert subject "pik8s4" cannot read node "pik8s4.thecluster.io".
+        # clan's meta.domain makes fqdnOrHostName return an FQDN, but cert CNs use the short
+        # inventory name. Force short hostname so Node Authorizer's cert-CN check matches.
         hostname = config.networking.hostName;
         clientCaFile = cfg.pki.ca.cert;
         tlsCertFile = cfg.pki.certs."kubelet-cert".cert;
