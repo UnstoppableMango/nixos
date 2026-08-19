@@ -5,10 +5,27 @@
 
   roles.pi4b = {
     description = "Raspberry Pi 4B";
-    perInstance =
-      { ... }:
+
+    interface =
+      { lib, ... }:
       {
-        nixosModule = ./4b.nix;
+        options.nameservers = lib.mkOption {
+          type = lib.types.listOf lib.types.str;
+          default = [
+            "192.168.1.46"
+            "192.168.1.47"
+          ];
+          description = "Nameservers for this Pi 4B.";
+        };
+      };
+
+    perInstance =
+      { settings, ... }:
+      {
+        nixosModule = {
+          imports = [ ./4b.nix ];
+          networking.nameservers = settings.nameservers;
+        };
       };
   };
 }

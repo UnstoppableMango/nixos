@@ -3,7 +3,12 @@
 #
 # ... and now UnstoppableMango
 
-{ pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 let
   PID_PATH = "/tmp/ssh_sleep_block.pid";
@@ -66,7 +71,12 @@ let
   '';
 in
 {
-  security.pam.services.sshd.text = pkgs.lib.mkDefault (
-    pkgs.lib.mkAfter "# Prevent sleep on active SSH\nsession optional pam_exec.so quiet ${ssh_script}"
-  );
+  options.shells.ssh.inhibitSleepOnSsh.enable =
+    lib.mkEnableOption "blocking system sleep while an SSH session is active";
+
+  config = lib.mkIf config.shells.ssh.inhibitSleepOnSsh.enable {
+    security.pam.services.sshd.text = pkgs.lib.mkDefault (
+      pkgs.lib.mkAfter "# Prevent sleep on active SSH\nsession optional pam_exec.so quiet ${ssh_script}"
+    );
+  };
 }

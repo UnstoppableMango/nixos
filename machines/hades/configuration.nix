@@ -1,4 +1,7 @@
 { inputs, pkgs, ... }:
+let
+  primaryUser = "erik";
+in
 {
   nix.settings = {
     extra-substituters = [
@@ -20,7 +23,7 @@
 
     system-features = [ "kvm" ];
 
-    trusted-users = [ "erik" ];
+    trusted-users = [ primaryUser ];
   };
 
   nix = {
@@ -193,8 +196,8 @@
 
   # Enable KVM virtualization support
   programs.virt-manager.enable = true;
-  users.groups.libvirtd.members = [ "erik" ];
-  users.groups.libvirt.members = [ "erik" ];
+  users.groups.libvirtd.members = [ primaryUser ];
+  users.groups.libvirt.members = [ primaryUser ];
   virtualisation.libvirtd.enable = true;
   virtualisation.spiceUSBRedirection.enable = true;
 
@@ -251,6 +254,7 @@
   users.defaultUserShell = pkgs.bash;
 
   host.gnome.enable = true;
+  shells.ssh.inhibitSleepOnSsh.enable = true;
 
   home-manager = {
     useGlobalPkgs = true;
@@ -259,7 +263,7 @@
     extraSpecialArgs = { inherit (inputs.dotfiles) inputs; };
   };
 
-  home-manager.users.erik = {
+  home-manager.users.${primaryUser} = {
     imports = with inputs; [
       dotfiles.homeModules.erik
       sops-nix.homeManagerModules.sops
@@ -277,16 +281,16 @@
     # erik's personal age key (public half tracked at sops/users/erik/key.json)
     # is a recipient on the rosequartz-admin-cert secret, unlike hades' own
     # machine key — this is a user secret, not a host one.
-    sops.age.keyFile = "/home/erik/.config/sops/age/keys.txt";
+    sops.age.keyFile = "/home/${primaryUser}/.config/sops/age/keys.txt";
     sops.secrets."rosequartz-admin-key" = {
       sopsFile = ../../vars/shared/rosequartz-admin-cert/key/secret;
       key = "data";
       format = "json";
-      path = "/home/erik/.kube/rosequartz-admin.key";
+      path = "/home/${primaryUser}/.kube/rosequartz-admin.key";
     };
 
     sops.templates."kube-config" = {
-      path = "/home/erik/.kube/config";
+      path = "/home/${primaryUser}/.kube/config";
       mode = "0600";
       content = ''
         apiVersion: v1
@@ -310,7 +314,7 @@
         - name: rosequartz-admin
           user:
             client-certificate: ${../../vars/shared/rosequartz-admin-cert/crt/value}
-            client-key: /home/erik/.kube/rosequartz-admin.key
+            client-key: /home/${primaryUser}/.kube/rosequartz-admin.key
         - name: rosequartz-github
           user:
             exec:
@@ -329,7 +333,7 @@
     };
   };
 
-  users.users.erik = {
+  users.users.${primaryUser} = {
     shell = pkgs.zsh;
     description = "Erik Rasmussen";
     extraGroups = [
@@ -342,7 +346,7 @@
 
   # Enable automatic login for the user.
   services.displayManager.autoLogin.enable = true;
-  services.displayManager.autoLogin.user = "erik";
+  services.displayManager.autoLogin.user = primaryUser;
 
   # https://github.com/NixOS/nixpkgs/issues/240444#issuecomment-1977617644
   programs.nix-ld.enable = true;

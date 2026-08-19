@@ -48,11 +48,5 @@ in
     raspberrypi-eeprom
   ];
 
-  networking = {
-    useDHCP = false;
-    nameservers = [
-      "192.168.1.46"
-      "192.168.1.47"
-    ];
-  };
+  networking.useDHCP = false;
 }
