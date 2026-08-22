@@ -20,12 +20,9 @@ in
   # https://search.nixos.org/options?channel=unstable&query=k3s
   services.k3s = {
     enable = true;
-    serverAddr = "https://192.168.1.100:6443";
     tokenFile = k3s-token.files.token.path;
 
     extraFlags = [
-      "--tls-san=192.168.1.104" # Match the existing config
-      "--tls-san=192.168.1.100"
       "--disable-cloud-controller"
       "--disable-helm-controller"
       "--disable-network-policy"
