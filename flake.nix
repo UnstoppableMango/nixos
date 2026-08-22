@@ -143,8 +143,6 @@
         disko.flakeModules.default
         home-manager.flakeModules.home-manager
         clan-core.flakeModules.default
-
-        ./apps/rosequartz.nix
       ];
 
       clan = {
