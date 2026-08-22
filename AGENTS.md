@@ -10,71 +10,70 @@ This file provides guidance to AI agents when working with code in this reposito
 - `make fmt` / `make format` - Format all Nix files with nixfmt
 - `make update` - Update all flake inputs
 - `make system` - Update the local flake and rebuild/switch (`sudo nixos-rebuild switch --flake /etc/nixos --cores 12`)
-- `make agreus-system` - Deploy agreus remotely via nixos-anywhere with facter hardware detection
+- `make sd-images` / `make pik8sN-sd` - Build SD card images for Pi nodes
+- `make pik8sN-flash` - Flash an SD card image to `$DISK` (default `/dev/sdi`)
+- `make .kube/rosequartz/config` - Generate a kubeconfig for the rosequartz cluster
 - `nix flake check --all-systems` - What CI runs (checks all systems)
 
 ## Architecture
 
-This is a NixOS configuration flake using **flake-parts** and **clan-core** for modular organization. Machines are configured via two parallel structures:
-- `hosts/` — direct `nixpkgs.lib.nixosSystem` definitions (currently hades only)
-- `machines/` — clan-managed machines (agreus, pik8s cluster nodes), configured via `clan.nix`
+This is a NixOS configuration flake using **flake-parts** and **clan-core** for modular organization. All machines (hades, agreus, pik8s1–6) are clan-managed and configured via `clan.nix`, which holds the inventory (machine tags, service instances) and per-machine `imports`/overrides. Each machine's NixOS config lives under `machines/<name>/configuration.nix`.
 
 ### Module System
 
-Plain NixOS modules live under `modules/` and are composed into host configs via direct `imports`.
+Plain NixOS modules live under `modules/` and are composed into machine configs via direct `imports`. Clan service modules (role-based, multi-machine) live under `modules/service/` and are registered as clan inventory modules in `clan.nix`.
 
-**How hades is assembled** (see `hosts/default.nix`):
+**How hades is assembled** (see `clan.nix` → `machines.hades`):
 ```nix
-hades = inputs.nixpkgs.lib.nixosSystem {
-  specialArgs = { inherit (inputs.dotfiles) inputs; };
-  modules = with inputs; [
+hades = {
+  clan.core.deployment.requireExplicitUpdate = true;
+  imports = with inputs; [
     nixos-hardware.nixosModules.asus-rog-strix-x570e
     nixos-hardware.nixosModules.common-pc-ssd
     home-manager.nixosModules.home-manager
-    disko.nixosModules.disko
-    sops-nix.nixosModules.sops
-    dotfiles.nixosModules.erik
     { nixpkgs.overlays = [ dotfiles.overlays.default ]; }
-    ../modules/desktops
-    ../modules/shells
-    ../modules/users/erik
-    ./hades/configuration.nix
+    ./machines/hades/configuration.nix
   ];
 };
 ```
+`machines/hades/configuration.nix` itself imports `../../modules/desktops` and `../../modules/shells`.
 
-Clan-managed machines (agreus, pik8s nodes) are configured in `clan.nix` via the clan inventory system; their NixOS config lives under `machines/<name>/configuration.nix` and clan service modules under `modules/service/`.
+Other machines (agreus, pik8s1–6) follow the same pattern with a thinner `imports` list, since they don't need desktop/hardware-preset modules.
 
 ### Directory Layout
 
-- `flake.nix` - Entry point; imports flake-parts modules and `./hosts`; clan config via `./clan.nix`
-- `hosts/` - Per-host NixOS system definitions; `default.nix` exports `flake.nixosConfigurations`; currently only hades
-- `machines/` - Per-machine config for clan-managed nodes (agreus, pik8s1–6)
-- `modules/` - Shared NixOS modules imported by host configs:
+- `flake.nix` - Entry point; imports flake-parts modules (incl. `./apps/rosequartz.nix`); clan config via `./clan.nix`
+- `machines/` - Per-machine `configuration.nix` for every host (hades, agreus, pik8s1–6)
+- `modules/` - Shared NixOS modules imported by machine configs:
   - `desktops/` - Desktop environment modules (currently GNOME only)
   - `hardware/` - Hardware-specific modules (currently NVIDIA config)
   - `shells/` - Shell service modules (currently SSH)
-  - `users/` - User environment modules; `users/erik/default.nix` wires home-manager config from the `dotfiles` input
-  - `service/` - Clan service modules (`k3s`, `pi`)
-- `clan.nix` - Clan meta-config: cluster name/domain, inventory of clan-managed machines and service instances
-- `vars/` - Per-machine variables (SSH keys, password hashes, state versions)
+  - `unifi/` - UniFi network module
+  - `service/` - Clan service modules (`k3s`, `pi`, `rosequartz`, `trouble`)
+- `clan.nix` - Clan meta-config: cluster name/domain, machine inventory + tags, service instances, per-machine `imports`/overrides
+- `vars/` - Clan-generated vars, split into `per-machine/` and `shared/` (SSH keys, password hashes, PKI, state versions)
 - `sops/` - SOPS secrets and age keys
 - `scripts/` - Utility scripts
+- `apps/rosequartz.nix` - Exposes the `rosequartz-kubeconfig` app used by `make .kube/rosequartz/config`
 
 ### Key Flake Inputs
 
-- `nixpkgs` (nixos-unstable) - Package set
+- `nixpkgs` (nixos-unstable) / `nixpkgs-stable` (nixos-25.11, followed by `clan-core`) - Package sets
 - `flake-parts` - Modular flake framework
 - `home-manager` - User environment management, integrated via `home-manager.nixosModules.home-manager`
-- `dotfiles` - Personal dotfiles flake; provides home-manager modules and overlays consumed in `modules/users/erik/default.nix`
+- `dotfiles` - Personal dotfiles flake; provides home-manager modules and overlays
 - `disko` - Declarative disk partitioning (each host has a `disk-config.nix`)
 - `nixos-hardware` - Hardware-specific module presets
-- `clan-core` (v25.11) - Clan cluster management framework; manages agreus and pik8s machines
+- `clan-core` (26.05) - Clan cluster management framework; manages all machines via `clan.nix`
 - `sops-nix` - SOPS secrets management
 - `nixos-facter` - Hardware detection for facter-based configs
 - `nixos-anywhere` - Remote NixOS deployment
 - `nixvim` - Neovim configuration (also pulled through `dotfiles`)
 - `mynix` - Personal Nix utilities flake
+- `gomod2nix` - Go module packaging (used by `mynix`)
+- `a2b` - Renders Flux manifests via the real `flux` CLI; used by `modules/service/rosequartz/flux.nix`
+- `inoculant` - Kubernetes addon-manifest bootstrap integration; used by rosequartz
+- `cairn` - (see current branch)
 - `treefmt-nix` - Formatter config (nixfmt enabled)
 
 ### Formatter
@@ -90,11 +89,11 @@ Clan-managed machines (agreus, pik8s nodes) are configured in `clan.nix` via the
 
 ## Hosts
 
-| Host           | Hardware              | Notes                                                |
-| -------------- | --------------------- | ---------------------------------------------------- |
-| hades          | ASUS ROG Strix X570-E | Primary desktop; AMD GPU; BTRFS; direct nixosSystem  |
-| agreus         | Generic x86_64        | Office mini PC; clan-managed; facter hardware config |
-| pik8s1–3, 5–6  | Raspberry Pi 4B       | k8s cluster nodes; clan-managed; aarch64             |
+| Host          | Hardware              | Notes                                                     |
+| ------------- | --------------------- | ---------------------------------------------------------- |
+| hades         | ASUS ROG Strix X570-E | Primary desktop; AMD GPU; BTRFS; clan-managed              |
+| agreus        | Generic x86_64        | Office mini PC; clan-managed; facter hardware config; rosequartz worker |
+| pik8s1–6      | Raspberry Pi 4B       | k8s cluster nodes; clan-managed; aarch64; pik8s4–6 are rosequartz control-plane |
 
 ## Sub-Agent Guidance
 
@@ -105,4 +104,6 @@ Read additional AGENTS.md files when working in these areas:
 
 ## CI
 
-GitHub Actions runs `nix flake check --all-systems` on nixos-runners with Cachix caching (`unstoppablemango`). The hades build runs too, with `max-jobs = 1` set to avoid OOM from parallel derivation builds on the runner's limited RAM.
+`.github/workflows/ci.yml` runs two jobs on push/PR to `main`, both with Cachix caching (`unstoppablemango`):
+- `build` (ubuntu-latest): `nix flake check` + `nix build .#nixosConfigurations.hades...toplevel`, with `max-jobs = 1` to avoid OOM on the runner's limited RAM
+- `rpi-kernel` (ubuntu-24.04-arm): `nix build .#rpi-kernel`
