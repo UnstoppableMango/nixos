@@ -70,6 +70,11 @@ in
           keyFile = cfg.pki.certs."worker-kubelet-client-cert".key;
         };
       };
+
+      proxy.kubeconfig = {
+        certFile = cfg.pki.certs."kube-proxy-cert".cert;
+        keyFile = cfg.pki.certs."kube-proxy-cert".key;
+      };
     };
 
     # -------------------------------------------------------------------------
