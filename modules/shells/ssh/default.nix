@@ -11,8 +11,10 @@
 }:
 
 let
-  PID_PATH = "/tmp/ssh_sleep_block.pid";
-  PID_PIPE = "pid_pipe";
+  RUN_DIR = "/run/ssh-sleep-block";
+  PID_PATH = "${RUN_DIR}/pid";
+  PID_PIPE = "${RUN_DIR}/pid_pipe";
+  LOCK_PATH = "${RUN_DIR}/lock";
 
   # Prevent sleeping on active SSH
   sleep_script = pkgs.writeScript "infinite-sleep" ''
@@ -26,7 +28,7 @@ let
   inhibit_script = pkgs.writeScript "inhibit_script" ''
     #!/bin/sh
 
-    systemd-inhibit --what=sleep --why="Active SSH session" --mode=block ${sleep_script} 0>&- &> /tmp/inhibit.out &
+    systemd-inhibit --what=sleep --why="Active SSH session" --mode=block ${sleep_script} 0>&- &> ${RUN_DIR}/inhibit.out &
   '';
 
   ssh_script = pkgs.writeScript "ssh-session-handler" ''
@@ -38,35 +40,54 @@ let
     # Inspired by: https://unix.stackexchange.com/a/136552/84197 and
     #              https://askubuntu.com/a/954943/388360
 
-    num_ssh=$(netstat -nt | awk '$4 ~ /:22$/ && $6 == "ESTABLISHED"' | wc -l)
+    (
+      if ! ${pkgs.util-linux}/bin/flock -w 10 200; then
+          logger "Failed to acquire ssh sleep inhibitor lock"
+          exit 1
+      fi
 
-    # echo "User id is $UID, num_ssh is $num_ssh, pam type $PAM_TYPE" > /tmp/ssh_user
+      num_ssh=$(${pkgs.iproute2}/bin/ss -nt | awk '$1 == "ESTAB" && $4 ~ /:22$/' | wc -l)
 
-    case "$PAM_TYPE" in
-        open_session)
-            if [ "$num_ssh" -gt 1 ]; then
-                exit
-            fi
+      case "$PAM_TYPE" in
+          open_session)
+              if [ "$num_ssh" -gt 1 ]; then
+                  exit
+              fi
 
-            logger "Starting sleep inhibitor"
-            mkfifo ${PID_PIPE}
-            ${inhibit_script}
-            logger "Sleep inhibitor started with PID $(cat ${PID_PIPE})"
-            rm ${PID_PIPE}
-            ;;
+              logger "Starting sleep inhibitor"
 
-        close_session)
-            if [ "$num_ssh" -ne 0 ]; then
-                exit
-            fi
+              old_umask=$(umask)
+              umask 077
+              rm -f ${PID_PIPE}
+              if ! mkfifo ${PID_PIPE}; then
+                  logger "Failed to create PID FIFO at ${PID_PIPE}"
+                  umask "$old_umask"
+                  exit 1
+              fi
+              umask "$old_umask"
 
-            logger "Killing sleep inhibitor PID $(cat ${PID_PATH})"
-            kill -9 $(cat ${PID_PATH}) && rm ${PID_PATH}
-            ;;
+              ${inhibit_script}
+              logger "Sleep inhibitor started with PID $(cat ${PID_PIPE})"
+              rm -f ${PID_PIPE}
+              ;;
 
-        *)
-            exit
-    esac
+          close_session)
+              if [ "$num_ssh" -ne 0 ]; then
+                  exit
+              fi
+
+              if [ ! -f ${PID_PATH} ]; then
+                  exit
+              fi
+
+              logger "Killing sleep inhibitor PID $(cat ${PID_PATH})"
+              kill -9 $(cat ${PID_PATH}) && rm -f ${PID_PATH}
+              ;;
+
+          *)
+              exit
+      esac
+    ) 200>${LOCK_PATH}
 
   '';
 in
@@ -75,6 +96,10 @@ in
     lib.mkEnableOption "blocking system sleep while an SSH session is active";
 
   config = lib.mkIf config.shells.ssh.inhibitSleepOnSsh.enable {
+    systemd.tmpfiles.rules = [
+      "d ${RUN_DIR} 0700 root root -"
+    ];
+
     security.pam.services.sshd.text = pkgs.lib.mkDefault (
       pkgs.lib.mkAfter "# Prevent sleep on active SSH\nsession optional pam_exec.so quiet ${ssh_script}"
     );
