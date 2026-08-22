@@ -108,11 +108,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1787204618,
-        "narHash": "sha256-tQysl+B0+U/5bgcW5hmzazTBc9CAjUOaZfq2ql2/awA=",
+        "lastModified": 1787390040,
+        "narHash": "sha256-zD0JZbqFJxyE/mLx03Wt9VwGwgXUSSjvFqccKoGstRg=",
         "owner": "UnstoppableMango",
         "repo": "cairn",
-        "rev": "711056488957d51b4177ae37a4b5e30669da1db2",
+        "rev": "ceddc4427668823623e4818e7c8698c1b36fa7b6",
         "type": "github"
       },
       "original": {
@@ -182,11 +182,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1787359243,
-        "narHash": "sha256-K7Vqzo+rXBad8/wZzKbqNrmANJUiDYebWSLykwN9OCs=",
-        "rev": "b7762ca27bf41465c542a76aaf672fd49d4bf052",
+        "lastModified": 1787393178,
+        "narHash": "sha256-HxxL231gBGQd8t/ti/x2oLphO2WczQFccLW+LgbA8Qg=",
+        "rev": "1ff281cffe7e6e18a6c9cea8fa33f2cf54af0584",
         "type": "tarball",
-        "url": "https://git.clan.lol/api/v1/repos/clan/clan-core/archive/b7762ca27bf41465c542a76aaf672fd49d4bf052.tar.gz"
+        "url": "https://git.clan.lol/api/v1/repos/clan/clan-core/archive/1ff281cffe7e6e18a6c9cea8fa33f2cf54af0584.tar.gz"
       },
       "original": {
         "type": "tarball",
@@ -537,8 +537,6 @@
     "flake-utils_3": {
       "inputs": {
         "systems": [
-          "cairn",
-          "inoculant",
           "systems"
         ]
       },
@@ -559,26 +557,6 @@
     "flake-utils_4": {
       "inputs": {
         "systems": [
-          "systems"
-        ]
-      },
-      "locked": {
-        "lastModified": 1731533236,
-        "narHash": "sha256-l0KFg5HjrsfsO/JpG+r7fRrqm12kzFHyUHqHCVpMMbI=",
-        "owner": "numtide",
-        "repo": "flake-utils",
-        "rev": "11707dc2f618dd54ca8739b309ec4fc024de578b",
-        "type": "github"
-      },
-      "original": {
-        "owner": "numtide",
-        "repo": "flake-utils",
-        "type": "github"
-      }
-    },
-    "flake-utils_5": {
-      "inputs": {
-        "systems": [
           "inoculant",
           "systems"
         ]
@@ -597,7 +575,7 @@
         "type": "github"
       }
     },
-    "flake-utils_6": {
+    "flake-utils_5": {
       "inputs": {
         "systems": [
           "nixos-facter",
@@ -710,29 +688,6 @@
     },
     "gomod2nix_3": {
       "inputs": {
-        "flake-utils": "flake-utils_3",
-        "nixpkgs": [
-          "cairn",
-          "inoculant",
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1770585520,
-        "narHash": "sha256-yBz9Ozd5Wb56i3e3cHZ8WcbzCQ9RlVaiW18qDYA/AzA=",
-        "owner": "nix-community",
-        "repo": "gomod2nix",
-        "rev": "1201ddd1279c35497754f016ef33d5e060f3da8d",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nix-community",
-        "repo": "gomod2nix",
-        "type": "github"
-      }
-    },
-    "gomod2nix_4": {
-      "inputs": {
         "flake-utils": [
           "flake-utils"
         ],
@@ -754,9 +709,9 @@
         "type": "github"
       }
     },
-    "gomod2nix_5": {
+    "gomod2nix_4": {
       "inputs": {
-        "flake-utils": "flake-utils_5",
+        "flake-utils": "flake-utils_4",
         "nixpkgs": [
           "inoculant",
           "nixpkgs"
@@ -832,8 +787,18 @@
           "flake-parts"
         ],
         "globset": "globset",
-        "gomod2nix": "gomod2nix_3",
-        "nix2container": "nix2container_3",
+        "gomod2nix": [
+          "cairn",
+          "a2b",
+          "mangopkgs",
+          "gomod2nix"
+        ],
+        "nix2container": [
+          "cairn",
+          "a2b",
+          "mangopkgs",
+          "nix2container"
+        ],
         "nixpkgs": [
           "cairn",
           "nixpkgs"
@@ -867,8 +832,8 @@
           "flake-parts"
         ],
         "globset": "globset_2",
-        "gomod2nix": "gomod2nix_5",
-        "nix2container": "nix2container_5",
+        "gomod2nix": "gomod2nix_4",
+        "nix2container": "nix2container_4",
         "nixpkgs": [
           "nixpkgs"
         ],
@@ -977,7 +942,7 @@
           "dotfiles",
           "gomod2nix"
         ],
-        "nix2container": "nix2container_4",
+        "nix2container": "nix2container_3",
         "nixpkgs": [
           "dotfiles",
           "nixpkgs"
@@ -1278,28 +1243,6 @@
     "nix2container_3": {
       "inputs": {
         "nixpkgs": [
-          "cairn",
-          "inoculant",
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1775487831,
-        "narHash": "sha256-2lguQpLPQaxpQCJjXhmEEAfabwsAhkP29Z7fgLzHARA=",
-        "owner": "nlewo",
-        "repo": "nix2container",
-        "rev": "76be9608a7f4d6c985d28b0e7be903ae2547df3e",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nlewo",
-        "repo": "nix2container",
-        "type": "github"
-      }
-    },
-    "nix2container_4": {
-      "inputs": {
-        "nixpkgs": [
           "dotfiles",
           "mangopkgs",
           "nixpkgs"
@@ -1319,7 +1262,7 @@
         "type": "github"
       }
     },
-    "nix2container_5": {
+    "nix2container_4": {
       "inputs": {
         "nixpkgs": [
           "inoculant",
@@ -1404,7 +1347,7 @@
         "disko": [
           "disko"
         ],
-        "flake-utils": "flake-utils_6",
+        "flake-utils": "flake-utils_5",
         "hwinfo": "hwinfo",
         "nixpkgs": [
           "nixpkgs"
@@ -1536,11 +1479,11 @@
     },
     "nixpkgs_2": {
       "locked": {
-        "lastModified": 1787135253,
-        "narHash": "sha256-RD2kNWCG+Bjo6h+JVjWVNntZs2GtRoeY2xHjts/FNkA=",
+        "lastModified": 1787360063,
+        "narHash": "sha256-dt4WdcvsA8/RCe+VZZwqU0X+XMM3wBbGCWA0/sFWzGo=",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "ffb3c9b700e759be2ef13237c9d8f953b32a1e46",
+        "rev": "2c423e03bbafcff28bfadc6781a4a8257f205cb5",
         "type": "github"
       },
       "original": {
@@ -1598,8 +1541,8 @@
         "disko": "disko_2",
         "dotfiles": "dotfiles",
         "flake-parts": "flake-parts",
-        "flake-utils": "flake-utils_4",
-        "gomod2nix": "gomod2nix_4",
+        "flake-utils": "flake-utils_3",
+        "gomod2nix": "gomod2nix_3",
         "home-manager": "home-manager",
         "inoculant": "inoculant_2",
         "mynix": "mynix",
