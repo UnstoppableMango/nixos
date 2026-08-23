@@ -23,6 +23,7 @@
 
     ./disk-config.nix
     ../../modules/desktops
+    ../../modules/ssh
     # ../../modules/users/erik
   ];
 
@@ -45,8 +46,6 @@
     AllowHybridSleep = "no";
     AllowSuspendThenHibernate = "no";
   };
-
-  cluster.rosequartz.advertiseAddress = "10.0.69.187";
 
   networking = {
     hostName = "agreus";
