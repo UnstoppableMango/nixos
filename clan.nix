@@ -196,11 +196,11 @@ in
       module.name = "@UnstoppableMango/pki";
       module.input = "cairn";
 
-      roles.node.tags.rosequartz = { };
-
       # Reuse the existing rosequartz-* var generators (and the CA behind them)
       # rather than minting a fresh set under cairn's default "cairn-" prefix.
-      roles.node.extraModules = [ { cluster.cairn.pki.generatorPrefix = "rosequartz"; } ];
+      roles.node.settings.generatorPrefix = "rosequartz";
+
+      roles.node.tags.rosequartz = { };
     };
 
     rosequartz-etcd = {
@@ -229,12 +229,6 @@ in
         machines.pik8s4.settings.ip = "10.0.69.104";
         machines.pik8s5.settings.ip = "10.0.69.105";
         machines.pik8s6.settings.ip = "10.0.69.106";
-
-        # cairn dropped this when it split the apiserver out of the monolithic
-        # control-plane module; without it the apiserver prefers Hostname over
-        # InternalIP when dialing kubelets.
-        # https://github.com/UnstoppableMango/cairn/issues/34
-        extraModules = [ { services.kubernetes.apiserver.preferredAddressTypes = "InternalIP"; } ];
       };
     };
 
@@ -285,27 +279,6 @@ in
       };
 
       roles.node.tags.rosequartz = { };
-
-      # cairn pins flannel's src outputHash to a 0.28.6 hash, but our nixpkgs
-      # ships 0.28.9, so its overlay turns into a fixed-output mismatch. Undo
-      # it with a later overlay (last one in the list wins).
-      # https://github.com/UnstoppableMango/cairn/issues/35
-      roles.node.extraModules = [
-        (
-          { lib, ... }:
-          {
-            nixpkgs.overlays = lib.mkAfter [
-              (_final: prev: {
-                flannel = prev.flannel.overrideAttrs (old: {
-                  src = old.src.overrideAttrs (_: {
-                    outputHash = "sha256-Im/8JB/IfwT3Ne7mSsXH71tEGf53MhSzNLw0pevLjn8=";
-                  });
-                });
-              })
-            ];
-          }
-        )
-      ];
     };
 
     rosequartz-kubeconfig = {

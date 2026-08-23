@@ -148,11 +148,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1787425976,
-        "narHash": "sha256-nkc7b8WOjYBsPlYDP/rZNzV31eXD672es7PmBuqp57I=",
+        "lastModified": 1787510499,
+        "narHash": "sha256-txs+crALMB4nZlg6hCnNPk33YDGRTTAexzojaFcPxro=",
         "owner": "UnstoppableMango",
         "repo": "cairn",
-        "rev": "012efa79ec8334d74c126a0cc5702b5e2e14902d",
+        "rev": "977fc6c73b2437c3a1b9a55bb4c9873de30708d8",
         "type": "github"
       },
       "original": {
@@ -349,7 +349,7 @@
           "mynix"
         ],
         "nil": "nil",
-        "nix-darwin": "nix-darwin_3",
+        "nix-darwin": "nix-darwin_2",
         "nix-direnv": "nix-direnv",
         "nix-init": "nix-init",
         "nix-vscode-extensions": "nix-vscode-extensions",
@@ -559,6 +559,25 @@
         "owner": "pdtpartners",
         "repo": "globset",
         "type": "github"
+      }
+    },
+    "gnome-shell": {
+      "flake": false,
+      "locked": {
+        "host": "gitlab.gnome.org",
+        "lastModified": 1776175984,
+        "narHash": "sha256-RJFlFW8GiMei6oqUGrMkGEvVqOH8U7Q8abc1yK4VKD8=",
+        "owner": "GNOME",
+        "repo": "gnome-shell",
+        "rev": "e0fdc4c13250e9a9b8ea9594c83925274f4a5dca",
+        "type": "gitlab"
+      },
+      "original": {
+        "host": "gitlab.gnome.org",
+        "owner": "GNOME",
+        "ref": "50.1",
+        "repo": "gnome-shell",
+        "type": "gitlab"
       }
     },
     "gomod2nix": {
@@ -855,7 +874,7 @@
         "type": "github"
       }
     },
-    "nix-darwin_3": {
+    "nix-darwin_2": {
       "inputs": {
         "nixpkgs": [
           "dotfiles",

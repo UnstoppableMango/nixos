@@ -24,9 +24,7 @@ Plain NixOS modules live under `modules/` and are composed into machine configs 
 
 The `rosequartz` Kubernetes cluster (pik8s4–6 control plane, agreus worker) is **not** defined in this repo. It runs on [cairn](https://github.com/UnstoppableMango/cairn), a library flake that registers one clan service per cluster component (`@UnstoppableMango/{pki,etcd,apiserver,kubelet,loadbalancer,network,kubeconfig,inoculant,coredns,flux}`). `clan.nix` declares a `rosequartz-<component>` instance per service with `module.input = "cairn"`; the services coordinate via clan exports. Cairn's `docs/USAGE.md` and per-service `modules/service/<name>/README.md` are the reference for their options.
 
-Two cairn behaviours are patched locally via `roles.<role>.extraModules` in `clan.nix`, each with an upstream issue linked in a comment. Check whether those are fixed before carrying them forward on a flake update.
-
-Cluster PKI predates cairn, so `cluster.cairn.pki.generatorPrefix` is pinned to `"rosequartz"`, which keeps every existing `vars/{shared,per-machine}/*/rosequartz-*` generator (and the CA behind them) resolving unchanged.
+Cluster PKI predates cairn, so the `pki` instance sets `roles.node.settings.generatorPrefix = "rosequartz"`, which keeps every existing `vars/{shared,per-machine}/*/rosequartz-*` generator (and the CA behind them) resolving unchanged. Leaving it at cairn's `"cairn"` default would mint a parallel CA and cert set and take the cluster down.
 
 **How hades is assembled** (see `clan.nix` → `machines.hades`):
 ```nix
