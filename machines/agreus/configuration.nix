@@ -23,7 +23,6 @@
 
     ./disk-config.nix
     ../../modules/desktops
-    ../../modules/shells
     # ../../modules/users/erik
   ];
 
