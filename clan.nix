@@ -1,6 +1,6 @@
 { inputs, ... }:
 let
-  hosts = import ./hosts.nix;
+  hosts = import "${inputs.dotfiles}/hosts.nix";
 
   # Trusted for root on every machine, via the clan `sshd` service.
   sshKeys = {
