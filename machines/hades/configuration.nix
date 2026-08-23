@@ -285,6 +285,17 @@ in
       openshift.enable = false;
     };
 
+    # Reach every clan machine by bare name. HostKeyAlias makes OpenSSH check
+    # the CA-signed host cert (issued for <machine>.thecluster.io) even though
+    # we dial the IP, so these connections never prompt to trust a fingerprint.
+    programs.ssh = {
+      enable = true;
+      settings = builtins.mapAttrs (name: host: {
+        HostName = host;
+        HostKeyAlias = "${name}.thecluster.io";
+      }) (import ../../hosts.nix);
+    };
+
     # erik's personal age key (public half tracked at sops/users/erik/key.json)
     # is a recipient on the rosequartz-admin-cert secret, unlike hades' own
     # machine key — this is a user secret, not a host one.
@@ -462,7 +473,6 @@ in
   };
 
   services.lldpd.enable = true;
-  services.openssh.enable = true;
 
   # Provide /bin/bash (and other FHS paths) so tools that hardcode /bin/bash work.
   # Workaround for GitHub Copilot CLI's bash tool on NixOS.

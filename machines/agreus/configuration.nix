@@ -71,9 +71,6 @@
     };
   };
 
-  # TODO: Confirm this is working via clan
-  # services.openssh.enable = true;
-
   environment.systemPackages = with pkgs; [
     curl
     gitMinimal

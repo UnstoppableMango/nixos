@@ -1,4 +1,19 @@
 { inputs, ... }:
+let
+  hosts = import ./hosts.nix;
+
+  # Trusted for root on every machine, via the clan `sshd` service.
+  sshKeys = {
+    hades = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEwW6dUPKvKXXzj+gKJS7EXh6UzyLjzatrcPXa0Y2qvz erik@hades";
+    darter-rsa = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDB02UwohkEJGpb8Uud4bNQa73X9WvwQcbsRr1M8c7nztbnUCCeLBTyCtRTMnR6dmoQ3xfGLbv55nlTFT/s6ZZKWEAql/gPJoBF9nEr0622IJQ6VPIpgcI8eA2YDwYA0l19Bji4u3VbTMB+M3Tz7JRmKqHo5bUvnZWi2cp+G5Hh2f2k0lQOa9ttjvVlLBQLCJV8NmCxikJS0ZuH2+KJPT2DVsY8dMZ2fQHh1/DI+ZAo6V1qjEU4SQKjpdIrUsPt9Ah1CBU7W3tG57+aYCoaay/BuUY4zlewxGdn3MAv/mjyqF6WgkzCilr7VBnO8CUgzLGu6F+8ljEJVZ5zqyTGfuni/069qMROEp6abhQe7MGToqFgsDkIJhSihomUNylM2piVFobZTeqGBXqh8h3W1fkQHsfMjYbkYP6kHx7yZ03Xw7X+4ZfySZ4s1PqvJE1ZALHdpzYSDK06+iqbJ3ZA/lpipg+Mzx7iRrD3CsPjzgi1iE6w5DVu5xAMIZIRFetTIAs= erik@darter";
+  };
+
+  # erik also gets a couple of older darter keys that root does not.
+  erikSshKeys = builtins.attrValues sshKeys ++ [
+    "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDRaJ8OwIVbSMTSzt4Z34lZghDvaT169OvzXXEldA9Rz06LH1/6VaKX1RsZaqMBtmfVlUATat9e53AOUbKORj7ZqZA19iOtV2uu/aXKyRWB+6sn0LFmMRIgnCyNInkSrbdwUBiJKyf1eiu5V5LgOGgfjteGOowF25olgFB5NzMujkHNzd/4X4Ehew3GjHN5x+swKlBQgi5ulGILaaTtiCrdVe/Di66CUpBGvtzi3SoUJ/nmLtvFFUb7osJzuiUYa5sQ1eLVtFzJ2La3bl/PAohJk5zBi/XQTmDrQK/yaHLr0U2z27CWOW8fHRcAHFXAcUCH8I4AeKPtFVxgC0hmvx6p2RBf++++FwWpedZG+P72HZsbh0oWHY54yLOpdE5siCqtiQ/lT6L8GUhw/uBZSnGOAfI12fcOsDgN0R0pow6zWQklgIKxgjgW5YL8iPCInL44slrBMCbdkmixfVcNZPhjNMbc+QaHTD7YmPbAvIvG4K8cJrf9xuw85E0qxLyjCSc= erik@darter"
+    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMsFkHA8jLd9sHV5a/zcMsaxo/o+ZnEB95CBSRnu3YfD erik@darter"
+  ];
+in
 {
   meta = {
     name = "thecluster";
@@ -125,6 +140,8 @@
             "video"
             "input"
           ];
+
+          openssh.authorizedKeys.keys = erikSshKeys;
         };
 
         # WIP
@@ -139,24 +156,20 @@
     sshd = {
       module.name = "sshd";
       module.input = "clan-core";
-      roles.server.tags.server = { };
-      # roles.client.tags = [ "workstation" ];
+
+      # Every machine runs sshd with a CA-signed host cert for
+      # <machine>.thecluster.io, and trusts that CA in return, so connecting
+      # never falls back to TOFU.
+      roles.server.tags.all = { };
+      roles.server.settings.authorizedKeys = sshKeys;
+      roles.client.tags.all = { };
     };
 
     internet = {
       module.name = "internet";
       module.input = "clan-core";
 
-      roles.default.machines = {
-        agreus.settings.host = "10.0.69.187";
-        hades.settings.host = "192.168.1.69";
-        pik8s1.settings.host = "192.168.1.101";
-        pik8s2.settings.host = "192.168.1.102";
-        pik8s3.settings.host = "192.168.1.103";
-        pik8s4.settings.host = "10.0.69.104";
-        pik8s5.settings.host = "10.0.69.105";
-        pik8s6.settings.host = "10.0.69.106";
-      };
+      roles.default.machines = builtins.mapAttrs (_: host: { settings.host = host; }) hosts;
     };
 
     raspberry-pi = {
@@ -193,43 +206,23 @@
     };
   };
 
-  machines =
-    let
-      sshKeys = [
-        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEwW6dUPKvKXXzj+gKJS7EXh6UzyLjzatrcPXa0Y2qvz erik@hades"
-        "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDB02UwohkEJGpb8Uud4bNQa73X9WvwQcbsRr1M8c7nztbnUCCeLBTyCtRTMnR6dmoQ3xfGLbv55nlTFT/s6ZZKWEAql/gPJoBF9nEr0622IJQ6VPIpgcI8eA2YDwYA0l19Bji4u3VbTMB+M3Tz7JRmKqHo5bUvnZWi2cp+G5Hh2f2k0lQOa9ttjvVlLBQLCJV8NmCxikJS0ZuH2+KJPT2DVsY8dMZ2fQHh1/DI+ZAo6V1qjEU4SQKjpdIrUsPt9Ah1CBU7W3tG57+aYCoaay/BuUY4zlewxGdn3MAv/mjyqF6WgkzCilr7VBnO8CUgzLGu6F+8ljEJVZ5zqyTGfuni/069qMROEp6abhQe7MGToqFgsDkIJhSihomUNylM2piVFobZTeqGBXqh8h3W1fkQHsfMjYbkYP6kHx7yZ03Xw7X+4ZfySZ4s1PqvJE1ZALHdpzYSDK06+iqbJ3ZA/lpipg+Mzx7iRrD3CsPjzgi1iE6w5DVu5xAMIZIRFetTIAs= erik@darter"
+  machines = {
+    hades = {
+      clan.core.deployment.requireExplicitUpdate = true;
+
+      imports = with inputs; [
+        nixos-hardware.nixosModules.asus-rog-strix-x570e
+        nixos-hardware.nixosModules.common-pc-ssd
+        home-manager.nixosModules.home-manager
+        { nixpkgs.overlays = [ dotfiles.overlays.default ]; }
+        ./machines/hades/configuration.nix
       ];
-
-      pik8s = idx: {
-        users.users.root.openssh.authorizedKeys.keys = sshKeys;
-      };
-    in
-    {
-      hades = {
-        clan.core.deployment.requireExplicitUpdate = true;
-
-        imports = with inputs; [
-          nixos-hardware.nixosModules.asus-rog-strix-x570e
-          nixos-hardware.nixosModules.common-pc-ssd
-          home-manager.nixosModules.home-manager
-          { nixpkgs.overlays = [ dotfiles.overlays.default ]; }
-          ./machines/hades/configuration.nix
-        ];
-        # TODO: re-enable once we've reviewed the networkd/doc-stripping defaults
-        clan.core.enableRecommendedDefaults = false;
-        users.users.root.openssh.authorizedKeys.keys = sshKeys;
-      };
-
-      agreus = {
-        imports = [ ./machines/agreus/configuration.nix ];
-        users.users.root.openssh.authorizedKeys.keys = sshKeys;
-      };
-
-      pik8s1 = pik8s 1;
-      pik8s2 = pik8s 2;
-      pik8s3 = pik8s 3;
-      pik8s4 = pik8s 4;
-      pik8s5 = pik8s 5;
-      pik8s6 = pik8s 6;
+      # TODO: re-enable once we've reviewed the networkd/doc-stripping defaults
+      clan.core.enableRecommendedDefaults = false;
     };
+
+    agreus = {
+      imports = [ ./machines/agreus/configuration.nix ];
+    };
+  };
 }
