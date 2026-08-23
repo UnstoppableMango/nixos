@@ -20,12 +20,6 @@
     };
   };
 
-  cluster.rosequartz = {
-    interface = "end0";
-    advertiseAddress = "10.0.69.106";
-    keepalivedPriority = 80;
-    etcd.advertiseClientUrls = [ "https://10.0.69.106:2379" ];
-    etcd.initialAdvertisePeerUrls = [ "https://10.0.69.106:2380" ];
-    etcd.initialClusterState = "existing";
-  };
+  # This node joined after the initial quorum was formed.
+  cluster.cairn.etcd.initialClusterState = "existing";
 }

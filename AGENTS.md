@@ -12,7 +12,6 @@ This file provides guidance to AI agents when working with code in this reposito
 - `make system` - Update the local flake and rebuild/switch (`sudo nixos-rebuild switch --flake /etc/nixos --cores 12`)
 - `make sd-images` / `make pik8sN-sd` - Build SD card images for Pi nodes
 - `make pik8sN-flash` - Flash an SD card image to `$DISK` (default `/dev/sdi`)
-- `make .kube/rosequartz/config` - Generate a kubeconfig for the rosequartz cluster
 - `nix flake check --all-systems` - What CI runs (checks all systems)
 
 ## Architecture
@@ -22,6 +21,12 @@ This is a NixOS configuration flake using **flake-parts** and **clan-core** for 
 ### Module System
 
 Plain NixOS modules live under `modules/` and are composed into machine configs via direct `imports`. Clan service modules (role-based, multi-machine) live under `modules/service/` and are registered as clan inventory modules in `clan.nix`.
+
+The `rosequartz` Kubernetes cluster (pik8s4–6 control plane, agreus worker) is **not** defined in this repo. It runs on [cairn](https://github.com/UnstoppableMango/cairn), a library flake that registers one clan service per cluster component (`@UnstoppableMango/{pki,etcd,apiserver,kubelet,loadbalancer,network,kubeconfig,inoculant,coredns,flux}`). `clan.nix` declares a `rosequartz-<component>` instance per service with `module.input = "cairn"`; the services coordinate via clan exports. Cairn's `docs/USAGE.md` and per-service `modules/service/<name>/README.md` are the reference for their options.
+
+Two cairn behaviours are patched locally via `roles.<role>.extraModules` in `clan.nix`, each with an upstream issue linked in a comment. Check whether those are fixed before carrying them forward on a flake update.
+
+Cluster PKI predates cairn, so `cluster.cairn.pki.generatorPrefix` is pinned to `"rosequartz"`, which keeps every existing `vars/{shared,per-machine}/*/rosequartz-*` generator (and the CA behind them) resolving unchanged.
 
 **How hades is assembled** (see `clan.nix` → `machines.hades`):
 ```nix
@@ -42,7 +47,7 @@ Other machines (agreus, pik8s1–6) follow the same pattern with a thinner `impo
 
 ### Directory Layout
 
-- `flake.nix` - Entry point; imports flake-parts modules (incl. `./apps/rosequartz.nix`); clan config via `./clan.nix`
+- `flake.nix` - Entry point; imports flake-parts modules; clan config via `./clan.nix`
 - `machines/` - Per-machine `configuration.nix` for every host (hades, agreus, pik8s1–6)
 - `modules/` - Shared NixOS modules imported by machine configs:
   - `desktops/` - Desktop environment modules (currently GNOME only)
@@ -50,13 +55,12 @@ Other machines (agreus, pik8s1–6) follow the same pattern with a thinner `impo
   - `ssh/` - System-level SSH behavior (currently just `ssh.inhibitSleepOnSsh`, a PAM hook that blocks suspend while an SSH session is open).
     SSH *client* config for erik lives in the dotfiles repo's `modules/ssh`.
   - `unifi/` - UniFi network module
-  - `service/` - Clan service modules (`k3s`, `pi`, `rosequartz`, `trouble`)
+  - `service/` - Clan service modules (`k3s`, `pi`, `trouble`); the rosequartz cluster's services come from the `cairn` input
 - Machine addresses live in the dotfiles repo's `hosts.nix`, imported here through the `dotfiles` flake input, so the `internet` clan service and erik's ssh client config never drift apart.
 - `clan.nix` - Clan meta-config: cluster name/domain, machine inventory + tags, service instances, per-machine `imports`/overrides
 - `vars/` - Clan-generated vars, split into `per-machine/` and `shared/` (SSH keys, password hashes, PKI, state versions)
 - `sops/` - SOPS secrets and age keys
 - `scripts/` - Utility scripts
-- `apps/rosequartz.nix` - Exposes the `rosequartz-kubeconfig` app used by `make .kube/rosequartz/config`
 
 ### Key Flake Inputs
 
@@ -73,9 +77,7 @@ Other machines (agreus, pik8s1–6) follow the same pattern with a thinner `impo
 - `nixvim` - Neovim configuration (also pulled through `dotfiles`)
 - `mynix` - Personal Nix utilities flake
 - `gomod2nix` - Go module packaging (used by `mynix`)
-- `a2b` - Renders Flux manifests via the real `flux` CLI; used by `modules/service/rosequartz/flux.nix`
-- `inoculant` - Kubernetes addon-manifest bootstrap integration; used by rosequartz
-- `cairn` - (see current branch)
+- `cairn` (26.05 clan-core, followed) - Kubernetes distribution on Nix and clan; provides every clan service the `rosequartz` cluster runs on. Pulls `a2b` (renders Flux manifests via the real `flux` CLI) and `inoculant` (addon-manifest bootstrap) in as its own inputs.
 - `treefmt-nix` - Formatter config (nixfmt enabled)
 
 ### Formatter
@@ -95,14 +97,14 @@ Other machines (agreus, pik8s1–6) follow the same pattern with a thinner `impo
 | ------------- | --------------------- | ---------------------------------------------------------- |
 | hades         | ASUS ROG Strix X570-E | Primary desktop; AMD GPU; BTRFS; clan-managed              |
 | agreus        | Generic x86_64        | Office mini PC; clan-managed; facter hardware config; rosequartz worker |
-| pik8s1–6      | Raspberry Pi 4B       | k8s cluster nodes; clan-managed; aarch64; pik8s4–6 are rosequartz control-plane |
+| pik8s1–6      | Raspberry Pi 4B       | k8s cluster nodes; clan-managed; aarch64; pik8s1–3 are k3s, pik8s4–6 are the rosequartz control-plane |
 
 ## Sub-Agent Guidance
 
 Read additional AGENTS.md files when working in these areas:
 
 - **Clan services** (`modules/service/`): read `./modules/service/AGENTS.md`
-- **Rosequartz / Kubernetes**: read `./modules/service/rosequartz/AGENTS.md`
+- **Rosequartz / Kubernetes**: the services live in the `cairn` input, not this repo. Read cairn's `AGENTS.md`, `docs/ARCHITECTURE.md`, and `modules/service/AGENTS.md`, plus the `rosequartz-*` instances in `clan.nix`.
 
 ## CI
 

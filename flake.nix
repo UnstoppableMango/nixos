@@ -85,26 +85,6 @@
       };
     };
 
-    a2b = {
-      url = "github:UnstoppableMango/a2b";
-      inputs = {
-        nixpkgs.follows = "nixpkgs";
-        systems.follows = "systems";
-        flake-parts.follows = "flake-parts";
-        treefmt-nix.follows = "treefmt-nix";
-      };
-    };
-
-    inoculant = {
-      url = "github:UnstoppableMango/inoculant";
-      inputs = {
-        nixpkgs.follows = "nixpkgs";
-        systems.follows = "systems";
-        flake-parts.follows = "flake-parts";
-        treefmt-nix.follows = "treefmt-nix";
-      };
-    };
-
     cairn = {
       url = "github:UnstoppableMango/cairn";
       inputs = {
@@ -112,6 +92,7 @@
         systems.follows = "systems";
         flake-parts.follows = "flake-parts";
         treefmt-nix.follows = "treefmt-nix";
+        clan-core.follows = "clan-core";
       };
     };
 

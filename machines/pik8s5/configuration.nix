@@ -19,12 +19,4 @@
       ];
     };
   };
-
-  cluster.rosequartz = {
-    interface = "end0";
-    advertiseAddress = "10.0.69.105";
-    keepalivedPriority = 90;
-    etcd.advertiseClientUrls = [ "https://10.0.69.105:2379" ];
-    etcd.initialAdvertisePeerUrls = [ "https://10.0.69.105:2380" ];
-  };
 }
