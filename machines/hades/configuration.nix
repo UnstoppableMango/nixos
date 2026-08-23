@@ -211,7 +211,14 @@ in
     variant = "";
   };
 
-  services.earlyoom.enable = true;
+  services.earlyoom = {
+    enable = true;
+    # Kill these last: `.claude-wrapped`, `code`, `code-<commit>`.
+    extraArgs = [
+      "--avoid"
+      "^(\\.?claude|code)"
+    ];
+  };
 
   # Enable CUPS to print documents.
   services.printing.enable = true;
