@@ -36,7 +36,7 @@ hades = {
   ];
 };
 ```
-`machines/hades/configuration.nix` itself imports `../../modules/desktops` and `../../modules/shells`.
+`machines/hades/configuration.nix` itself imports `../../modules/desktops`, `../../modules/ssh`, and `../../modules/unifi`.
 
 Other machines (agreus, pik8s1–6) follow the same pattern with a thinner `imports` list, since they don't need desktop/hardware-preset modules.
 
@@ -47,9 +47,11 @@ Other machines (agreus, pik8s1–6) follow the same pattern with a thinner `impo
 - `modules/` - Shared NixOS modules imported by machine configs:
   - `desktops/` - Desktop environment modules (currently GNOME only)
   - `hardware/` - Hardware-specific modules (currently NVIDIA config)
-  - `shells/` - Shell service modules (currently SSH)
+  - `ssh/` - System-level SSH behavior (currently just `ssh.inhibitSleepOnSsh`, a PAM hook that blocks suspend while an SSH session is open).
+    SSH *client* config for erik lives in the dotfiles repo's `modules/ssh`.
   - `unifi/` - UniFi network module
   - `service/` - Clan service modules (`k3s`, `pi`, `rosequartz`, `trouble`)
+- Machine addresses live in the dotfiles repo's `hosts.nix`, imported here through the `dotfiles` flake input, so the `internet` clan service and erik's ssh client config never drift apart.
 - `clan.nix` - Clan meta-config: cluster name/domain, machine inventory + tags, service instances, per-machine `imports`/overrides
 - `vars/` - Clan-generated vars, split into `per-machine/` and `shared/` (SSH keys, password hashes, PKI, state versions)
 - `sops/` - SOPS secrets and age keys

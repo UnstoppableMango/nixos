@@ -38,7 +38,7 @@ in
   imports = [
     ./disk-config.nix
     ../../modules/desktops
-    ../../modules/shells
+    ../../modules/ssh
     ../../modules/unifi
   ];
 
@@ -261,7 +261,7 @@ in
   users.defaultUserShell = pkgs.bash;
 
   host.gnome.enable = true;
-  shells.ssh.inhibitSleepOnSsh.enable = true;
+  ssh.inhibitSleepOnSsh.enable = true;
 
   home-manager = {
     useGlobalPkgs = true;
@@ -273,6 +273,9 @@ in
   home-manager.users.${primaryUser} = {
     imports = with inputs; [
       dotfiles.homeModules.erik
+      # dotfiles' modules/stylix configures options this module owns, so any
+      # consumer of homeModules.erik has to bring it along.
+      dotfiles.inputs.stylix.homeModules.stylix
       sops-nix.homeManagerModules.sops
     ];
 
@@ -283,17 +286,6 @@ in
 
       # Not currently using and also printing annoying shell warning
       openshift.enable = false;
-    };
-
-    # Reach every clan machine by bare name. HostKeyAlias makes OpenSSH check
-    # the CA-signed host cert (issued for <machine>.thecluster.io) even though
-    # we dial the IP, so these connections never prompt to trust a fingerprint.
-    programs.ssh = {
-      enable = true;
-      settings = builtins.mapAttrs (name: host: {
-        HostName = host;
-        HostKeyAlias = "${name}.thecluster.io";
-      }) (import ../../hosts.nix);
     };
 
     # erik's personal age key (public half tracked at sops/users/erik/key.json)

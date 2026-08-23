@@ -92,10 +92,9 @@ let
   '';
 in
 {
-  options.shells.ssh.inhibitSleepOnSsh.enable =
-    lib.mkEnableOption "blocking system sleep while an SSH session is active";
+  options.ssh.inhibitSleepOnSsh.enable = lib.mkEnableOption "blocking system sleep while an SSH session is active";
 
-  config = lib.mkIf config.shells.ssh.inhibitSleepOnSsh.enable {
+  config = lib.mkIf config.ssh.inhibitSleepOnSsh.enable {
     systemd.tmpfiles.rules = [
       "d ${RUN_DIR} 0700 root root -"
     ];
