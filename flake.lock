@@ -360,6 +360,9 @@
         "nixvim": [
           "nixvim"
         ],
+        "sops-nix": [
+          "sops-nix"
+        ],
         "stylix": "stylix",
         "systems": [
           "systems"
@@ -371,11 +374,11 @@
         "zed": "zed"
       },
       "locked": {
-        "lastModified": 1787532195,
-        "narHash": "sha256-Hjxzv5bSiN0DbVBfl1OVOxJeXYiDjG1F/T7qSoCclgE=",
+        "lastModified": 1787535910,
+        "narHash": "sha256-wDaZ2DrIfyxf4oeWJn7qPkVOEPB6Ce8CHJP8l+hqWVE=",
         "owner": "unstoppablemango",
         "repo": "dotfiles",
-        "rev": "f285b075d75689247196da9656fd33caeb72b9c6",
+        "rev": "062ac8e04fef0cf3034890b45dd2700d4e0cfc0f",
         "type": "github"
       },
       "original": {

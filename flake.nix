@@ -107,6 +107,10 @@
         home-manager.follows = "home-manager";
         mynix.follows = "mynix";
         nixvim.follows = "nixvim";
+        # Mandatory, not hygiene: dotfiles' modules/sops imports sops-nix's
+        # home-manager module by path, and the module system dedupes by path.
+        # Two different sops-nix store paths would double-declare options.sops.*.
+        sops-nix.follows = "sops-nix";
         systems.follows = "systems";
         treefmt-nix.follows = "treefmt-nix";
       };

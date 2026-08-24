@@ -276,7 +276,9 @@ in
       # dotfiles' modules/stylix configures options this module owns, so any
       # consumer of homeModules.erik has to bring it along.
       dotfiles.inputs.stylix.homeModules.stylix
-      sops-nix.homeManagerModules.sops
+      # sops-nix's home-manager module arrives via dotfiles' modules/sops,
+      # which also sets sops.age.keyFile. That only dedupes against our own
+      # sops-nix because the dotfiles input follows it (see flake.nix).
     ];
 
     dotfiles = {
@@ -286,12 +288,24 @@ in
 
       # Not currently using and also printing annoying shell warning
       openshift.enable = false;
+
+      # The kubeconfig's shape (contexts, VIP, dex OIDC exec block) lives in
+      # dotfiles so darter shares it. Only the clan-generated material and the
+      # decision to own ~/.kube/config outright are ours.
+      kubernetes.rosequartz = {
+        enable = true;
+        caFile = "${../../vars/shared/rosequartz-ca/crt/value}";
+        admin.certFile = "${../../vars/shared/rosequartz-admin-cert/crt/value}";
+        admin.keyFile = "/home/${primaryUser}/.kube/rosequartz-admin.key";
+        currentContext = "rosequartz";
+        target = ".kube/config";
+        sopsTemplate = "kube-config";
+      };
     };
 
-    # erik's personal age key (public half tracked at sops/users/erik/key.json)
-    # is a recipient on the rosequartz-admin-cert secret, unlike hades' own
-    # machine key — this is a user secret, not a host one.
-    sops.age.keyFile = "/home/${primaryUser}/.config/sops/age/keys.txt";
+    # Decrypted by erik's personal age key, whose location dotfiles' modules/sops
+    # sets. That user key is a recipient on rosequartz-admin-cert, unlike hades'
+    # own machine key: this is a user secret, not a host one.
     sops.secrets."rosequartz-admin-key" = {
       sopsFile = ../../vars/shared/rosequartz-admin-cert/key/secret;
       key = "data";
@@ -299,48 +313,6 @@ in
       path = "/home/${primaryUser}/.kube/rosequartz-admin.key";
     };
 
-    sops.templates."kube-config" = {
-      path = "/home/${primaryUser}/.kube/config";
-      mode = "0600";
-      content = ''
-        apiVersion: v1
-        kind: Config
-        clusters:
-        - cluster:
-            certificate-authority: ${../../vars/shared/rosequartz-ca/crt/value}
-            server: https://10.0.69.100:6443
-          name: rosequartz
-        contexts:
-        - context:
-            cluster: rosequartz
-            user: rosequartz-admin
-          name: rosequartz
-        - context:
-            cluster: rosequartz
-            user: rosequartz-github
-          name: rosequartz-github
-        current-context: rosequartz
-        users:
-        - name: rosequartz-admin
-          user:
-            client-certificate: ${../../vars/shared/rosequartz-admin-cert/crt/value}
-            client-key: /home/${primaryUser}/.kube/rosequartz-admin.key
-        - name: rosequartz-github
-          user:
-            exec:
-              apiVersion: client.authentication.k8s.io/v1
-              command: kubectl
-              args:
-                - oidc-login
-                - get-token
-                - --oidc-issuer-url=https://dex.thecluster.io
-                - --oidc-client-id=rosequartz-kubernetes
-                - --oidc-extra-scope=groups
-              installHint: |
-                kubelogin plugin not found. Install: https://github.com/int128/kubelogin
-              interactiveMode: IfAvailable
-      '';
-    };
   };
 
   users.users.${primaryUser} = {
