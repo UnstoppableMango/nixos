@@ -174,6 +174,12 @@ in
       roles.default.machines = builtins.mapAttrs (_: host: { settings.host = host.ip; }) (
         builtins.intersectAttrs machines hosts
       );
+      # pollux isn't in the dotfiles hosts.nix yet; the pinned dotfiles
+      # revision predates the table's move to the UnstoppableMango/hosts
+      # flake, so route it explicitly until this repo migrates.
+      roles.default.machines = builtins.mapAttrs (_: host: { settings.host = host; }) hosts // {
+        pollux.settings.host = "10.0.69.14";
+      };
     };
 
     raspberry-pi = {
