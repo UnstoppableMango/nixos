@@ -127,13 +127,17 @@
         treefmt-nix.flakeModule
         disko.flakeModules.default
         home-manager.flakeModules.home-manager
-        clan-core.flakeModules.default
+        # cairn.flakeModules.default already imports clan-core's own; adding
+        # it separately duplicates the `clan` option declaration.
+        cairn.flakeModules.default
       ];
 
       clan = {
         imports = [ (import ./clan.nix { inherit inputs; }) ];
         specialArgs = { inherit inputs; };
       };
+
+      cairn.clusters.rosequartz = import ./clan/rosequartz-cluster.nix;
 
       perSystem =
         {
