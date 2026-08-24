@@ -2,6 +2,9 @@
   "machines": {
     "agreus": {
       "installedAt": 1777846691
+    },
+    "pollux": {
+      "installedAt": 1787603194
     }
   }
 }
