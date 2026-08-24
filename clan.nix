@@ -323,7 +323,7 @@ in
         settings = {
           url = "https://github.com/UnstoppableMango/the-cluster";
           branch = "main";
-          path = "./clusters/rosequartz";
+          path = "./flux/clusters/rosequartz";
         };
 
         machines = {
