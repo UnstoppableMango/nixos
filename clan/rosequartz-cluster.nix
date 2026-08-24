@@ -64,7 +64,7 @@
       enable = true;
       url = "https://github.com/UnstoppableMango/the-cluster";
       branch = "main";
-      path = "./flux/clusters/rosequartz";
+      path = "./clusters/rosequartz";
     };
   };
 }
