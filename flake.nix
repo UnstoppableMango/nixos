@@ -87,33 +87,35 @@
 
     cairn = {
       url = "github:UnstoppableMango/cairn";
-      inputs = {
-        nixpkgs.follows = "nixpkgs";
-        systems.follows = "systems";
-        flake-parts.follows = "flake-parts";
-        treefmt-nix.follows = "treefmt-nix";
-        clan-core.follows = "clan-core";
-      };
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.systems.follows = "systems";
+      inputs.flake-parts.follows = "flake-parts";
+      inputs.treefmt-nix.follows = "treefmt-nix";
+      inputs.clan-core.follows = "clan-core";
+    };
+
+    hosts = {
+      url = "github:UnstoppableMango/hosts";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.flake-parts.follows = "flake-parts";
+      inputs.systems.follows = "systems";
+      inputs.treefmt-nix.follows = "treefmt-nix";
     };
 
     dotfiles = {
       url = "github:unstoppablemango/dotfiles";
-      inputs = {
-        nixpkgs.follows = "nixpkgs";
-        flake-parts.follows = "flake-parts";
-        flake-utils.follows = "flake-utils";
-        clan-core.follows = "clan-core";
-        gomod2nix.follows = "gomod2nix";
-        home-manager.follows = "home-manager";
-        mynix.follows = "mynix";
-        nixvim.follows = "nixvim";
-        # Mandatory, not hygiene: dotfiles' modules/sops imports sops-nix's
-        # home-manager module by path, and the module system dedupes by path.
-        # Two different sops-nix store paths would double-declare options.sops.*.
-        sops-nix.follows = "sops-nix";
-        systems.follows = "systems";
-        treefmt-nix.follows = "treefmt-nix";
-      };
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.flake-parts.follows = "flake-parts";
+      inputs.flake-utils.follows = "flake-utils";
+      inputs.clan-core.follows = "clan-core";
+      inputs.gomod2nix.follows = "gomod2nix";
+      inputs.home-manager.follows = "home-manager";
+      inputs.mynix.follows = "mynix";
+      inputs.nixvim.follows = "nixvim";
+      inputs.sops-nix.follows = "sops-nix";
+      inputs.systems.follows = "systems";
+      inputs.treefmt-nix.follows = "treefmt-nix";
+      inputs.hosts.follows = "hosts";
     };
   };
 

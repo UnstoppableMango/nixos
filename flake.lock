@@ -344,6 +344,9 @@
         "home-manager": [
           "home-manager"
         ],
+        "hosts": [
+          "hosts"
+        ],
         "mangopkgs": "mangopkgs_2",
         "mynix": [
           "mynix"
@@ -374,11 +377,11 @@
         "zed": "zed"
       },
       "locked": {
-        "lastModified": 1787567216,
-        "narHash": "sha256-Zxjp/YL9+SBOUDZ8JTRcfbO42ReS4ET+Q+g1UfsAmd8=",
+        "lastModified": 1787695675,
+        "narHash": "sha256-3vD6OUkXTnOj4UyaGQjSGr1+GZ0DlgxJnJqSIPvSyMk=",
         "owner": "unstoppablemango",
         "repo": "dotfiles",
-        "rev": "5ffa44ecccd803adcd506302b6cbdde40046921c",
+        "rev": "7e4fdd0b0e1f306726fb3844e13d4d664026df0e",
         "type": "github"
       },
       "original": {
@@ -647,6 +650,35 @@
       "original": {
         "owner": "nix-community",
         "repo": "home-manager",
+        "type": "github"
+      }
+    },
+    "hosts": {
+      "inputs": {
+        "flake-parts": [
+          "flake-parts"
+        ],
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "systems": [
+          "systems"
+        ],
+        "treefmt-nix": [
+          "treefmt-nix"
+        ]
+      },
+      "locked": {
+        "lastModified": 1787518919,
+        "narHash": "sha256-xlcSZwnkgeihed50oNkiOxQL2OvvFTm9RdeAJDXg8S0=",
+        "owner": "UnstoppableMango",
+        "repo": "hosts",
+        "rev": "77793084c72d0f8537bf845e7bce69b07c27d2fa",
+        "type": "github"
+      },
+      "original": {
+        "owner": "UnstoppableMango",
+        "repo": "hosts",
         "type": "github"
       }
     },
@@ -999,11 +1031,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1787536108,
-        "narHash": "sha256-x7anlJMh2xZoluQRsXihJAKFSWgarDyKJN4dkv66l9E=",
+        "lastModified": 1787622155,
+        "narHash": "sha256-0XU4pHTmXMR+yJ4w8dqQMm0u9ZPBaZR7U6Vnv6Ty+tc=",
         "owner": "nix-community",
         "repo": "nix-vscode-extensions",
-        "rev": "974dcf027535c5e791cece0aa37aaec2fe8137fa",
+        "rev": "bc4a6f1cd385c23a70fb3ce6572f2c9c5db78574",
         "type": "github"
       },
       "original": {
@@ -1073,11 +1105,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1786369505,
-        "narHash": "sha256-EwMMllhUahcROTnutTnkGB+F4b6U+xS2zBqd5RcdcjA=",
+        "lastModified": 1787565767,
+        "narHash": "sha256-VpmRctshZzRUZuwe77yAweneFtZBtLo5mshxvMi3s6o=",
         "owner": "nix-community",
         "repo": "nixd",
-        "rev": "231a447ab2c60153fbfdfb60aceea533b0af480c",
+        "rev": "00f6bcb3fe865f442d61cd0b3a33e8e30b47f70a",
         "type": "github"
       },
       "original": {
@@ -1344,6 +1376,7 @@
         "flake-utils": "flake-utils_2",
         "gomod2nix": "gomod2nix_2",
         "home-manager": "home-manager",
+        "hosts": "hosts",
         "mynix": "mynix",
         "nixos-anywhere": "nixos-anywhere",
         "nixos-facter": "nixos-facter",

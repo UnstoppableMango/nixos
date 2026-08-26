@@ -267,7 +267,12 @@ in
     useGlobalPkgs = true;
     useUserPackages = true;
     backupFileExtension = "bak";
-    extraSpecialArgs = { inherit (inputs.dotfiles) inputs; };
+    # dotfiles' users/shared/neovim.nix reaches for `self.nixvimModules.erik`,
+    # so `self` here is the dotfiles flake, not ours.
+    extraSpecialArgs = {
+      inherit (inputs.dotfiles) inputs;
+      self = inputs.dotfiles;
+    };
   };
 
   home-manager.users.${primaryUser} = {
