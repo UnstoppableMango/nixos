@@ -291,6 +291,12 @@ in
       emacs.enable = true;
       ai.enable = true;
 
+      # Serve the omnigent web UI to the rest of the LAN, not just loopback,
+      # so the desktop and mobile clients on other devices reach this host at
+      # 10.0.69.69 / 192.168.1.69 / hades. Safe only because the machine sits
+      # behind the house firewall: the server itself authenticates nothing.
+      ai.omnigent.listenAddress = "0.0.0.0";
+
       # Not currently using and also printing annoying shell warning
       openshift.enable = false;
 
