@@ -650,6 +650,35 @@
         "type": "github"
       }
     },
+    "hosts": {
+      "inputs": {
+        "flake-parts": [
+          "flake-parts"
+        ],
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "systems": [
+          "systems"
+        ],
+        "treefmt-nix": [
+          "treefmt-nix"
+        ]
+      },
+      "locked": {
+        "lastModified": 1787518919,
+        "narHash": "sha256-xlcSZwnkgeihed50oNkiOxQL2OvvFTm9RdeAJDXg8S0=",
+        "owner": "UnstoppableMango",
+        "repo": "hosts",
+        "rev": "77793084c72d0f8537bf845e7bce69b07c27d2fa",
+        "type": "github"
+      },
+      "original": {
+        "owner": "UnstoppableMango",
+        "repo": "hosts",
+        "type": "github"
+      }
+    },
     "hwinfo": {
       "inputs": {
         "blueprint": [
@@ -1344,6 +1373,7 @@
         "flake-utils": "flake-utils_2",
         "gomod2nix": "gomod2nix_2",
         "home-manager": "home-manager",
+        "hosts": "hosts",
         "mynix": "mynix",
         "nixos-anywhere": "nixos-anywhere",
         "nixos-facter": "nixos-facter",
