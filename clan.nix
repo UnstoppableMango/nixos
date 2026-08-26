@@ -1,6 +1,19 @@
 { inputs, ... }:
 let
-  hosts = import "${inputs.dotfiles}/hosts.nix";
+  inherit (inputs.hosts) hosts;
+
+  piTags = [
+    "basement"
+    "pi4b"
+    "k8s"
+    "control-plane"
+    "server"
+    "headless"
+  ];
+
+  pik8s = idx: {
+    tags = piTags;
+  };
 
   # Trusted for root on every machine, via the clan `sshd` service.
   sshKeys = {
@@ -13,6 +26,90 @@ let
     "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDRaJ8OwIVbSMTSzt4Z34lZghDvaT169OvzXXEldA9Rz06LH1/6VaKX1RsZaqMBtmfVlUATat9e53AOUbKORj7ZqZA19iOtV2uu/aXKyRWB+6sn0LFmMRIgnCyNInkSrbdwUBiJKyf1eiu5V5LgOGgfjteGOowF25olgFB5NzMujkHNzd/4X4Ehew3GjHN5x+swKlBQgi5ulGILaaTtiCrdVe/Di66CUpBGvtzi3SoUJ/nmLtvFFUb7osJzuiUYa5sQ1eLVtFzJ2La3bl/PAohJk5zBi/XQTmDrQK/yaHLr0U2z27CWOW8fHRcAHFXAcUCH8I4AeKPtFVxgC0hmvx6p2RBf++++FwWpedZG+P72HZsbh0oWHY54yLOpdE5siCqtiQ/lT6L8GUhw/uBZSnGOAfI12fcOsDgN0R0pow6zWQklgIKxgjgW5YL8iPCInL44slrBMCbdkmixfVcNZPhjNMbc+QaHTD7YmPbAvIvG4K8cJrf9xuw85E0qxLyjCSc= erik@darter"
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMsFkHA8jLd9sHV5a/zcMsaxo/o+ZnEB95CBSRnu3YfD erik@darter"
   ];
+
+  machines = {
+    hades = {
+      tags = [
+        "workstation"
+        "gaming"
+        "tower"
+      ];
+    };
+
+    agreus = {
+      tags = [
+        "office"
+        "k8s"
+        "worker"
+        "mini"
+        "server"
+        "rosequartz"
+      ];
+    };
+
+    # castor = {
+    #   # host: inventory.instances.internet.roles.default.machines.castor
+    #   tags = [
+    #     "basement"
+    #     "k8s"
+    #     "worker"
+    #     "rack"
+    #     "server"
+    #     "headless"
+    #   ];
+    # };
+
+    # pollux = {
+    #   # host: inventory.instances.internet.roles.default.machines.pollux
+    #   tags = [
+    #     "basement"
+    #     "k8s"
+    #     "worker"
+    #     "rack"
+    #     "server"
+    #     "headless"
+    #   ];
+    # };
+
+    # gaea = {
+    #   # host: inventory.instances.internet.roles.default.machines.gaea
+    #   tags = [
+    #     "basement"
+    #     "k8s"
+    #     "worker"
+    #     "rack"
+    #     "server"
+    #   ];
+    # };
+
+    # zeus = {
+    #   # host: inventory.instances.internet.roles.default.machines.zeus
+    #   tags = [
+    #     "basement"
+    #     "k8s"
+    #     "worker"
+    #     "tower"
+    #     "server"
+    #   ];
+    # };
+
+    pik8s1 = pik8s 1;
+    pik8s2 = pik8s 2;
+    pik8s3 = pik8s 3;
+
+    pik8s4 = {
+      tags = piTags ++ [ "rosequartz" ];
+    };
+
+    pik8s5 = {
+      tags = piTags ++ [ "rosequartz" ];
+    };
+
+    pik8s6 = {
+      tags = piTags ++ [ "rosequartz" ];
+    };
+  };
+
 in
 {
   meta = {
@@ -25,103 +122,7 @@ in
   modules."@UnstoppableMango/pi" = import ./modules/service/pi;
   modules."@UnstoppableMango/trouble" = import ./modules/service/trouble;
 
-  inventory.machines =
-    let
-      piTags = [
-        "basement"
-        "pi4b"
-        "k8s"
-        "control-plane"
-        "server"
-        "headless"
-      ];
-
-      pik8s = idx: {
-        tags = piTags;
-      };
-    in
-    {
-      hades = {
-        tags = [
-          "workstation"
-          "gaming"
-          "tower"
-        ];
-      };
-
-      agreus = {
-        tags = [
-          "office"
-          "k8s"
-          "worker"
-          "mini"
-          "server"
-          "rosequartz"
-        ];
-      };
-
-      # castor = {
-      #   # host: inventory.instances.internet.roles.default.machines.castor
-      #   tags = [
-      #     "basement"
-      #     "k8s"
-      #     "worker"
-      #     "rack"
-      #     "server"
-      #     "headless"
-      #   ];
-      # };
-
-      # pollux = {
-      #   # host: inventory.instances.internet.roles.default.machines.pollux
-      #   tags = [
-      #     "basement"
-      #     "k8s"
-      #     "worker"
-      #     "rack"
-      #     "server"
-      #     "headless"
-      #   ];
-      # };
-
-      # gaea = {
-      #   # host: inventory.instances.internet.roles.default.machines.gaea
-      #   tags = [
-      #     "basement"
-      #     "k8s"
-      #     "worker"
-      #     "rack"
-      #     "server"
-      #   ];
-      # };
-
-      # zeus = {
-      #   # host: inventory.instances.internet.roles.default.machines.zeus
-      #   tags = [
-      #     "basement"
-      #     "k8s"
-      #     "worker"
-      #     "tower"
-      #     "server"
-      #   ];
-      # };
-
-      pik8s1 = pik8s 1;
-      pik8s2 = pik8s 2;
-      pik8s3 = pik8s 3;
-
-      pik8s4 = {
-        tags = piTags ++ [ "rosequartz" ];
-      };
-
-      pik8s5 = {
-        tags = piTags ++ [ "rosequartz" ];
-      };
-
-      pik8s6 = {
-        tags = piTags ++ [ "rosequartz" ];
-      };
-    };
+  inventory.machines = machines;
 
   inventory.instances = {
     erik = {
@@ -168,7 +169,11 @@ in
       module.name = "internet";
       module.input = "clan-core";
 
-      roles.default.machines = builtins.mapAttrs (_: host: { settings.host = host; }) hosts;
+      # `hosts` covers machines this clan doesn't manage, so narrow it to the
+      # inventory before mapping: an entry here that isn't a machine fails eval.
+      roles.default.machines = builtins.mapAttrs (_: host: { settings.host = host.ip; }) (
+        builtins.intersectAttrs machines hosts
+      );
     };
 
     raspberry-pi = {
