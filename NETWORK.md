@@ -143,10 +143,6 @@ It is configured for `10.0.69.14` with gateway `10.0.69.1` on a GS724Tv4 access 
 Bringing it online requires converting the GS724Tv4 uplink to a VLAN 1+20 trunk.
 The procedure is preserved at `git show 49fb9c7:modules/service/rosequartz/plans/VLAN-SWITCH-CONFIG.md`.
 
-**The `hosts` flake is stale on pollux.**
-`github:UnstoppableMango/hosts` lists pollux at `192.168.1.14`, while `clan/rosequartz-cluster.nix` and `machines/pollux/configuration.nix` both specify `10.0.69.14`.
-The flake lives in a separate repository and is corrected there.
-
 **hades reaches VLAN 20 on-link only.**
 Its sole default gateway is `192.168.1.1` via `enp6s0`.
 `10.0.69.0/24` is reachable as a directly connected subnet through `enp7s0`, not by routing through pfSense.
