@@ -20,7 +20,7 @@ let
   clanMachines = {
     hades = { };
     agreus = { };
-    # castor = { };
+    castor = { };
     # gaea = { };
     pollux = { };
     # zeus = { };
