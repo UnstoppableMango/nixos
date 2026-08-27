@@ -59,17 +59,17 @@ let
     #   ];
     # };
 
-    # pollux = {
-    #   # host: inventory.instances.internet.roles.default.machines.pollux
-    #   tags = [
-    #     "basement"
-    #     "k8s"
-    #     "worker"
-    #     "rack"
-    #     "server"
-    #     "headless"
-    #   ];
-    # };
+    pollux = {
+      # host: inventory.instances.internet.roles.default.machines.pollux
+      tags = [
+        "basement"
+        "k8s"
+        "worker"
+        "rack"
+        "server"
+        "headless"
+      ];
+    };
 
     # gaea = {
     #   # host: inventory.instances.internet.roles.default.machines.gaea
@@ -168,12 +168,7 @@ in
     internet = {
       module.name = "internet";
       module.input = "clan-core";
-
-      # `hosts` covers machines this clan doesn't manage, so narrow it to the
-      # inventory before mapping: an entry here that isn't a machine fails eval.
-      roles.default.machines = builtins.mapAttrs (_: host: { settings.host = host.ip; }) (
-        builtins.intersectAttrs machines hosts
-      );
+      roles.default.machines = machines;
     };
 
     raspberry-pi = {
