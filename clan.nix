@@ -1,7 +1,5 @@
 { inputs, ... }:
 let
-  inherit (inputs.hosts) hosts;
-
   piTags = [
     "basement"
     "pi4b"
