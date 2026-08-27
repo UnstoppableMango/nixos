@@ -1,17 +1,6 @@
 { inputs, ... }:
 let
-  piTags = [
-    "basement"
-    "pi4b"
-    "k8s"
-    "control-plane"
-    "server"
-    "headless"
-  ];
-
-  pik8s = idx: {
-    tags = piTags;
-  };
+  inherit (inputs.hosts) hosts;
 
   # Trusted for root on every machine, via the clan `sshd` service.
   sshKeys = {
@@ -25,88 +14,35 @@ let
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMsFkHA8jLd9sHV5a/zcMsaxo/o+ZnEB95CBSRnu3YfD erik@darter"
   ];
 
-  machines = {
-    hades = {
-      tags = [
-        "workstation"
-        "gaming"
-        "tower"
-      ];
-    };
-
-    agreus = {
-      tags = [
-        "office"
-        "k8s"
-        "worker"
-        "mini"
-        "server"
-        "rosequartz"
-      ];
-    };
-
-    # castor = {
-    #   # host: inventory.instances.internet.roles.default.machines.castor
-    #   tags = [
-    #     "basement"
-    #     "k8s"
-    #     "worker"
-    #     "rack"
-    #     "server"
-    #     "headless"
-    #   ];
-    # };
-
-    pollux = {
-      # host: inventory.instances.internet.roles.default.machines.pollux
-      tags = [
-        "basement"
-        "k8s"
-        "worker"
-        "rack"
-        "server"
-        "headless"
-      ];
-    };
-
-    # gaea = {
-    #   # host: inventory.instances.internet.roles.default.machines.gaea
-    #   tags = [
-    #     "basement"
-    #     "k8s"
-    #     "worker"
-    #     "rack"
-    #     "server"
-    #   ];
-    # };
-
-    # zeus = {
-    #   # host: inventory.instances.internet.roles.default.machines.zeus
-    #   tags = [
-    #     "basement"
-    #     "k8s"
-    #     "worker"
-    #     "tower"
-    #     "server"
-    #   ];
-    # };
-
-    pik8s1 = pik8s 1;
-    pik8s2 = pik8s 2;
-    pik8s3 = pik8s 3;
-
-    pik8s4 = {
-      tags = piTags ++ [ "rosequartz" ];
-    };
-
-    pik8s5 = {
-      tags = piTags ++ [ "rosequartz" ];
-    };
-
-    pik8s6 = {
-      tags = piTags ++ [ "rosequartz" ];
-    };
+  # Which machines this clan manages. Tags and addresses come from the `hosts`
+  # flake, which covers the whole network, so narrow it to these names; comment
+  # an entry out to drop the machine from the inventory.
+  clanMachines = {
+    hades = { };
+    agreus = { };
+    # castor = { };
+    # gaea = { };
+    pollux = { };
+    # zeus = { };
+    pik8s1 = { };
+    pik8s2 = { };
+    pik8s3 = { };
+    pik8s4 = { };
+    pik8s5 = { };
+    pik8s6 = { };
   };
+
+  # intersectAttrs drops unmatched names silently, so a typo above would quietly
+  # remove a machine from the clan rather than fail. Check first.
+  unknown = builtins.attrNames (builtins.removeAttrs clanMachines (builtins.attrNames hosts));
+
+  managed =
+    if unknown == [ ] then
+      builtins.intersectAttrs clanMachines hosts
+    else
+      throw "clan.nix: not in the hosts flake: ${builtins.concatStringsSep ", " unknown}";
+
+  machines = builtins.mapAttrs (_: host: { inherit (host) tags; }) managed;
 
 in
 {
@@ -166,7 +102,7 @@ in
     internet = {
       module.name = "internet";
       module.input = "clan-core";
-      roles.default.machines = machines;
+      roles.default.machines = builtins.mapAttrs (_: host: { settings.host = host.ip; }) managed;
     };
 
     raspberry-pi = {
