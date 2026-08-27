@@ -186,11 +186,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1787692000,
-        "narHash": "sha256-WHJokZRWe1MxxlHL7zA9QE2rcYt3cV6x6QOyD+gyLbs=",
-        "rev": "8861404bb30897a4c3c6b558112d1088566e3975",
+        "lastModified": 1787807332,
+        "narHash": "sha256-hUAur/xKkqn0Pm3GYqQy8U3/h8KVzzjUjoPFQ1+GATM=",
+        "rev": "3c236f3392f9657e5b158404a29f314948151cf7",
         "type": "tarball",
-        "url": "https://git.clan.lol/api/v1/repos/clan/clan-core/archive/8861404bb30897a4c3c6b558112d1088566e3975.tar.gz"
+        "url": "https://git.clan.lol/api/v1/repos/clan/clan-core/archive/3c236f3392f9657e5b158404a29f314948151cf7.tar.gz"
       },
       "original": {
         "type": "tarball",
@@ -377,11 +377,11 @@
         "zed": "zed"
       },
       "locked": {
-        "lastModified": 1787728881,
-        "narHash": "sha256-7JiO1tKSxcAcILHP9E4LzvWh9nqBg6Me9RhsKMP6abI=",
+        "lastModified": 1787815669,
+        "narHash": "sha256-Dhyzh+nPhCriNRKNJelfA5ujiShUnCamU4IRj+2CZg8=",
         "owner": "unstoppablemango",
         "repo": "dotfiles",
-        "rev": "5b45d323c1d2a62cab3446d366021431ba80802f",
+        "rev": "8b7d85e1e2674f71d6c5fd4818c883646b3df4f3",
         "type": "github"
       },
       "original": {
@@ -640,11 +640,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1787715947,
-        "narHash": "sha256-jT6g5aWwA6TrIUJhqQ9ssm8W5e8vAl2Bv8gddEKKVNU=",
+        "lastModified": 1787797243,
+        "narHash": "sha256-8+Q7NOB7RPajRjA4pbCDLzqH+MTjnG9x6LUPLfL2joA=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "7690127e7e1c90ab1dcaff525d0dafbeb7e14182",
+        "rev": "99c9ec63390f1d8c14d95d9e8b17cc29cfbd4e11",
         "type": "github"
       },
       "original": {
@@ -1134,11 +1134,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1787728578,
-        "narHash": "sha256-smYWAWHV9i4D/u3cVgwY/AMoXP0le8OxRSnd0eHf3oY=",
+        "lastModified": 1787728766,
+        "narHash": "sha256-g2oZlrBU3AI2ubCiY/UyE9ALTIDueTcF//QP3vaY9IQ=",
         "owner": "nix-community",
         "repo": "nixos-anywhere",
-        "rev": "006875f7549e087f1bdd09bd9dce39646e6956fb",
+        "rev": "6b77f26ec4538ced04bf1d02f374b0ec02e9c27e",
         "type": "github"
       },
       "original": {
@@ -1458,11 +1458,11 @@
         "tinted-zed": "tinted-zed"
       },
       "locked": {
-        "lastModified": 1787175104,
-        "narHash": "sha256-tzNjlb0loxeWlipvxSNAUUihloeTZoyGFhEen87yM9k=",
+        "lastModified": 1787771653,
+        "narHash": "sha256-DkkJSBOXWV/mja5Vy8az5g1KpZlsbUwlmH0BsQhowaQ=",
         "owner": "danth",
         "repo": "stylix",
-        "rev": "a9e5a76a1b75b137f266e4f445e1eaba82e9783e",
+        "rev": "5e3809851f486e7fc7e84b40f174c74b60ecc784",
         "type": "github"
       },
       "original": {
