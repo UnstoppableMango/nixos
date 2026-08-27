@@ -54,8 +54,13 @@ Other machines (agreus, pik8s1–6) follow the same pattern with a thinner `impo
     SSH *client* config for erik lives in the dotfiles repo's `modules/ssh`.
   - `unifi/` - UniFi network module
   - `service/` - Clan service modules (`k3s`, `pi`, `trouble`); the rosequartz cluster's services come from the `cairn` input
-- Machine addresses live in the [hosts](https://github.com/UnstoppableMango/hosts) flake's `hosts` output, consumed here and by dotfiles (which follows the same input), so the `internet` clan service and erik's ssh client config never drift apart.
-  Each entry is a record (`ip`, `arch`, `role`), and the flake covers hosts this clan does not manage, so `clan.nix` narrows it with `builtins.intersectAttrs machines hosts` before mapping onto `internet` roles.
+- Machine metadata lives in the [hosts](https://github.com/UnstoppableMango/hosts) flake's `hosts` output, consumed here and by dotfiles (which follows the same input), so the `internet` clan service and erik's ssh client config never drift apart.
+  Each entry is a record (`ip`, `arch`, `tags`).
+  Tags are **not** defined in this repo: edit them in the hosts flake and `nix flake update hosts`.
+  Every host carries exactly one role tag (`control-plane`, `worker`, `workstation`), and the flake validates that.
+- `clan.nix` owns only clan *membership*, as the `clanMachines` attrset of names.
+  The hosts flake covers machines this clan does not manage, so `clanMachines` narrows it via `builtins.intersectAttrs`; the resulting `managed` set feeds both `inventory.machines` (tags) and the `internet` instance (addresses).
+  Comment an entry out to drop a machine. A name that is not in the hosts flake throws rather than being silently dropped.
 - `NETWORK.md` - VLANs, subnets, switch chain, and per-host IP/VLAN assignments, plus the known gaps between configured and reachable addresses.
   Read it before deriving network facts from `machines/*/configuration.nix`, since the physical topology those IPs sit on is recorded nowhere else.
 - erik's home-manager surface is owned by the dotfiles repo, and two pieces of it are supplied from here rather than duplicated:
