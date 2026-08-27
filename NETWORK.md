@@ -27,7 +27,7 @@ flowchart TB
 
   FW ==>|"VLAN 1+20 trunk"| U24
   U24 ==>|"VLAN 1+20 trunk"| GS108
-  U24 -->|"VLAN 1 access"| GS724
+  U24 ==>|"VLAN 1+20 trunk"| GS724
 
   subgraph V1["VLAN 1 · Personal · 192.168.1.0/24"]
     direction TB
@@ -61,16 +61,14 @@ flowchart TB
   U24 -.-> K3S
   U24 -.-> PRN
   U24 -.-> MED
-  GS724 -.->|"no upstream VLAN 20 trunk"| POLLUX
+  GS724 --> POLLUX
 
   CP -.->|advertises| VIP
-
-  classDef gap stroke-dasharray: 5 5
-  class POLLUX gap
 ```
 
-Solid links are confirmed.
-Dashed links mark either an unverified switch attachment or a port with no working upstream path, both detailed under [Known gaps](#known-gaps).
+Solid links are confirmed physical attachments.
+A dashed link to a switch marks an unverified attachment, detailed under [Known gaps](#known-gaps).
+The dashed VIP link is a keepalived advertisement rather than a cable.
 
 ## VLANs and subnets
 
@@ -98,7 +96,7 @@ The rosequartz service CIDR is `10.0.0.0/24` and the pod CIDR is `10.244.0.0/16`
 | pik8s5 | `10.0.69.105` | 20 | UniFi 24p | rosequartz control plane |
 | pik8s6 | `10.0.69.106` | 20 | UniFi 24p | rosequartz control plane |
 | agreus | `10.0.69.187` | 20 | UniFi 24p | rosequartz worker |
-| pollux | `10.0.69.14` | 20 | GS724Tv4 | rosequartz worker, no upstream path |
+| pollux | `10.0.69.14` | 20 | GS724Tv4 | rosequartz worker |
 | rosequartz VIP | `10.0.69.100` | 20 | keepalived on pik8s4-6 | apiserver endpoint |
 | Printer | DHCP | 1 | Unverified | Consumer |
 | Media / consoles | DHCP | 1 | Unverified | Consumer |
@@ -110,9 +108,9 @@ NetworkManager leaves both wired interfaces unmanaged and handles only `wlp5s0`.
 
 | Switch | Uplink | Carries | Downstream |
 | --- | --- | --- | --- |
-| UniFi 24p | pfSense, trunk | VLAN 1 + 20 | GS108T trunk, GS724Tv4 access, UniFi APs, pik8s4-6, agreus |
+| UniFi 24p | pfSense, trunk | VLAN 1 + 20 | GS108T trunk, GS724Tv4 trunk, UniFi APs, pik8s4-6, agreus |
 | GS108T | UniFi 24p, trunk | VLAN 1 + 20 | hades `enp6s0` on VLAN 1, hades `enp7s0` on VLAN 20 |
-| GS724Tv4 | UniFi 24p, access | VLAN 1 only | zeus, gaea, castor on VLAN 1; pollux on a VLAN 20 access port |
+| GS724Tv4 | UniFi 24p, trunk | VLAN 1 + 20 | zeus, gaea, castor on VLAN 1 access ports; pollux on a VLAN 20 access port |
 
 The UniFi APs sit on VLAN 1 access ports, so wireless clients land on `192.168.1.0/24` with no path onto VLAN 20.
 The UniFi controller itself runs on hades via `modules/unifi`, started on demand rather than at boot.
@@ -137,11 +135,6 @@ pik8s4 holds the VIP by default.
 The VIP is intentionally absent from the `hosts` flake, since it is not a machine.
 
 ## Known gaps
-
-**pollux has no path to its gateway.**
-It is configured for `10.0.69.14` with gateway `10.0.69.1` on a GS724Tv4 access port, but that switch's uplink to the UniFi 24p carries VLAN 1 only.
-Bringing it online requires converting the GS724Tv4 uplink to a VLAN 1+20 trunk.
-The procedure is preserved at `git show 49fb9c7:modules/service/rosequartz/plans/VLAN-SWITCH-CONFIG.md`.
 
 **hades reaches VLAN 20 on-link only.**
 Its sole default gateway is `192.168.1.1` via `enp6s0`.
