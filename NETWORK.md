@@ -101,7 +101,7 @@ The rosequartz service CIDR is `10.0.0.0/24` and the pod CIDR is `10.244.0.0/16`
 | Printer | DHCP | 1 | Unverified | Unverified | Consumer |
 | Media / consoles | DHCP | 1 | Unverified | Unverified | Consumer |
 
-zeus, gaea, and pollux each have a second NIC on the GS724Tv4 that no config uses: gaea on `g3`, pollux on `g9`, zeus on `g18`, all left on VLAN 1.
+zeus, gaea, and pollux each have a second NIC on the GS724Tv4 that no config uses: gaea on `g3` and zeus on `g18`, both on VLAN 1, and pollux on `g9`, which carries PVID 20 and is up with a link-local address only (`fe80::20b:abff:fe71:dae3`).
 `g19` is the trunk uplink to the UniFi 24p.
 
 hades holds two static addresses because `enp6s0` and `enp7s0` share a MAC address, which makes DHCP unreliable on both.
@@ -148,9 +148,11 @@ Its sole default gateway is `192.168.1.1` via `enp6s0`.
 `10.0.69.0/24` is reachable as a directly connected subnet through `enp7s0`, not by routing through pfSense.
 Any VLAN 20 address outside that `/24` is unreachable from hades.
 
-**castor is configured but not installed.**
-Its NixOS config, clan membership, and rosequartz worker entry all name `10.0.69.13`, and the box still runs Ubuntu on `192.168.1.13`.
-Its GS724Tv4 port `g5` is still a VLAN 1 access port (PVID 1), so the address is unreachable until the port moves to VLAN 20 and the machine is installed.
+**castor has NixOS on disk but has never booted it.**
+Its install ran `--phases kexec,disko,install`, so the `reboot` phase never ran and the box stayed in the kexec'd installer, which held a VLAN 1 address from its pre-migration network.
+Its GS724Tv4 port `g5` carries PVID 20, so the network side is in place for the installed system.
+The port reports link up and receives flooded broadcast, but its receive counter (`ifHCInOctets.5`) does not advance, no MAC is learned on it in either VLAN, and neither `10.0.69.13` nor the old `192.168.1.13` answers ARP or ICMP.
+A power cycle is what is missing: the installed system is what comes up on `10.0.69.13`. That needs physical or console access.
 
 **Switch attachment for pik8s1-3, the printer, and media devices is unverified.**
 They are confirmed on VLAN 1 by their addresses, but which switch port each occupies is not recorded.
