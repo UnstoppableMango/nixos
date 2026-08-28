@@ -82,24 +82,27 @@ The rosequartz service CIDR is `10.0.0.0/24` and the pod CIDR is `10.244.0.0/16`
 
 ## Hosts
 
-| Host | IP | VLAN | Switch | Role |
-| --- | --- | --- | --- | --- |
-| hades (`enp6s0`) | `192.168.1.69` | 1 | GS108T | Workstation |
-| hades (`enp7s0`) | `10.0.69.69` | 20 | GS108T | Workstation |
-| zeus | `192.168.1.10` | 1 | GS724Tv4 | Worker |
-| gaea | `192.168.1.11` | 1 | GS724Tv4 | Worker |
-| pik8s1 | `192.168.1.101` | 1 | Unverified | k3s |
-| pik8s2 | `192.168.1.102` | 1 | Unverified | k3s |
-| pik8s3 | `192.168.1.103` | 1 | Unverified | k3s |
-| pik8s4 | `10.0.69.104` | 20 | UniFi 24p | rosequartz control plane |
-| pik8s5 | `10.0.69.105` | 20 | UniFi 24p | rosequartz control plane |
-| pik8s6 | `10.0.69.106` | 20 | UniFi 24p | rosequartz control plane |
-| agreus | `10.0.69.187` | 20 | UniFi 24p | rosequartz worker |
-| pollux | `10.0.69.14` | 20 | GS724Tv4 | rosequartz worker |
-| castor | `10.0.69.13` | 20 | GS724Tv4 | rosequartz worker |
-| rosequartz VIP | `10.0.69.100` | 20 | keepalived on pik8s4-6 | apiserver endpoint |
-| Printer | DHCP | 1 | Unverified | Consumer |
-| Media / consoles | DHCP | 1 | Unverified | Consumer |
+| Host | IP | VLAN | Switch | Port | Role |
+| --- | --- | --- | --- | --- | --- |
+| hades (`enp6s0`) | `192.168.1.69` | 1 | GS108T | Unverified | Workstation |
+| hades (`enp7s0`) | `10.0.69.69` | 20 | GS108T | Unverified | Workstation |
+| zeus | `192.168.1.10` | 1 | GS724Tv4 | `g22` | Worker |
+| gaea | `192.168.1.11` | 1 | GS724Tv4 | `g1` | Worker |
+| pik8s1 | `192.168.1.101` | 1 | Unverified | Unverified | k3s |
+| pik8s2 | `192.168.1.102` | 1 | Unverified | Unverified | k3s |
+| pik8s3 | `192.168.1.103` | 1 | Unverified | Unverified | k3s |
+| pik8s4 | `10.0.69.104` | 20 | UniFi 24p | Unverified | rosequartz control plane |
+| pik8s5 | `10.0.69.105` | 20 | UniFi 24p | Unverified | rosequartz control plane |
+| pik8s6 | `10.0.69.106` | 20 | UniFi 24p | Unverified | rosequartz control plane |
+| agreus | `10.0.69.187` | 20 | UniFi 24p | Unverified | rosequartz worker |
+| pollux | `10.0.69.14` | 20 | GS724Tv4 | `g7` | rosequartz worker |
+| castor | `10.0.69.13` | 20 | GS724Tv4 | `g5` | rosequartz worker |
+| rosequartz VIP | `10.0.69.100` | 20 | keepalived on pik8s4-6 | n/a | apiserver endpoint |
+| Printer | DHCP | 1 | Unverified | Unverified | Consumer |
+| Media / consoles | DHCP | 1 | Unverified | Unverified | Consumer |
+
+zeus, gaea, and pollux each have a second NIC on the GS724Tv4 that no config uses: gaea on `g3`, pollux on `g9`, zeus on `g18`, all left on VLAN 1.
+`g19` is the trunk uplink to the UniFi 24p.
 
 hades holds two static addresses because `enp6s0` and `enp7s0` share a MAC address, which makes DHCP unreliable on both.
 NetworkManager leaves both wired interfaces unmanaged and handles only `wlp5s0`.
@@ -110,7 +113,11 @@ NetworkManager leaves both wired interfaces unmanaged and handles only `wlp5s0`.
 | --- | --- | --- | --- |
 | UniFi 24p | pfSense, trunk | VLAN 1 + 20 | GS108T trunk, GS724Tv4 trunk, UniFi APs, pik8s4-6, agreus |
 | GS108T | UniFi 24p, trunk | VLAN 1 + 20 | hades `enp6s0` on VLAN 1, hades `enp7s0` on VLAN 20 |
-| GS724Tv4 | UniFi 24p, trunk | VLAN 1 + 20 | zeus and gaea on VLAN 1 access ports; castor and pollux on VLAN 20 access ports |
+| GS724Tv4 | UniFi 24p on `g19`, trunk | VLAN 1 + 20 | zeus and gaea on VLAN 1 access ports; castor and pollux on VLAN 20 access ports |
+
+Both Netgear switches answer SNMP v2c on community `public`: GS724Tv4 at `192.168.1.6`, GS108T at `192.168.1.5`.
+Walking `dot1qTpFdbPort` (`1.3.6.1.2.1.17.7.1.2.2.1.2`) maps VLAN plus MAC to port number, and `dot1qPvid` (`1.3.6.1.2.1.17.7.1.4.5.1.1`) gives each port's untagged VLAN.
+That pair is how the port assignments above were established, and is faster than the web UI for re-checking them.
 
 The UniFi APs sit on VLAN 1 access ports, so wireless clients land on `192.168.1.0/24` with no path onto VLAN 20.
 The UniFi controller itself runs on hades via `modules/unifi`, started on demand rather than at boot.
@@ -143,7 +150,7 @@ Any VLAN 20 address outside that `/24` is unreachable from hades.
 
 **castor is configured but not installed.**
 Its NixOS config, clan membership, and rosequartz worker entry all name `10.0.69.13`, and the box still runs Ubuntu on `192.168.1.13`.
-Its GS724Tv4 port is still a VLAN 1 access port, so the address is unreachable until the port moves to VLAN 20 and the machine is installed.
+Its GS724Tv4 port `g5` is still a VLAN 1 access port (PVID 1), so the address is unreachable until the port moves to VLAN 20 and the machine is installed.
 
 **Switch attachment for pik8s1-3, the printer, and media devices is unverified.**
 They are confirmed on VLAN 1 by their addresses, but which switch port each occupies is not recorded.
