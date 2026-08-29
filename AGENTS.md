@@ -16,7 +16,7 @@ This file provides guidance to AI agents when working with code in this reposito
 
 ## Architecture
 
-This is a NixOS configuration flake using **flake-parts** and **clan-core** for modular organization. All machines (hades, agreus, pik8s1–6) are clan-managed and configured via `clan.nix`, which holds the inventory (machine tags, service instances) and per-machine `imports`/overrides. Each machine's NixOS config lives under `machines/<name>/configuration.nix`.
+This is a NixOS configuration flake using **flake-parts** and **clan-core** for modular organization. All machines (hades, agreus, pollux, castor, pik8s1–6) are clan-managed and configured via `clan.nix`, which holds the inventory (machine tags, service instances) and per-machine `imports`/overrides. Each machine's NixOS config lives under `machines/<name>/configuration.nix`.
 
 ### Module System
 
@@ -41,12 +41,12 @@ hades = {
 ```
 `machines/hades/configuration.nix` itself imports `../../modules/desktops`, `../../modules/ssh`, and `../../modules/unifi`.
 
-Other machines (agreus, pik8s1–6) follow the same pattern with a thinner `imports` list, since they don't need desktop/hardware-preset modules.
+Other machines (agreus, pollux, castor, pik8s1–6) follow the same pattern with a thinner `imports` list, since they don't need desktop/hardware-preset modules.
 
 ### Directory Layout
 
 - `flake.nix` - Entry point; imports flake-parts modules; clan config via `./clan.nix`
-- `machines/` - Per-machine `configuration.nix` for every host (hades, agreus, pik8s1–6)
+- `machines/` - Per-machine `configuration.nix` for every host (hades, agreus, pollux, castor, pik8s1–6)
 - `modules/` - Shared NixOS modules imported by machine configs:
   - `desktops/` - Desktop environment modules (currently GNOME only)
   - `hardware/` - Hardware-specific modules (currently NVIDIA config)
@@ -109,6 +109,8 @@ Other machines (agreus, pik8s1–6) follow the same pattern with a thinner `impo
 | ------------- | --------------------- | ---------------------------------------------------------- |
 | hades         | ASUS ROG Strix X570-E | Primary desktop; AMD GPU; BTRFS; clan-managed              |
 | agreus        | Generic x86_64        | Office mini PC; clan-managed; facter hardware config; rosequartz worker |
+| pollux        | Sandy Bridge i5, legacy BIOS | Basement rack server; clan-managed; facter hardware config; rosequartz worker |
+| castor        | Sandy Bridge i5-2500, UEFI  | Basement rack server; pollux's twin; rosequartz worker; NixOS on disk, never booted into it |
 | pik8s1–6      | Raspberry Pi 4B       | k8s cluster nodes; clan-managed; aarch64; pik8s1–3 are k3s, pik8s4–6 are the rosequartz control-plane |
 
 ## Sub-Agent Guidance
