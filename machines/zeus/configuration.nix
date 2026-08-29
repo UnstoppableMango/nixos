@@ -19,9 +19,9 @@
 
   nixpkgs.hostPlatform = "x86_64-linux";
 
-  # Sandy Bridge box, pollux's twin, and it takes the same grub setup. On the
-  # hybrid layout disko lays down, this installs BIOS grub to the disk and an
-  # EFI removable-path loader to the ESP, so it boots in either firmware mode.
+  # Dual Xeon E5-2670 tower whose firmware is in legacy BIOS mode, so it takes
+  # grub rather than gaea's systemd-boot. efiSupport keeps the hybrid layout
+  # bootable if the firmware ever switches to UEFI.
   boot.loader.grub = {
     enable = true;
     efiSupport = true;
@@ -36,22 +36,25 @@
     AllowSuspendThenHibernate = "no";
   };
 
+  # enp6s0 is the port cabled to GS724Tv4 `g22`. The board's other five NICs
+  # stay unconfigured; two of them carried the previous cluster's 10.69.0.0/16
+  # network.
   networking = {
-    hostName = "castor";
+    hostName = "zeus";
     useDHCP = false;
 
     defaultGateway = {
       address = "10.0.69.1";
-      interface = "eno1";
+      interface = "enp6s0";
     };
 
     nameservers = [ "10.0.69.1" ];
 
-    interfaces.eno1 = {
+    interfaces.enp6s0 = {
       useDHCP = false;
       ipv4.addresses = [
         {
-          address = "10.0.69.13";
+          address = "10.0.69.10";
           prefixLength = 24;
         }
       ];

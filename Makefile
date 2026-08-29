@@ -20,6 +20,12 @@ pollux: build
 castor: HOST := castor
 castor: build
 
+zeus: HOST := zeus
+zeus: build
+
+gaea: HOST := gaea
+gaea: build
+
 check:
 	$(NIX) flake check
 
@@ -50,6 +56,6 @@ bin/%-sd-card: | bin
 ${PIS:%=%-flash}: %-flash: bin/%-sd-card.img
 	sudo dd if=$< of=$(DISK) bs=4M status=progress conv=fsync
 
-.PHONY: build hades agreus pollux castor check format fmt update system sd-images \
+.PHONY: build hades agreus pollux castor zeus gaea check format fmt update system sd-images \
         pik8s1-sd pik8s2-sd pik8s3-sd pik8s4-sd pik8s5-sd pik8s6-sd \
         pik8s1-flash pik8s2-flash pik8s3-flash pik8s4-flash pik8s5-flash pik8s6-flash

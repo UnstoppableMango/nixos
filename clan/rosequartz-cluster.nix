@@ -1,6 +1,6 @@
 # THECLUSTER's vanilla-Kubernetes cluster, "rosequartz": pik8s4/5/6 as an HA
-# control plane behind a keepalived VIP, agreus, pollux, and castor as
-# workers. Lowered
+# control plane behind a keepalived VIP, agreus, pollux, castor, zeus, and
+# gaea as workers. Lowered
 # by cairn's `cairn.clusters` option tree (flakeModules/cluster/lower.nix)
 # into the same per-service inventory instances this used to be hand-wired
 # as in clan.nix.
@@ -46,6 +46,16 @@
     castor = {
       role = "worker";
       ip = "10.0.69.13";
+    };
+
+    zeus = {
+      role = "worker";
+      ip = "10.0.69.10";
+    };
+
+    gaea = {
+      role = "worker";
+      ip = "10.0.69.11";
     };
   };
 
