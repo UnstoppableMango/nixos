@@ -19,13 +19,14 @@
 
   nixpkgs.hostPlatform = "x86_64-linux";
 
-  # Sandy Bridge box, pollux's twin, and it takes the same grub setup. On the
-  # hybrid layout disko lays down, this installs BIOS grub to the disk and an
-  # EFI removable-path loader to the ESP, so it boots in either firmware mode.
-  boot.loader.grub = {
-    enable = true;
-    efiSupport = true;
-    efiInstallAsRemovable = true;
+  # EPYC 7502 rack box whose firmware is in UEFI mode, so it takes
+  # systemd-boot rather than zeus's legacy-BIOS grub.
+  boot.loader = {
+    efi.canTouchEfiVariables = true;
+    systemd-boot = {
+      enable = true;
+      configurationLimit = 25;
+    };
   };
 
   # https://nixos.wiki/wiki/Power_Management#systemd_sleep
@@ -36,8 +37,10 @@
     AllowSuspendThenHibernate = "no";
   };
 
+  # eno1 is the port cabled to GS724Tv4 `g1`. eno2 stays unconfigured; it
+  # carried the previous cluster's 10.69.0.0/16 network on a VLAN 69 subinterface.
   networking = {
-    hostName = "castor";
+    hostName = "gaea";
     useDHCP = false;
 
     defaultGateway = {
@@ -51,7 +54,7 @@
       useDHCP = false;
       ipv4.addresses = [
         {
-          address = "10.0.69.13";
+          address = "10.0.69.11";
           prefixLength = 24;
         }
       ];

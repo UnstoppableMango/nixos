@@ -21,9 +21,9 @@ let
     hades = { };
     agreus = { };
     castor = { };
-    # gaea = { };
+    gaea = { };
     pollux = { };
-    # zeus = { };
+    zeus = { };
     pik8s1 = { };
     pik8s2 = { };
     pik8s3 = { };
