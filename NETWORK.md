@@ -35,7 +35,6 @@ flowchart TB
     HADES1["hades enp6s0<br/>192.168.1.69"]
     K3S["pik8s1 · pik8s2 · pik8s3<br/>192.168.1.101-103<br/>k3s"]
     ZEUS["zeus 192.168.1.10"]
-    GAEA["gaea 192.168.1.11"]
     PRN["Printer<br/>DHCP"]
     MED["Media / consoles<br/>DHCP"]
   end
@@ -48,6 +47,7 @@ flowchart TB
     AGREUS["agreus 10.0.69.187<br/>worker"]
     POLLUX["pollux 10.0.69.14<br/>worker"]
     CASTOR["castor 10.0.69.13<br/>worker"]
+    GAEA["gaea 10.0.69.11<br/>worker"]
   end
 
   U24 --> AP
@@ -87,7 +87,7 @@ The rosequartz service CIDR is `10.0.0.0/24` and the pod CIDR is `10.244.0.0/16`
 | hades (`enp6s0`) | `192.168.1.69` | 1 | GS108T | Unverified | Workstation |
 | hades (`enp7s0`) | `10.0.69.69` | 20 | GS108T | Unverified | Workstation |
 | zeus | `192.168.1.10` | 1 | GS724Tv4 | `g22` | Worker |
-| gaea | `192.168.1.11` | 1 | GS724Tv4 | `g1` | Worker |
+| gaea | `10.0.69.11` | 20 | GS724Tv4 | `g1` | rosequartz worker |
 | pik8s1 | `192.168.1.101` | 1 | Unverified | Unverified | k3s |
 | pik8s2 | `192.168.1.102` | 1 | Unverified | Unverified | k3s |
 | pik8s3 | `192.168.1.103` | 1 | Unverified | Unverified | k3s |
@@ -113,7 +113,7 @@ NetworkManager leaves both wired interfaces unmanaged and handles only `wlp5s0`.
 | --- | --- | --- | --- |
 | UniFi 24p | pfSense, trunk | VLAN 1 + 20 | GS108T trunk, GS724Tv4 trunk, UniFi APs, pik8s4-6, agreus |
 | GS108T | UniFi 24p, trunk | VLAN 1 + 20 | hades `enp6s0` on VLAN 1, hades `enp7s0` on VLAN 20 |
-| GS724Tv4 | UniFi 24p on `g19`, trunk | VLAN 1 + 20 | zeus and gaea on VLAN 1 access ports; castor and pollux on VLAN 20 access ports |
+| GS724Tv4 | UniFi 24p on `g19`, trunk | VLAN 1 + 20 | zeus on a VLAN 1 access port; castor, pollux, and gaea on VLAN 20 access ports |
 
 Both Netgear switches answer SNMP v2c on community `public`: GS724Tv4 at `192.168.1.6`, GS108T at `192.168.1.5`.
 Walking `dot1qTpFdbPort` (`1.3.6.1.2.1.17.7.1.2.2.1.2`) maps VLAN plus MAC to port number, and `dot1qPvid` (`1.3.6.1.2.1.17.7.1.4.5.1.1`) gives each port's untagged VLAN.
