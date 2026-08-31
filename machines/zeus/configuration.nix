@@ -36,7 +36,7 @@
     AllowSuspendThenHibernate = "no";
   };
 
-  # enp6s0 is the port cabled to GS724Tv4 `g22`. The board's other five NICs
+  # enp6s0 is the port cabled to GS724Tv4 `g18`. The board's other five NICs
   # stay unconfigured; two of them carried the previous cluster's 10.69.0.0/16
   # network.
   networking = {
