@@ -97,14 +97,14 @@ The rosequartz service CIDR is `10.0.0.0/24` and the pod CIDR is `10.244.0.0/16`
 | agreus | `10.0.69.187` | 20 | UniFi 24p | Unverified | rosequartz worker |
 | pollux | `10.0.69.14` | 20 | GS724Tv4 | `g7` | rosequartz worker |
 | castor (`eno1`) | `10.0.69.13` | 20 | GS724Tv4 | `g5` | rosequartz worker |
-| castor (`enp2s0`) | DHCP | 1 | GS724Tv4 | `g11` | Second NIC, currently the only reachable one |
+| castor (`enp2s0`) | DHCP | 1 | GS724Tv4 | `g11` | Second NIC, unused by any config |
 | rosequartz VIP | `10.0.69.100` | 20 | keepalived on pik8s4-6 | n/a | apiserver endpoint |
 | Unidentified (`d0:50:99:e1:dc:92`) | `192.168.1.9` | 1 | GS724Tv4 | `g22` | Answers SSH with `ssh-rsa`/`ssh-dss` host keys only |
 | Unidentified (`d0:50:99:e1:dd:1e`) | `192.168.1.7` | 1 | GS724Tv4 | `g24` | Answers SSH with `ssh-rsa`/`ssh-dss` host keys only |
 | Printer | DHCP | 1 | Unverified | Unverified | Consumer |
 | Media / consoles | DHCP | 1 | Unverified | Unverified | Consumer |
 
-gaea and pollux each have a second NIC on the GS724Tv4 that no config uses: gaea on `g3`, on VLAN 1, and pollux on `g9`, which carries PVID 20 and is up with a link-local address only (`fe80::20b:abff:fe71:dae3`).
+gaea, pollux, and castor each have a second NIC on the GS724Tv4 that no config uses: gaea on `g3` and castor on `g11`, both on VLAN 1, and pollux on `g9`, which carries PVID 20 and is up with a link-local address only (`fe80::20b:abff:fe71:dae3`).
 zeus's other five NICs are all down and hold no address.
 `g19` is the trunk uplink to the UniFi 24p.
 
@@ -117,7 +117,7 @@ NetworkManager leaves both wired interfaces unmanaged and handles only `wlp5s0`.
 | --- | --- | --- | --- |
 | UniFi 24p | pfSense, trunk | VLAN 1 + 20 | GS108T trunk, GS724Tv4 trunk, UniFi APs, pik8s4-6, agreus |
 | GS108T | UniFi 24p, trunk | VLAN 1 + 20 | hades `enp6s0` on VLAN 1, hades `enp7s0` on VLAN 20 |
-| GS724Tv4 | UniFi 24p on `g19`, trunk | VLAN 1 + 20 | zeus `g18`, gaea `g1`, and pollux `g7` on VLAN 20 access ports; castor `g5` on a VLAN 1 access port |
+| GS724Tv4 | UniFi 24p on `g19`, trunk | VLAN 1 + 20 | zeus `g18`, gaea `g1`, pollux `g7`, and castor `g5` on VLAN 20 access ports |
 
 Both Netgear switches answer SNMP v2c on community `public`: GS724Tv4 at `192.168.1.6`, GS108T at `192.168.1.5`.
 Walking `dot1qTpFdbPort` (`1.3.6.1.2.1.17.7.1.2.2.1.2`) maps VLAN plus MAC to port number, and `dot1qPvid` (`1.3.6.1.2.1.17.7.1.4.5.1.1`) gives each port's untagged VLAN.
@@ -151,12 +151,6 @@ The VIP is intentionally absent from the `hosts` flake, since it is not a machin
 Its sole default gateway is `192.168.1.1` via `enp6s0`.
 `10.0.69.0/24` is reachable as a directly connected subnet through `enp7s0`, not by routing through pfSense.
 Any VLAN 20 address outside that `/24` is unreachable from hades.
-
-**castor's cluster address is stranded on the wrong VLAN.**
-The installed NixOS is running: `eno1` holds the static `10.0.69.13/24` and `enp2s0` holds a DHCP address on VLAN 1.
-`eno1` is cabled to GS724Tv4 `g5`, which carries PVID 1, so `10.0.69.13` sits on the VLAN 1 broadcast domain and nothing on either subnet can reach it.
-The host is only reachable through `enp2s0` on `g11`.
-Moving `g5` to VLAN 20 untagged with PVID 20 is what closes the gap.
 
 **Switch attachment for pik8s1-3, the printer, and media devices is unverified.**
 They are confirmed on VLAN 1 by their addresses, but which switch port each occupies is not recorded.

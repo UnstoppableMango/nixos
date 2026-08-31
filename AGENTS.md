@@ -110,7 +110,7 @@ Other machines (agreus, pollux, castor, zeus, gaea, pik8s1–6) follow the same 
 | hades         | ASUS ROG Strix X570-E | Primary desktop; AMD GPU; BTRFS; clan-managed              |
 | agreus        | Generic x86_64        | Office mini PC; clan-managed; facter hardware config; rosequartz worker |
 | pollux        | Sandy Bridge i5, legacy BIOS | Basement rack server; clan-managed; facter hardware config; rosequartz worker |
-| castor        | Sandy Bridge i5-2500  | Basement rack server; pollux's twin; rosequartz worker; firmware mode unverified, so it takes pollux's dual-mode grub; running NixOS, but `eno1`'s `10.0.69.13` is stranded on VLAN 1 (see `NETWORK.md`) |
+| castor        | Sandy Bridge i5-2500  | Basement rack server; pollux's twin; rosequartz worker; firmware mode unverified, so it takes pollux's dual-mode grub |
 | zeus          | Dual Xeon E5-2670 tower, legacy BIOS | Basement tower; clan-managed; rosequartz worker; grub with `efiSupport` so the hybrid layout survives a firmware switch |
 | gaea          | EPYC 7502 rack box, UEFI | Basement rack server; clan-managed; rosequartz worker; systemd-boot |
 | pik8s1–6      | Raspberry Pi 4B       | k8s cluster nodes; clan-managed; aarch64; pik8s1–3 are k3s, pik8s4–6 are the rosequartz control-plane |
