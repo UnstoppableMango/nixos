@@ -34,10 +34,13 @@ in
   nixpkgs.hostPlatform = "aarch64-linux";
 
   hardware = {
-    raspberry-pi."4" = {
-      apply-overlays-dtmerge.enable = true;
-      poe-hat.enable = true;
-    };
+    raspberry-pi."4".apply-overlays-dtmerge.enable = true;
+
+    # The PoE HAT uses the stock rpi-poe overlay. All of its fan-curve
+    # parameters are optional and the defaults are what we want.
+    raspberry-pi.configtxt.deviceTreeOverlays."board-type=0x11" = [
+      { rpi-poe = { }; }
+    ];
   };
 
   # TODO: make sure everything works before disabling

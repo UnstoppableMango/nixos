@@ -277,17 +277,23 @@ in
 
   home-manager.users.${primaryUser} = {
     imports = with inputs; [
-      dotfiles.homeModules.erik
-      # dotfiles' modules/stylix configures options this module owns, so any
-      # consumer of homeModules.erik has to bring it along.
+      # dotfiles selects a host profile by importing the host file, which pulls
+      # in users/erik/default.nix itself. homeModules.erik is that default, so
+      # importing it as well would double up.
+      "${dotfiles}/users/erik/hades.nix"
+      # dotfiles' modules configure options they do not declare themselves, so
+      # every consumer of the erik profile brings the same set along that
+      # dotfiles' own homeConfigurations do.
       dotfiles.inputs.stylix.homeModules.stylix
-      # sops-nix's home-manager module arrives via dotfiles' modules/sops,
-      # which also sets sops.age.keyFile. That only dedupes against our own
-      # sops-nix because the dotfiles input follows it (see flake.nix).
+      dotfiles.inputs.nixvim.homeModules.nixvim
+      dotfiles.inputs.nix2git.homeModules.nix2git
+      # dotfiles' modules/sops sets sops.age.keyFile but no longer imports
+      # sops-nix itself. This only dedupes against dotfiles' own sops-nix
+      # because the dotfiles input follows ours (see flake.nix).
+      sops-nix.homeManagerModules.sops
     ];
 
     dotfiles = {
-      hades = true;
       emacs.enable = true;
       ai.enable = true;
 

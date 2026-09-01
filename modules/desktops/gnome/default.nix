@@ -22,7 +22,6 @@
         gedit # text editor
         gnome-characters
         gnome-music
-        gnome-photos
         gnome-terminal
         gnome-tour
         hitori # sudoku game
