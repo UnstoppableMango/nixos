@@ -15,7 +15,10 @@
     ];
   };
 
-  imports = [ ./disk-config.nix ];
+  imports = [
+    ../../modules/ceph
+    ./disk-config.nix
+  ];
 
   nixpkgs.hostPlatform = "x86_64-linux";
 
