@@ -22,6 +22,7 @@
     # dotfiles.nixosModules.erik
 
     ./disk-config.nix
+    ../../modules/ceph
     ../../modules/desktops
     ../../modules/ssh
     # ../../modules/users/erik
