@@ -179,11 +179,6 @@ in
       daemon.settings = {
         userland-proxy = false;
       };
-
-      rootless = {
-        enable = true;
-        setSocketVariable = true;
-      };
     };
 
     podman = {
@@ -343,7 +338,7 @@ in
     extraGroups = [
       "openrazer"
       "libvirt" # crc wants `libvirt` not `libvirtd`
-      "docker" # for kind, hopefully
+      "docker" # /var/run/docker.sock is root-owned; this group is the access path
       "podman"
     ];
   };
