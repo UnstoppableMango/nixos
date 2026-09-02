@@ -335,6 +335,14 @@ in
   users.users.${primaryUser} = {
     shell = pkgs.zsh;
     description = "Erik Rasmussen";
+
+    # Start erik's systemd user manager at boot and keep it after logout, so
+    # `claude-remote-control.service` is up whenever the machine is. Plain
+    # `claude remote-control` reattaches to the sessions the previous server
+    # was serving, but only for about four hours after it stopped, and without
+    # lingering that clock runs while nobody is logged in.
+    linger = true;
+
     extraGroups = [
       "openrazer"
       "libvirt" # crc wants `libvirt` not `libvirtd`
