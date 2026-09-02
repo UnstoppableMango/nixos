@@ -20,23 +20,19 @@
 
     nixos-anywhere = {
       url = "github:nix-community/nixos-anywhere";
-      inputs = {
-        nixpkgs.follows = "nixpkgs";
-        disko.follows = "disko";
-        treefmt-nix.follows = "treefmt-nix";
-      };
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.disko.follows = "disko";
+      inputs.treefmt-nix.follows = "treefmt-nix";
     };
 
     clan-core = {
       url = "https://git.clan.lol/clan/clan-core/archive/26.05.tar.gz";
-      inputs = {
-        nixpkgs.follows = "nixpkgs-stable";
-        systems.follows = "systems";
-        flake-parts.follows = "flake-parts";
-        disko.follows = "disko";
-        sops-nix.follows = "sops-nix";
-        treefmt-nix.follows = "treefmt-nix";
-      };
+      inputs.nixpkgs.follows = "nixpkgs-stable";
+      inputs.systems.follows = "systems";
+      inputs.flake-parts.follows = "flake-parts";
+      inputs.disko.follows = "disko";
+      inputs.sops-nix.follows = "sops-nix";
+      inputs.treefmt-nix.follows = "treefmt-nix";
     };
 
     nixos-facter = {
@@ -76,13 +72,11 @@
 
     mynix = {
       url = "github:unstoppablemango/nix";
-      inputs = {
-        nixpkgs.follows = "nixpkgs";
-        flake-parts.follows = "flake-parts";
-        gomod2nix.follows = "gomod2nix";
-        systems.follows = "systems";
-        treefmt-nix.follows = "treefmt-nix";
-      };
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.flake-parts.follows = "flake-parts";
+      inputs.gomod2nix.follows = "gomod2nix";
+      inputs.systems.follows = "systems";
+      inputs.treefmt-nix.follows = "treefmt-nix";
     };
 
     cairn = {
@@ -129,8 +123,6 @@
         treefmt-nix.flakeModule
         disko.flakeModules.default
         home-manager.flakeModules.home-manager
-        # cairn.flakeModules.default already imports clan-core's own; adding
-        # it separately duplicates the `clan` option declaration.
         cairn.flakeModules.default
       ];
 
