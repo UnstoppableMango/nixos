@@ -31,7 +31,7 @@ This repository contains UnstoppableMango's personal NixOS configurations using 
 ### Module Structure
 - Each module should export both `flake.modules.nixos.*` and `flake.modules.homeManager.*` when applicable
 - Use `self.modules.*` for internal module references
-- Follow the pattern seen in `users/erik/default.nix` for module organization
+- Follow the pattern seen in dotfiles' `home/default.nix` for module organization
 
 ## Building and Testing
 
@@ -134,7 +134,7 @@ This repository contains UnstoppableMango's personal NixOS configurations using 
 Add to `environment.systemPackages` in the host's configuration.nix
 
 ### Adding a user package
-Add to `home.packages` in the user's home-manager configuration (e.g., users/erik/default.nix)
+Add to `home.packages` in the user's home-manager configuration (e.g. dotfiles' `hosts/hades.nix`)
 
 ### Adding a new host
 1. Create hosts/<hostname>/configuration.nix
