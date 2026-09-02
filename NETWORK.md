@@ -5,7 +5,7 @@ Physical and layer-2 topology behind the static IPs configured in `machines/*/co
 ## Overview
 
 The network is split into two VLANs on a shared physical switch fabric.
-VLAN 1 is the native, untagged personal network on `192.168.1.0/24`, carrying the workstation, wireless clients, the older k3s pi nodes, and consumer devices.
+VLAN 1 is the native, untagged personal network on `192.168.1.0/24`, carrying the workstation, wireless clients, and consumer devices.
 VLAN 20 is the homelab network on `10.0.69.0/24`, isolated at layer 2, carrying the rosequartz Kubernetes cluster.
 
 A pfSense SBC is the single edge device.
@@ -33,7 +33,6 @@ flowchart TB
     direction TB
     AP["UniFi APs<br/>wireless clients"]
     HADES1["hades enp6s0<br/>192.168.1.69"]
-    K3S["pik8s1 · pik8s2 · pik8s3<br/>192.168.1.101-103<br/>k3s"]
     PRN["Printer<br/>DHCP"]
     MED["Media / consoles<br/>DHCP"]
   end
@@ -42,7 +41,8 @@ flowchart TB
     direction TB
     VIP["rosequartz VIP<br/>10.0.69.100<br/>keepalived"]
     HADES2["hades enp7s0<br/>10.0.69.69"]
-    CP["pik8s4 · pik8s5 · pik8s6<br/>10.0.69.104-106<br/>control plane"]
+    CP["pik8s1 · pik8s2 · pik8s4 · pik8s5 · pik8s6<br/>10.0.69.101-102, 104-106<br/>control plane"]
+    PIW["pik8s3 10.0.69.103<br/>worker"]
     AGREUS["agreus 10.0.69.187<br/>worker"]
     POLLUX["pollux 10.0.69.14<br/>worker"]
     CASTOR["castor 10.0.69.13<br/>worker"]
@@ -74,7 +74,7 @@ The dashed VIP link is a keepalived advertisement rather than a cable.
 
 | VLAN | Name | Subnet | Gateway | Purpose |
 | --- | --- | --- | --- | --- |
-| 1 (native) | Personal | `192.168.1.0/24` | `192.168.1.1` | Workstation, wireless, k3s pi nodes, consumer devices |
+| 1 (native) | Personal | `192.168.1.0/24` | `192.168.1.1` | Workstation, wireless, consumer devices |
 | 20 | Homelab | `10.0.69.0/24` | `10.0.69.1` | rosequartz Kubernetes cluster |
 
 Neither subnet overlaps the cluster's internal ranges.
@@ -88,9 +88,9 @@ The rosequartz service CIDR is `10.0.0.0/24` and the pod CIDR is `10.244.0.0/16`
 | hades (`enp7s0`) | `10.0.69.69` | 20 | GS108T | Unverified | Workstation |
 | zeus | `10.0.69.10` | 20 | GS724Tv4 | `g18` | rosequartz worker |
 | gaea | `10.0.69.11` | 20 | GS724Tv4 | `g1` | rosequartz worker |
-| pik8s1 | `192.168.1.101` | 1 | Unverified | Unverified | k3s |
-| pik8s2 | `192.168.1.102` | 1 | Unverified | Unverified | k3s |
-| pik8s3 | `192.168.1.103` | 1 | Unverified | Unverified | k3s |
+| pik8s1 | `10.0.69.101` | 20 | Unverified | Unverified | rosequartz control plane |
+| pik8s2 | `10.0.69.102` | 20 | Unverified | Unverified | rosequartz control plane |
+| pik8s3 | `10.0.69.103` | 20 | Unverified | Unverified | rosequartz worker |
 | pik8s4 | `10.0.69.104` | 20 | UniFi 24p | Unverified | rosequartz control plane |
 | pik8s5 | `10.0.69.105` | 20 | UniFi 24p | Unverified | rosequartz control plane |
 | pik8s6 | `10.0.69.106` | 20 | UniFi 24p | Unverified | rosequartz control plane |
@@ -98,7 +98,7 @@ The rosequartz service CIDR is `10.0.0.0/24` and the pod CIDR is `10.244.0.0/16`
 | pollux | `10.0.69.14` | 20 | GS724Tv4 | `g7` | rosequartz worker |
 | castor (`eno1`) | `10.0.69.13` | 20 | GS724Tv4 | `g5` | rosequartz worker |
 | castor (`enp2s0`) | DHCP | 1 | GS724Tv4 | `g11` | Second NIC, unused by any config |
-| rosequartz VIP | `10.0.69.100` | 20 | keepalived on pik8s4-6 | n/a | apiserver endpoint |
+| rosequartz VIP | `10.0.69.100` | 20 | keepalived on pik8s1, pik8s2, pik8s4-6 | n/a | apiserver endpoint |
 | Unidentified (`d0:50:99:e1:dc:92`) | `192.168.1.9` | 1 | GS724Tv4 | `g22` | Answers SSH with `ssh-rsa`/`ssh-dss` host keys only |
 | Unidentified (`d0:50:99:e1:dd:1e`) | `192.168.1.7` | 1 | GS724Tv4 | `g24` | Answers SSH with `ssh-rsa`/`ssh-dss` host keys only |
 | Printer | DHCP | 1 | Unverified | Unverified | Consumer |
@@ -141,6 +141,8 @@ The apiserver is fronted by a keepalived VIP at `10.0.69.100`, held by whichever
 | pik8s4 | 100 |
 | pik8s5 | 90 |
 | pik8s6 | 80 |
+| pik8s1 | 70 |
+| pik8s2 | 60 |
 
 pik8s4 holds the VIP by default.
 The VIP is intentionally absent from the `hosts` flake, since it is not a machine.
@@ -153,4 +155,4 @@ Its sole default gateway is `192.168.1.1` via `enp6s0`.
 Any VLAN 20 address outside that `/24` is unreachable from hades.
 
 **Switch attachment for pik8s1-3, the printer, and media devices is unverified.**
-They are confirmed on VLAN 1 by their addresses, but which switch port each occupies is not recorded.
+The printer and media devices are confirmed on VLAN 1 by their addresses; pik8s1-3 are configured for VLAN 20 and need their ports moved to match. Which switch port each occupies is not recorded.
