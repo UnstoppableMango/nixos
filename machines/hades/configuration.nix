@@ -262,20 +262,15 @@ in
     useGlobalPkgs = true;
     useUserPackages = true;
     backupFileExtension = "bak";
-    # dotfiles' users/shared/neovim.nix reaches for `self.nixvimModules.erik`,
-    # so `self` here is the dotfiles flake, not ours.
-    extraSpecialArgs = {
-      inherit (inputs.dotfiles) inputs;
-      self = inputs.dotfiles;
-    };
   };
 
   home-manager.users.${primaryUser} = {
     imports = with inputs; [
-      # dotfiles selects a host profile by importing the host file, which pulls
-      # in users/erik/default.nix itself. homeModules.erik is that default, so
-      # importing it as well would double up.
-      "${dotfiles}/users/erik/hades.nix"
+      # The host file composes dotfiles' home/ (erik's identity) with the
+      # profiles hades wants, so it is the whole configuration on its own.
+      # homeModules.erik is only the home/ half; importing it as well would
+      # double up.
+      dotfiles.homeModules.hades
       # dotfiles' modules configure options they do not declare themselves, so
       # every consumer of the erik profile brings the same set along that
       # dotfiles' own homeConfigurations do.
