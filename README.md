@@ -17,7 +17,8 @@ The `rosequartz` Kubernetes cluster that most of these machines belong to is def
 | castor | `10.0.69.13` | Sandy Bridge i5-2500, pollux's twin | rosequartz worker |
 | zeus | `10.0.69.10` | Dual Xeon E5-2670 tower, legacy BIOS | rosequartz worker |
 | gaea | `10.0.69.11` | EPYC 7502 rack box, UEFI | rosequartz worker |
-| pik8s1-3 | `192.168.1.101-103` | Raspberry Pi 4B | k3s nodes |
+| pik8s1-2 | `10.0.69.101-102` | Raspberry Pi 4B | rosequartz control plane |
+| pik8s3 | `10.0.69.103` | Raspberry Pi 4B | rosequartz worker |
 | pik8s4-6 | `10.0.69.104-106` | Raspberry Pi 4B | rosequartz control plane |
 
 Machine metadata (address, arch, role tags) comes from the shared [hosts](https://github.com/UnstoppableMango/hosts) flake rather than being defined here.
