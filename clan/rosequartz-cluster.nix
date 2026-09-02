@@ -96,6 +96,18 @@
     loadbalancer = {
       enable = true;
       interface = "end0";
+
+      # `machines` defaults to every control-plane machine. pik8s1 and pik8s2
+      # stay out while their UniFi 24p ports are still VLAN 1 untagged with
+      # VLAN 20 tagged: VRRP runs on the cluster-wide `interface`, so
+      # keepalived there would advertise on VLAN 1 and put the VIP on the
+      # wrong network. Drop this pin once their ports become VLAN 20 access
+      # ports and their `end0.20` collapses into `end0`.
+      machines = [
+        "pik8s4"
+        "pik8s5"
+        "pik8s6"
+      ];
     };
 
     # inoculant defaults to every machine in the cluster; the existing config
