@@ -59,7 +59,7 @@ flowchart TB
   GS724 --> ZEUS
   GS724 --> GAEA
   GS724 --> CASTOR
-  U24 -.-> K3S
+  U24 -.-> PIW
   U24 -.-> PRN
   U24 -.-> MED
   GS724 --> POLLUX
