@@ -82,7 +82,6 @@ This repository contains UnstoppableMango's personal NixOS configurations using 
 
 ### Virtualization
 - Docker with BTRFS storage driver
-- Docker rootless mode enabled
 - KVM/libvirt for VM management
 - User erik has libvirtd/libvirt group access
 
