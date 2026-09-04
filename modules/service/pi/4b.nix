@@ -1,6 +1,18 @@
 { inputs, ... }:
 let
-  pkgs = inputs.nixpkgs.legacyPackages.aarch64-linux;
+  # flashrom 1.8.0's cmocka suite fails on aarch64 (write_chip_bad_status_test,
+  # plus the leak check), and nixpkgs gates doCheck only on Darwin, so the
+  # failure blocks raspberrypi-eeprom and with it system-path. The tests cover
+  # flashrom's own chip drivers, not anything rpi-eeprom-update relies on.
+  #
+  # The override lands here rather than in nixpkgs.overlays because this module
+  # takes packages straight from legacyPackages, outside the NixOS pkgs fixpoint
+  # an overlay would reach.
+  pkgs = inputs.nixpkgs.legacyPackages.aarch64-linux.extend (
+    _: prev: {
+      flashrom = prev.flashrom.overrideAttrs { doCheck = false; };
+    }
+  );
 in
 {
   imports = with inputs; [
