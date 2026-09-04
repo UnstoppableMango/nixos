@@ -110,7 +110,7 @@ This repository contains UnstoppableMango's personal NixOS configurations using 
 
 ### GitHub Actions
 - Workflow: `.github/workflows/ci.yml`
-- Runs on: nixos-runners
+- Runs on: ubuntu-latest
 - Checks: `nix flake check --all-systems`
 - Caching: Cachix (unstoppablemango)
 - Note: hades build disabled in CI (too large)
