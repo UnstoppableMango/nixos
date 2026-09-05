@@ -135,8 +135,9 @@ The pfSense gateways (`192.168.1.1` on VLAN 1, `10.0.69.1` on VLAN 20) resolve p
 
 The resolvers sit on VLAN 20, on-link for every machine there and reachable over `enp7s0` from hades.
 
-Every machine except hades resolves through systemd-resolved, which clan-core's recommended defaults enable.
-hades opts out of those defaults in `clan.nix` and uses resolvconf instead; `modules/dns` carries the `interface_order` entry that keeps these resolvers ahead of the ones NetworkManager picks up from wlp5s0's DHCP lease.
+Every machine resolves through systemd-resolved and configures its interfaces with networkd, both from clan-core's recommended defaults.
+The resolvers above are systemd-resolved's global scope, so anything a link supplies of its own is scoped to that link.
+Only hades has such a link, NetworkManager on wlp5s0, so `modules/dns` also sets the routing-only domain `~thecluster.lan` to keep internal names on the global scope while the wireless fallback is associated.
 
 CoreDNS runs inside rosequartz and resolves cluster-internal names.
 It is reached through the cluster, not through the LAN resolver.
