@@ -1,22 +1,5 @@
 { pkgs, lib, ... }:
 {
-  nix.settings = {
-    extra-substituters = [
-      # "https://ncps.thecluster.lan"
-      "https://nix-community.cachix.org"
-      "https://unstoppablemango.cachix.org"
-    ];
-    extra-trusted-public-keys = [
-      # "ncps.thecluster.lan:D8fcKW2/D+zjKOABa3bDjEe8x+EPZpXnBDm+XwtNrhI="
-      "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
-      "unstoppablemango.cachix.org-1:m7uEI6X1Ov8DyFWJQX4WsRFRWFuzRW5c/Xms8ZaP74U="
-    ];
-    experimental-features = [
-      "nix-command"
-      "flakes"
-    ];
-  };
-
   imports = [
     # home-manager.nixosModules.home-manager
     # dotfiles.nixosModules.erik
