@@ -2,9 +2,8 @@
 
 Serves a machine's own `/nix/store` to the rest of the clan as a signed binary cache.
 
-Unlike `ncps.thecluster.lan`, which proxies and caches *upstream* substituters, harmonia
-fetches nothing. A server only offers paths that machine has already built or realised,
-so the useful servers are the ones that build the most.
+Unlike `ncps.thecluster.lan`, which proxies and caches *upstream* substituters, harmonia fetches nothing.
+A server only offers paths that machine has already built or realised, so the useful servers are the ones that build the most.
 
 Servers are plain HTTP on the LAN. NAR signatures carry the integrity guarantee, so TLS
 would only hide which paths are being fetched. A server therefore exposes every path in
