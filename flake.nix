@@ -1,6 +1,11 @@
 {
   description = "UnstoppableMango's NixOS configuration";
 
+  # ./modules/nix turns this on for the clan's own machines. Declaring it here
+  # too means evaluating this flake from anywhere else, a fresh checkout or CI,
+  # does not need the feature already set in the ambient nix.conf.
+  nixConfig.extra-experimental-features = [ "pipe-operators" ];
+
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
     nixpkgs-stable.url = "github:nixos/nixpkgs?ref=nixos-25.11";
