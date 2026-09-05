@@ -7,6 +7,7 @@
     ./disk-config.nix
     ../../modules/ceph
     ../../modules/desktops
+    ../../modules/dns
     ../../modules/ssh
     # ../../modules/users/erik
   ];
