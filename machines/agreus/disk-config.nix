@@ -14,7 +14,9 @@
           esp = {
             priority = 1;
             name = "ESP";
-            size = "500M";
+            # 500M holds only about a dozen generations of kernel + initrd, and
+            # configurationLimit is 25, so the ESP fills and blocks rebuilds.
+            size = "2G";
             type = "EF00";
             content = {
               type = "filesystem";
