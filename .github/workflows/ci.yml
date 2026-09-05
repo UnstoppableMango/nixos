@@ -4,11 +4,13 @@ on:
   push:
     branches: [main]
   pull_request:
-    branches: [main]
+
+permissions:
+  contents: read
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: thecluster
     steps:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
 
@@ -22,7 +24,7 @@ jobs:
       - uses: cachix/cachix-action@5f2d7c5294214f71b873db4b969586b980625e71 # v17
         with:
           name: unstoppablemango
-          authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
+          authToken: ${{ github.event_name == 'push' && secrets.CACHIX_AUTH_TOKEN || '' }}
 
       - run: nix flake check
       - run: nix build .#nixosConfigurations.hades.config.system.build.toplevel
@@ -39,6 +41,6 @@ jobs:
       - uses: cachix/cachix-action@5f2d7c5294214f71b873db4b969586b980625e71 # v17
         with:
           name: unstoppablemango
-          authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
+          authToken: ${{ github.event_name == 'push' && secrets.CACHIX_AUTH_TOKEN || '' }}
 
       - run: nix build .#rpi-kernel

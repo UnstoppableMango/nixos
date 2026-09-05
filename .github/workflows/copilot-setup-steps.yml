@@ -11,9 +11,7 @@ on:
 
 jobs:
   copilot-setup-steps:
-    # Everything is broken
-    runs-on: ubuntu-latest
-    # runs-on: nixos-runners
+    runs-on: thecluster
     permissions:
       contents: read
     steps:
