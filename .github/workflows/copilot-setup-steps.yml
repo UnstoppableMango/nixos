@@ -11,7 +11,7 @@ on:
 
 jobs:
   copilot-setup-steps:
-    runs-on: [self-hosted, thecluster]
+    runs-on: thecluster
     permissions:
       contents: read
     steps:
