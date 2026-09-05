@@ -10,29 +10,19 @@
 # complete list rather than an internal-only prefix. They sit on VLAN 20,
 # on-link for every machine there and reachable over enp7s0 from hades.
 {
-  networking = {
-    nameservers = [
-      "10.0.69.201"
-      "10.0.69.202"
-    ];
+  networking.nameservers = [
+    "10.0.69.201"
+    "10.0.69.202"
+  ];
 
-    # hades is the only machine on resolvconf: it opts out of clan-core's
-    # recommended defaults in clan.nix, so it does not get systemd-resolved
-    # like the rest of the clan, and it is also the only machine with a second
-    # source of resolvers (NetworkManager, from wlp5s0's DHCP lease, where the
-    # wired link is primary and wireless is the fallback).
-    #
-    # openresolv keeps one record per source and orders anything it does not
-    # find in interface_order alphabetically, which puts `NetworkManager` ahead
-    # of `static`, the record NixOS writes for the nameservers above. glibc
-    # treats the first NXDOMAIN it gets as final rather than trying the next
-    # server, so the DHCP resolvers alone decide whether an internal name
-    # resolves. Naming `static` pins the pair to the front; the DHCP resolvers
-    # stay in resolv.conf and take over once these two time out.
-    #
-    # Inert on the systemd-resolved machines, which do not generate this file.
-    resolvconf.extraConfig = ''
-      interface_order='lo lo[0-9]* static'
-    '';
-  };
+  # Every machine runs systemd-resolved, so the pair above lands in the global
+  # scope and anything a link supplies of its own is scoped to that link. Only
+  # hades has such a link today: NetworkManager on wlp5s0, the wireless
+  # fallback behind the two wired interfaces, whose DHCP lease carries public
+  # resolvers that know nothing about thecluster.lan.
+  #
+  # A routing-only domain (the `~` prefix contributes no search suffix) sends
+  # thecluster.lan to the global scope explicitly, instead of leaving the
+  # choice of scope to resolved while the fallback is associated.
+  services.resolved.domains = [ "~thecluster.lan" ];
 }
