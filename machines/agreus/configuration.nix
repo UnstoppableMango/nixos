@@ -8,6 +8,7 @@
     ../../modules/ceph
     ../../modules/desktops
     ../../modules/dns
+    ../../modules/nix
     ../../modules/ssh
     # ../../modules/users/erik
   ];
