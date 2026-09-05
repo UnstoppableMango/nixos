@@ -99,6 +99,20 @@ in
       roles.client.tags.all = { };
     };
 
+    clan-cache = {
+      module.name = "trusted-nix-caches";
+      module.input = "clan-core";
+
+      roles.default = {
+        # cache.clan.lol and nix-community.cachix.org, trusted everywhere.
+        tags.all = { };
+
+        # The service only marks caches as trusted. ./modules/cache carries the
+        # substituters the daemon actually pulls from, shared by every machine.
+        extraModules = [ ./modules/cache ];
+      };
+    };
+
     internet = {
       module.name = "internet";
       module.input = "clan-core";

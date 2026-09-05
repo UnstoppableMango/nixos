@@ -3,19 +3,18 @@ let
   primaryUser = "erik";
 in
 {
+  # Shared caches come from ../../modules/cache via the clan-cache instance.
   nix.settings = {
-    extra-substituters = [
-      # "https://ncps.thecluster.lan"
-      "https://nix-community.cachix.org"
-      "https://unstoppablemango.cachix.org"
-      "https://zed.cachix.org"
-    ];
+    # dotfiles' modules/zed sets this too, but only in erik's nix.conf, which
+    # the daemon does not read. It stays here so `nixos-rebuild` as root also
+    # pulls Zed from cache. Keep the key in step with that module.
+    extra-substituters = [ "https://zed.cachix.org" ];
     extra-trusted-public-keys = [
-      # "ncps.thecluster.lan:D8fcKW2/D+zjKOABa3bDjEe8x+EPZpXnBDm+XwtNrhI="
-      "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
-      "unstoppablemango.cachix.org-1:m7uEI6X1Ov8DyFWJQX4WsRFRWFuzRW5c/Xms8ZaP74U="
       "zed.cachix.org-1:/pHQ6dpMsAZk2DiP4WCL0p9YDNKWj2Q5FL20bNmw1cU="
     ];
+
+    # Every other machine gets this from clan-core's recommended defaults, which
+    # hades opts out of in clan.nix.
     experimental-features = [
       "nix-command"
       "flakes"
