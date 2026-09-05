@@ -189,11 +189,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1788584625,
-        "narHash": "sha256-bQo786uw4bWt73/dabHMONRzteS9CAY/6/XKk18rlFo=",
-        "rev": "a45136553c1283d2ee8a927ffce4a6bd6cb6b33d",
+        "lastModified": 1788602745,
+        "narHash": "sha256-c401cVIF3nsY6aqOBYx4gw1Q5r8bgzRoa8m2/QikFng=",
+        "rev": "c6d6ce574603e40ba14adcb4370c6334fb80db54",
         "type": "tarball",
-        "url": "https://git.clan.lol/api/v1/repos/clan/clan-core/archive/a45136553c1283d2ee8a927ffce4a6bd6cb6b33d.tar.gz"
+        "url": "https://git.clan.lol/api/v1/repos/clan/clan-core/archive/c6d6ce574603e40ba14adcb4370c6334fb80db54.tar.gz"
       },
       "original": {
         "type": "tarball",
@@ -381,11 +381,11 @@
         "zed": "zed"
       },
       "locked": {
-        "lastModified": 1788580143,
-        "narHash": "sha256-fh6FTfrGe/d4Y9K0WZL+7lJnbEazqYMxiBjtNaAQg94=",
+        "lastModified": 1788626519,
+        "narHash": "sha256-3XPPIl8OaeR8Z8FmDIlVvvuPlObcnKMmyE8VJ96bG4A=",
         "owner": "unstoppablemango",
         "repo": "dotfiles",
-        "rev": "cf74d7541f1183d6a7e1d55a62ab456b0da3d5c2",
+        "rev": "0bc121f5bb7e40bd6ff9256c1008bbb596355e28",
         "type": "github"
       },
       "original": {
@@ -644,11 +644,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1788487777,
-        "narHash": "sha256-Ro/e1N4ZR8/XaFF+sF9SgfPK79HM5YNEppzFj8p+0Ak=",
+        "lastModified": 1788620682,
+        "narHash": "sha256-qdXXcNrxlA35KvMH8yxlQen3pyJnV7yMDbv1QOOIOBQ=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "693e8ce0fb240a73c116a03cfd7b19269c87af88",
+        "rev": "8381f3481e4424ea0b53c9e7469c14da799d5822",
         "type": "github"
       },
       "original": {
