@@ -52,6 +52,7 @@ in
     description = "THECLUSTER";
   };
 
+  modules."@UnstoppableMango/harmonia" = import ./modules/service/harmonia;
   modules."@UnstoppableMango/k3s" = import ./modules/service/k3s;
   modules."@UnstoppableMango/pi" = import ./modules/service/pi;
   modules."@UnstoppableMango/trouble" = import ./modules/service/trouble;
@@ -111,6 +112,24 @@ in
         # substituters the daemon actually pulls from, shared by every machine.
         extraModules = [ ./modules/cache ];
       };
+    };
+
+    # Serves each server's own store to the clan. Complements ./modules/cache,
+    # whose entries are all hosted or pull-through caches: nothing there offers
+    # a path that only ever existed on one of these machines.
+    harmonia = {
+      module.name = "@UnstoppableMango/harmonia";
+      module.input = "self";
+
+      # Addresses come from the hosts flake rather than <machine>.thecluster.io,
+      # so reaching a server does not depend on LAN DNS.
+      roles.server.machines = {
+        gaea.settings.address = managed.gaea.ip;
+        hades.settings.address = managed.hades.ip;
+        zeus.settings.address = managed.zeus.ip;
+      };
+
+      roles.client.tags.all = { };
     };
 
     internet = {
