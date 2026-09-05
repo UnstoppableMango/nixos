@@ -3,6 +3,7 @@
   imports = [
     ../../modules/ceph
     ../../modules/dns
+    ../../modules/nix
     ./disk-config.nix
   ];
 

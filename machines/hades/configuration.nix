@@ -31,6 +31,7 @@ in
     ./disk-config.nix
     ../../modules/desktops
     ../../modules/dns
+    ../../modules/nix
     ../../modules/ssh
     ../../modules/unifi
   ];
