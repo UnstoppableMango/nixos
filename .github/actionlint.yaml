@@ -1,0 +1,5 @@
+self-hosted-runner:
+  # ARC scale set installed by the-cluster; runners register with the scale set
+  # name as their only label.
+  labels:
+    - thecluster
