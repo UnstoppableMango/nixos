@@ -1,6 +1,9 @@
 { lib, ... }:
 {
-  imports = [ ./disk-config.nix ];
+  imports = [
+    ./disk-config.nix
+    ../../modules/dns
+  ];
 
   networking = {
     hostName = "pik8s6";
@@ -8,8 +11,6 @@
       address = "10.0.69.1";
       interface = "end0";
     };
-    nameservers = [ "10.0.69.1" ];
-
     interfaces.end0 = {
       useDHCP = false;
       ipv4.addresses = [

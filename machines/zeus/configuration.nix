@@ -2,6 +2,7 @@
 {
   imports = [
     ../../modules/ceph
+    ../../modules/dns
     ./disk-config.nix
   ];
 
@@ -35,8 +36,6 @@
       address = "10.0.69.1";
       interface = "enp6s0";
     };
-
-    nameservers = [ "10.0.69.1" ];
 
     interfaces.enp6s0 = {
       useDHCP = false;
