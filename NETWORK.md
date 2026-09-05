@@ -129,8 +129,14 @@ The UniFi controller itself runs on hades via `modules/unifi`, started on demand
 
 ## DNS and service addressing
 
-pfSense resolves LAN names for both VLANs.
-Every machine points its `nameservers` at its own gateway: `192.168.1.1` on VLAN 1, `10.0.69.1` on VLAN 20.
+Every machine points its `nameservers` at `10.0.69.201` and `10.0.69.202`, set once in `modules/dns` and imported by each `machines/*/configuration.nix`.
+Both are full recursors, and they are the only resolvers that carry the `thecluster.lan` zone.
+The pfSense gateways (`192.168.1.1` on VLAN 1, `10.0.69.1` on VLAN 20) resolve public names and the rest of the LAN, but answer NXDOMAIN inside `thecluster.lan`, so a machine pointed at its gateway cannot reach the `ncps.thecluster.lan` substituter in `modules/cache`.
+
+The resolvers sit on VLAN 20, on-link for every machine there and reachable over `enp7s0` from hades.
+
+Every machine except hades resolves through systemd-resolved, which clan-core's recommended defaults enable.
+hades opts out of those defaults in `clan.nix` and uses resolvconf instead; `modules/dns` carries the `interface_order` entry that keeps these resolvers ahead of the ones NetworkManager picks up from wlp5s0's DHCP lease.
 
 CoreDNS runs inside rosequartz and resolves cluster-internal names.
 It is reached through the cluster, not through the LAN resolver.

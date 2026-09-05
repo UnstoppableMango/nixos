@@ -7,6 +7,7 @@
     ./disk-config.nix
     ../../modules/ceph
     ../../modules/desktops
+    ../../modules/dns
     ../../modules/ssh
     # ../../modules/users/erik
   ];
@@ -39,8 +40,6 @@
       address = "10.0.69.1";
       interface = "enp0s31f6";
     };
-
-    nameservers = [ "10.0.69.1" ];
 
     interfaces.enp0s31f6 = {
       useDHCP = false;

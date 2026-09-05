@@ -3,29 +3,13 @@
   manifest.name = "raspberry-pi";
   manifest.readme = builtins.readFile ./README.md;
 
+  # Hardware only. Resolvers are clan-wide and come from ../../dns, imported by
+  # each machine's configuration.nix. Setting `networking.nameservers` here would
+  # not work: it is a list, so a role-level value concatenates with the machine's
+  # rather than overriding it, and the role's entries would lead the resolver
+  # order on every Pi.
   roles.pi4b = {
     description = "Raspberry Pi 4B";
-
-    interface =
-      { lib, ... }:
-      {
-        options.nameservers = lib.mkOption {
-          type = lib.types.listOf lib.types.str;
-          default = [
-            "192.168.1.46"
-            "192.168.1.47"
-          ];
-          description = "Nameservers for this Pi 4B.";
-        };
-      };
-
-    perInstance =
-      { settings, ... }:
-      {
-        nixosModule = {
-          imports = [ ./4b.nix ];
-          networking.nameservers = settings.nameservers;
-        };
-      };
+    perInstance.nixosModule.imports = [ ./4b.nix ];
   };
 }
