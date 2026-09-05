@@ -145,8 +145,8 @@
           _module.args.pkgs = import inputs.nixpkgs {
             inherit system;
             config.allowUnfree = true;
-            overlays = [
-              inputs.dotfiles.overlays.default
+            overlays = with inputs; [
+              dotfiles.overlays.default
             ];
           };
 

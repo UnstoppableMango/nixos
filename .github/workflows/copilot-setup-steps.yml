@@ -11,9 +11,7 @@ on:
 
 jobs:
   copilot-setup-steps:
-    # Everything is broken
-    runs-on: ubuntu-latest
-    # runs-on: thecluster
+    runs-on: [self-hosted, thecluster]
     permissions:
       contents: read
     steps:
