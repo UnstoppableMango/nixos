@@ -142,7 +142,10 @@ in
       address = "192.168.1.1";
       interface = "enp6s0";
     };
-    nameservers = [ "192.168.1.1" ];
+    nameservers = [
+      "10.0.69.201"
+      "10.0.69.202"
+    ];
   };
 
   time.timeZone = "America/Chicago";
