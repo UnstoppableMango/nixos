@@ -21,6 +21,7 @@ This is a NixOS configuration flake using **flake-parts** and **clan-core** for 
 ### Module System
 
 Plain NixOS modules live under `modules/` and are composed into machine configs via direct `imports`. Clan service modules (role-based, multi-machine) live under `modules/service/` and are registered as clan inventory modules in `clan.nix`.
+Modules every machine needs (`modules/dns`, `modules/nix`) are not imported per machine: the `base` instance in `clan.nix` attaches them to every inventory member through its `tags.all` role, the same way the `clan-cache` instance attaches `modules/cache`.
 
 The `rosequartz` Kubernetes cluster (pik8s4–6 control plane, agreus worker) is **not** defined in this repo. It runs on [cairn](https://github.com/UnstoppableMango/cairn), a library flake that registers one clan service per cluster component (`@UnstoppableMango/{pki,etcd,apiserver,kubelet,loadbalancer,network,kubeconfig,inoculant,coredns,flux}`). `clan.nix` declares a `rosequartz-<component>` instance per service with `module.input = "cairn"`; the services coordinate via clan exports. Cairn's `docs/USAGE.md` and per-service `modules/service/<name>/README.md` are the reference for their options.
 
@@ -53,7 +54,7 @@ Other machines (agreus, pollux, castor, zeus, gaea, pik8s1–6) follow the same 
   - `ssh/` - System-level SSH behavior (currently just `ssh.inhibitSleepOnSsh`, a PAM hook that blocks suspend while an SSH session is open).
     SSH *client* config for erik lives in the dotfiles repo's `modules/ssh`.
   - `unifi/` - UniFi network module
-  - `service/` - Clan service modules (`k3s`, `pi`, `trouble`); the rosequartz cluster's services come from the `cairn` input
+  - `service/` - Clan service modules (`base`, `k3s`, `pi`, `trouble`); the rosequartz cluster's services come from the `cairn` input
 - Machine metadata lives in the [hosts](https://github.com/UnstoppableMango/hosts) flake's `hosts` output, consumed here and by dotfiles (which follows the same input), so the `internet` clan service and erik's ssh client config never drift apart.
   Each entry is a record (`ip`, `arch`, `tags`).
   Tags are **not** defined in this repo: edit them in the hosts flake and `nix flake update hosts`.

@@ -1,8 +1,6 @@
 {
   imports = [
     ./disk-config.nix
-    ../../modules/dns
-    ../../modules/nix
   ];
 
   networking = {

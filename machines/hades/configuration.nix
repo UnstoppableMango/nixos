@@ -30,8 +30,6 @@ in
   imports = [
     ./disk-config.nix
     ../../modules/desktops
-    ../../modules/dns
-    ../../modules/nix
     ../../modules/ssh
     ../../modules/unifi
   ];
@@ -137,7 +135,7 @@ in
       address = "192.168.1.1";
       interface = "enp6s0";
     };
-    # Resolvers come from ../../modules/dns.
+    # Resolvers come from ../../modules/dns, via the `base` clan instance.
   };
 
   # hades is a workstation, so keep the HTML manual and nixos-help that the

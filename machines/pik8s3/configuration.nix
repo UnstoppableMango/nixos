@@ -1,8 +1,6 @@
 {
   imports = [
     ./disk-config.nix
-    ../../modules/dns
-    ../../modules/nix
   ];
 
   # Transitional dual-homing. The UniFi 24p port carries VLAN 1 untagged and

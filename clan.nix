@@ -52,6 +52,7 @@ in
     description = "THECLUSTER";
   };
 
+  modules."@UnstoppableMango/base" = import ./modules/service/base;
   modules."@UnstoppableMango/harmonia" = import ./modules/service/harmonia;
   modules."@UnstoppableMango/k3s" = import ./modules/service/k3s;
   modules."@UnstoppableMango/pi" = import ./modules/service/pi;
@@ -60,6 +61,15 @@ in
   inventory.machines = machines;
 
   inventory.instances = {
+    # Plain NixOS modules every machine carries (./modules/dns, ./modules/nix).
+    # Attaching them here, rather than in each machines/*/configuration.nix,
+    # means a new machine inherits them by joining the inventory.
+    base = {
+      module.name = "@UnstoppableMango/base";
+      module.input = "self";
+      roles.default.tags.all = { };
+    };
+
     erik = {
       module.name = "users";
 
