@@ -36,8 +36,6 @@
       interface = "eno1";
     };
 
-    nameservers = [ "10.0.69.1" ];
-
     interfaces.eno1 = {
       useDHCP = false;
       ipv4.addresses = [

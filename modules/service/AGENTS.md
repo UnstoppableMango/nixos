@@ -255,6 +255,7 @@ modules."@UnstoppableMango/myservice" = lib.importApply ./modules/service/myserv
 
 | Module | Roles | Notes |
 |--------|-------|-------|
+| `@UnstoppableMango/base` | `default` | Attaches `modules/dns` and `modules/nix` to every machine via `tags.all` |
 | `@UnstoppableMango/k3s` | `control-plane`, `worker` | Uses vars for k3s token; common config in `k3s.nix` |
 | `@UnstoppableMango/pi` | `pi4b` | Hardware config for Raspberry Pi 4B |
 | `@UnstoppableMango/trouble` | `server` | Minimal debug tooling service |

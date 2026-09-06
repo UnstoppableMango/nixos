@@ -1,5 +1,7 @@
 {
-  imports = [ ./disk-config.nix ];
+  imports = [
+    ./disk-config.nix
+  ];
 
   # Transitional dual-homing. The UniFi 24p port carries VLAN 1 untagged and
   # VLAN 20 tagged, so this machine keeps its old address and default route
@@ -13,8 +15,6 @@
       address = "192.168.1.1";
       interface = "end0";
     };
-    nameservers = [ "192.168.1.1" ];
-
     interfaces.end0 = {
       useDHCP = false;
       ipv4.addresses = [

@@ -36,8 +36,6 @@
       interface = "enp6s0";
     };
 
-    nameservers = [ "10.0.69.1" ];
-
     interfaces.enp6s0 = {
       useDHCP = false;
       ipv4.addresses = [

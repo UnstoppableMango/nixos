@@ -31,6 +31,11 @@ jobs:
           extra_nix_config: |
             max-jobs = 2
             cores = 4
+            # install-nix-action drops its own `experimental-features =
+            # nix-command flakes` line as soon as extra_nix_config mentions
+            # `experimental-features` at all, which `extra-` matches. Spell the
+            # whole set out so nix-command survives.
+            experimental-features = nix-command flakes pipe-operators
 
       - uses: cachix/cachix-action@5f2d7c5294214f71b873db4b969586b980625e71 # v17
         with:
@@ -48,6 +53,8 @@ jobs:
       - uses: cachix/install-nix-action@8aa03977d8d733052d78f4e008a241fd1dbf36b3 # v31.10.6
         with:
           github_access_token: ${{ secrets.GITHUB_TOKEN }}
+          extra_nix_config: |
+            experimental-features = nix-command flakes pipe-operators
 
       - uses: cachix/cachix-action@5f2d7c5294214f71b873db4b969586b980625e71 # v17
         with:

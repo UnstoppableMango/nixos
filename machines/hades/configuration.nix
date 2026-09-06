@@ -13,13 +13,6 @@ in
       "zed.cachix.org-1:/pHQ6dpMsAZk2DiP4WCL0p9YDNKWj2Q5FL20bNmw1cU="
     ];
 
-    # Every other machine gets this from clan-core's recommended defaults, which
-    # hades opts out of in clan.nix.
-    experimental-features = [
-      "nix-command"
-      "flakes"
-    ];
-
     system-features = [ "kvm" ];
 
     trusted-users = [ primaryUser ];
@@ -142,11 +135,12 @@ in
       address = "192.168.1.1";
       interface = "enp6s0";
     };
-    nameservers = [
-      "10.0.69.201"
-      "10.0.69.202"
-    ];
+    # Resolvers come from ../../modules/dns, via the `base` clan instance.
   };
+
+  # hades is a workstation, so keep the HTML manual and nixos-help that the
+  # recommended defaults drop from servers.
+  documentation.doc.enable = true;
 
   time.timeZone = "America/Chicago";
   i18n.defaultLocale = "en_US.UTF-8";

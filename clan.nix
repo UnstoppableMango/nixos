@@ -52,6 +52,7 @@ in
     description = "THECLUSTER";
   };
 
+  modules."@UnstoppableMango/base" = import ./modules/service/base;
   modules."@UnstoppableMango/harmonia" = import ./modules/service/harmonia;
   modules."@UnstoppableMango/k3s" = import ./modules/service/k3s;
   modules."@UnstoppableMango/pi" = import ./modules/service/pi;
@@ -60,6 +61,15 @@ in
   inventory.machines = machines;
 
   inventory.instances = {
+    # Plain NixOS modules every machine carries (./modules/dns, ./modules/nix).
+    # Attaching them here, rather than in each machines/*/configuration.nix,
+    # means a new machine inherits them by joining the inventory.
+    base = {
+      module.name = "@UnstoppableMango/base";
+      module.input = "self";
+      roles.default.tags.all = { };
+    };
+
     erik = {
       module.name = "users";
 
@@ -161,6 +171,12 @@ in
     hades = {
       clan.core.deployment.requireExplicitUpdate = true;
 
+      # clan-core's recommended defaults set networking.domain from meta.domain
+      # above, which makes targetHost default to root@hades.thecluster.io. That
+      # name does not exist in DNS, so use the address like the `internet`
+      # instance does.
+      clan.core.networking.targetHost = "root@${managed.hades.ip}";
+
       imports = with inputs; [
         nixos-hardware.nixosModules.asus-rog-strix-x570e
         nixos-hardware.nixosModules.common-pc-ssd
@@ -168,8 +184,6 @@ in
         { nixpkgs.overlays = [ dotfiles.overlays.default ]; }
         ./machines/hades/configuration.nix
       ];
-      # TODO: re-enable once we've reviewed the networkd/doc-stripping defaults
-      clan.core.enableRecommendedDefaults = false;
     };
 
     agreus = {
