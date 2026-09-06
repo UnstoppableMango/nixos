@@ -9,6 +9,14 @@
 # Both are full recursors and serve public names too, so this pair is the
 # complete list rather than an internal-only prefix. They sit on VLAN 20,
 # on-link for every machine there and reachable over enp7s0 from hades.
+#
+# Both addresses front the pihole deployment in rosequartz, so they share a
+# failure domain: with the cluster down, no name resolves anywhere in the clan.
+# A gateway is deliberately not listed as a third resolver. resolved stays on
+# whichever server last answered, so after the outage a machine would keep
+# using the gateway and silently lose thecluster.lan, the failure this module
+# exists to prevent. NETWORK.md, "DNS and service addressing", has the
+# reasoning and what the clan can still do without DNS.
 {
   networking.nameservers = [
     "10.0.69.201"

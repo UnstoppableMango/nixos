@@ -129,11 +129,16 @@ The UniFi controller itself runs on hades via `modules/unifi`, started on demand
 
 ## DNS and service addressing
 
-Every machine points its `nameservers` at `10.0.69.201` and `10.0.69.202`, set once in `modules/dns` and imported by each `machines/*/configuration.nix`.
+Every machine points its `nameservers` at `10.0.69.201` and `10.0.69.202`, set once in `modules/dns` and attached to every machine by the `base` clan instance.
 Both are full recursors, and they are the only resolvers that carry the `thecluster.lan` zone.
 The pfSense gateways (`192.168.1.1` on VLAN 1, `10.0.69.1` on VLAN 20) resolve public names and the rest of the LAN, but answer NXDOMAIN inside `thecluster.lan`, so a machine pointed at its gateway cannot reach the `ncps.thecluster.lan` substituter in `modules/cache`.
 
 The resolvers sit on VLAN 20, on-link for every machine there and reachable over `enp7s0` from hades.
+Both are the pihole deployment in rosequartz (the-cluster `apps/pihole/rosequartz`), exposed on two load-balancer addresses, so they are one failure domain: if rosequartz is down, every clan machine loses resolution for all names, including public ones.
+That is a deliberate trade.
+A gateway listed as a third resolver would keep public names working through an outage, but systemd-resolved stays on whichever server last answered, so after the outage the machine would keep asking the gateway and silently lose `thecluster.lan` again, the same failure this layout exists to prevent.
+The clan tolerates the outage because nothing it needs to recover resolves through DNS: clan deployments and harmonia reach machines by address from the hosts flake, and the cluster nodes hold static addresses and cached images.
+hades keeps public resolution regardless through the per-link resolvers on `wlp5s0`.
 
 Every machine resolves through systemd-resolved and configures its wired interfaces with networkd, both from clan-core's recommended defaults.
 The resolvers above are systemd-resolved's global scope, so anything a link supplies of its own is scoped to that link.
