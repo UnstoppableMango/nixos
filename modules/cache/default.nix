@@ -21,7 +21,10 @@
     ];
 
     extra-trusted-public-keys = [
-      "ncps.thecluster.lan:D8fcKW2/D+zjKOABa3bDjEe8x+EPZpXnBDm+XwtNrhI="
+      # Read from https://ncps.thecluster.lan/pubkey, never copied forward: the
+      # name derives from ncps' --cache-hostname, so a superseded key is
+      # well-formed and silently ignores every substitute it is offered.
+      "ncps.thecluster.lan:pAJGNVSRmG7gCDSOAaiHDxLFUSdys5Pk0XvcJ5803Dw="
       "mangopkgs.cachix.org-1:uJ5FgSbOg1uiXLcL0gBh1lO+y3KVuthy6UeOFYR1fLk="
       "unmango.cachix.org-1:Psb+0nALJfIcYiZLc9JYri4FJGNnzM6goZX7iLErXCI="
       "unstoppablemango.cachix.org-1:m7uEI6X1Ov8DyFWJQX4WsRFRWFuzRW5c/Xms8ZaP74U="
