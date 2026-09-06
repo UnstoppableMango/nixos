@@ -129,16 +129,11 @@ The UniFi controller itself runs on hades via `modules/unifi`, started on demand
 
 ## DNS and service addressing
 
-<<<<<<< HEAD
-Every machine points its `nameservers` at `10.0.69.201` and `10.0.69.202`, set once in `modules/dns` and attached to every machine by the `base` clan instance.
-=======
 Every machine points its `nameservers` at `10.0.69.201` and `10.0.69.202`, set once in `modules/dns` and imported by each `machines/*/configuration.nix`.
->>>>>>> d047972 (refactor: centralize DNS resolver configuration in modules/dns)
 Both are full recursors, and they are the only resolvers that carry the `thecluster.lan` zone.
 The pfSense gateways (`192.168.1.1` on VLAN 1, `10.0.69.1` on VLAN 20) resolve public names and the rest of the LAN, but answer NXDOMAIN inside `thecluster.lan`, so a machine pointed at its gateway cannot reach the `ncps.thecluster.lan` substituter in `modules/cache`.
 
 The resolvers sit on VLAN 20, on-link for every machine there and reachable over `enp7s0` from hades.
-<<<<<<< HEAD
 Both are the pihole deployment in rosequartz (the-cluster `apps/pihole/rosequartz`), exposed on two load-balancer addresses, so they are one failure domain: if rosequartz is down, every clan machine loses resolution for all names, including public ones.
 That is a deliberate trade.
 A gateway listed as a third resolver would keep public names working through an outage, but systemd-resolved stays on whichever server last answered, so after the outage the machine would keep asking the gateway and silently lose `thecluster.lan` again, the same failure this layout exists to prevent.
@@ -148,11 +143,6 @@ hades keeps public resolution regardless through the per-link resolvers on `wlp5
 Every machine resolves through systemd-resolved and configures its wired interfaces with networkd, both from clan-core's recommended defaults.
 The resolvers above are systemd-resolved's global scope, so anything a link supplies of its own is scoped to that link.
 Only hades has such a link, NetworkManager on wlp5s0, so `modules/dns` also sets the routing-only domain `~thecluster.lan` to keep internal names on the global scope while the wireless fallback is associated.
-=======
-
-Every machine except hades resolves through systemd-resolved, which clan-core's recommended defaults enable.
-hades opts out of those defaults in `clan.nix` and uses resolvconf instead; `modules/dns` carries the `interface_order` entry that keeps these resolvers ahead of the ones NetworkManager picks up from wlp5s0's DHCP lease.
->>>>>>> d047972 (refactor: centralize DNS resolver configuration in modules/dns)
 
 CoreDNS runs inside rosequartz and resolves cluster-internal names.
 It is reached through the cluster, not through the LAN resolver.
