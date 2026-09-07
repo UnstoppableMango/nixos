@@ -277,6 +277,9 @@ in
       dotfiles.inputs.stylix.homeModules.stylix
       dotfiles.inputs.nixvim.homeModules.nixvim
       dotfiles.inputs.nix2git.homeModules.nix2git
+      # dotfiles' profiles/dev sets programs.tdl.enable, but the option is
+      # declared upstream in the tdl flake.
+      dotfiles.inputs.tdl.homeModules.tdl
       # dotfiles' modules/sops sets sops.age.keyFile but no longer imports
       # sops-nix itself. This only dedupes against dotfiles' own sops-nix
       # because the dotfiles input follows ours (see flake.nix).
