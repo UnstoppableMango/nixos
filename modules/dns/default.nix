@@ -32,5 +32,5 @@
   # A routing-only domain (the `~` prefix contributes no search suffix) sends
   # thecluster.lan to the global scope explicitly, instead of leaving the
   # choice of scope to resolved while the fallback is associated.
-  services.resolved.domains = [ "~thecluster.lan" ];
+  services.resolved.settings.Resolve.Domains = [ "~thecluster.lan" ];
 }
