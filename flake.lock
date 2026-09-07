@@ -189,11 +189,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1788638739,
-        "narHash": "sha256-bawNtjncJ1K/pg8dCEVOCcL5S5qVC1c+J35kqnZIAy4=",
-        "rev": "e49149423b52f19b1a2b58b034f3522ab652dccf",
+        "lastModified": 1788757879,
+        "narHash": "sha256-yXnhNvOjgTpFp8fzVunsyL5G/ylwtRkUCv3GJ4Xf27w=",
+        "rev": "fd871c34cce6893b450fdf640ed0b1334070d7b3",
         "type": "tarball",
-        "url": "https://git.clan.lol/api/v1/repos/clan/clan-core/archive/e49149423b52f19b1a2b58b034f3522ab652dccf.tar.gz"
+        "url": "https://git.clan.lol/api/v1/repos/clan/clan-core/archive/fd871c34cce6893b450fdf640ed0b1334070d7b3.tar.gz"
       },
       "original": {
         "type": "tarball",
@@ -381,11 +381,11 @@
         "zed": "zed"
       },
       "locked": {
-        "lastModified": 1788640944,
-        "narHash": "sha256-dbjy+1r0FrAVk6GrXVQIURSbXLv920VYDmGp3TcMR4E=",
+        "lastModified": 1788753383,
+        "narHash": "sha256-6Bsh5EcrNwa8GZn72gKI3l46ZHdsqdtQNa75LPE3jjc=",
         "owner": "unstoppablemango",
         "repo": "dotfiles",
-        "rev": "4e0d41c966b310a285f80363c99dec3726378316",
+        "rev": "4946ff7f0216ddb47b644755b3c68b40bb14fe0a",
         "type": "github"
       },
       "original": {
@@ -644,11 +644,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1788620682,
-        "narHash": "sha256-qdXXcNrxlA35KvMH8yxlQen3pyJnV7yMDbv1QOOIOBQ=",
+        "lastModified": 1788651960,
+        "narHash": "sha256-v9wJd32eZ2bvhBzVOd7TIjLQd011P7nwOhjKtWlci5I=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "8381f3481e4424ea0b53c9e7469c14da799d5822",
+        "rev": "2c0350c759688177331b8f5242311fae8877bdb3",
         "type": "github"
       },
       "original": {
@@ -1338,11 +1338,11 @@
     },
     "nixpkgs_2": {
       "locked": {
-        "lastModified": 1788531059,
-        "narHash": "sha256-hLD4l3QOGBQhkVp3mQ2lJ/YbEi99qUgKapb40KovZ88=",
+        "lastModified": 1788614874,
+        "narHash": "sha256-7QYjT2vHLuX9Z1pdxHXDKCbh1CR3D/2rywB9Tx0MPRg=",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "801bef6abd86b91e51083066b83fb354a11fc640",
+        "rev": "c043004d1c6985732bcc1cbc5a9c9aecbbb4e0f0",
         "type": "github"
       },
       "original": {
