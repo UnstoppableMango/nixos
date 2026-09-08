@@ -110,17 +110,6 @@
       ];
     };
 
-    # inoculant defaults to every machine in the cluster; the existing config
-    # scopes it to the control plane only, so pin that explicitly rather than
-    # silently picking up agreus.
-    inoculant.machines = [
-      "pik8s1"
-      "pik8s2"
-      "pik8s4"
-      "pik8s5"
-      "pik8s6"
-    ];
-
     flux = {
       enable = true;
       url = "https://github.com/UnstoppableMango/the-cluster";
