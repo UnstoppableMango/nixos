@@ -1,4 +1,4 @@
-{ inputs, pkgs, ... }:
+{ pkgs, ... }:
 let
   primaryUser = "erik";
 in
@@ -262,78 +262,10 @@ in
   host.gnome.enable = true;
   ssh.inhibitSleepOnSsh.enable = true;
 
-  home-manager = {
-    useGlobalPkgs = true;
-    useUserPackages = true;
-    backupFileExtension = "bak";
-  };
-
-  home-manager.users.${primaryUser} = {
-    imports = with inputs; [
-      # The host file composes dotfiles' home/ (erik's identity) with the
-      # profiles hades wants, so it is the whole configuration on its own.
-      # homeModules.erik is only the home/ half; importing it as well would
-      # double up.
-      dotfiles.homeModules.hades
-      # dotfiles' modules configure options they do not declare themselves, so
-      # every consumer of the erik profile brings the same set along that
-      # dotfiles' own homeConfigurations do.
-      dotfiles.inputs.stylix.homeModules.stylix
-      dotfiles.inputs.nixvim.homeModules.nixvim
-      dotfiles.inputs.nix2git.homeModules.nix2git
-      # dotfiles' profiles/dev sets programs.tdl.enable, but the option is
-      # declared upstream in the tdl flake.
-      dotfiles.inputs.tdl.homeModules.tdl
-      # dotfiles' modules/sops sets sops.age.keyFile but no longer imports
-      # sops-nix itself. This only dedupes against dotfiles' own sops-nix
-      # because the dotfiles input follows ours (see flake.nix).
-      sops-nix.homeManagerModules.sops
-    ];
-
-    dotfiles = {
-      emacs.enable = true;
-      ai.enable = true;
-
-      # Serve the omnigent web UI to the rest of the LAN, not just loopback,
-      # so the desktop and mobile clients on other devices reach this host at
-      # 10.0.69.69 / 192.168.1.69 / hades. Safe only because the machine sits
-      # behind the house firewall: the server itself authenticates nothing.
-      ai.omnigent.listenAddress = "0.0.0.0";
-
-      # Keep this machine reachable from claude.ai/code and the mobile apps
-      # without a terminal open. Outbound-only: the server registers with
-      # Anthropic and opens no inbound port.
-      ai.remoteControl.enable = true;
-
-      # Not currently using and also printing annoying shell warning
-      openshift.enable = false;
-
-      # The kubeconfig's shape (contexts, VIP, dex OIDC exec block) lives in
-      # dotfiles so darter shares it. Only the clan-generated material and the
-      # decision to own ~/.kube/config outright are ours.
-      kubernetes.rosequartz = {
-        enable = true;
-        caFile = "${../../vars/shared/rosequartz-ca/crt/value}";
-        admin.certFile = "${../../vars/shared/rosequartz-admin-cert/crt/value}";
-        admin.keyFile = "/home/${primaryUser}/.kube/rosequartz-admin.key";
-        currentContext = "rosequartz";
-        target = ".kube/config";
-        sopsTemplate = "kube-config";
-      };
-    };
-
-    # Decrypted by erik's personal age key, whose location dotfiles' modules/sops
-    # sets. That user key is a recipient on rosequartz-admin-cert, unlike hades'
-    # own machine key: this is a user secret, not a host one.
-    sops.secrets."rosequartz-admin-key" = {
-      sopsFile = ../../vars/shared/rosequartz-admin-cert/key/secret;
-      key = "data";
-      format = "json";
-      path = "/home/${primaryUser}/.kube/rosequartz-admin.key";
-    };
-
-  };
-
+  # erik's home environment is a standalone Home Manager install switched with
+  # `make home` from the dotfiles repo, not a NixOS module here. This file owns
+  # the machine and erik's system account; everything under his home directory,
+  # including the rosequartz kubeconfig and its admin identity, is that repo's.
   users.users.${primaryUser} = {
     shell = pkgs.zsh;
     description = "Erik Rasmussen";

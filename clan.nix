@@ -180,7 +180,9 @@ in
       imports = with inputs; [
         nixos-hardware.nixosModules.asus-rog-strix-x570e
         nixos-hardware.nixosModules.common-pc-ssd
-        home-manager.nixosModules.home-manager
+        # erik's home is a standalone Home Manager install, so the only thing
+        # taken from dotfiles here is the overlay (nix-direnv and friends, which
+        # the system half also pulls from).
         { nixpkgs.overlays = [ dotfiles.overlays.default ]; }
         ./machines/hades/configuration.nix
       ];
