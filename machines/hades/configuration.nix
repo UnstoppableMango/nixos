@@ -104,6 +104,10 @@ in
     "iptable_nat"
   ];
 
+  # Language servers watch entire module caches, so a handful of concurrent
+  # editor and agent sessions exhaust systemd's 524288 default.
+  boot.kernel.sysctl."fs.inotify.max_user_watches" = 1048576;
+
   networking = {
     hostName = "hades";
     # enp6s0 (RTL8125 2.5GbE, PCI 06:00.0) and enp7s0 (Intel I211 1GbE, PCI 07:00.0)
