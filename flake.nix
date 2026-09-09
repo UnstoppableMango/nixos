@@ -127,7 +127,6 @@
         flake-parts.flakeModules.modules
         treefmt-nix.flakeModule
         disko.flakeModules.default
-        home-manager.flakeModules.home-manager
         cairn.flakeModules.default
       ];
 
