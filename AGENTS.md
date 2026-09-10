@@ -49,6 +49,10 @@ Other machines (agreus, pollux, castor, zeus, gaea, pik8s1–6) follow the same 
 - `flake.nix` - Entry point; imports flake-parts modules; clan config via `./clan.nix`
 - `machines/` - Per-machine `configuration.nix` for every host (hades, agreus, pollux, castor, zeus, gaea, pik8s1–6)
 - `modules/` - Shared NixOS modules imported by machine configs:
+  - `brave/` - Brave enterprise policy at `/etc/brave/policies/managed/`, currently just the `thecluster` managed-bookmarks folder.
+    Brave itself is installed by the dotfiles repo's home-manager configuration; policy lives in `/etc`, which home-manager cannot write, so it is supplied here.
+    The bookmark list is a plain data file (`modules/brave/bookmarks.nix`) shared with the `brave-bookmarks-policy` package in `flake.nix`, so darter, which is not a clan machine and has no Nix-managed `/etc`, installs the same file with
+    `sudo install -Dm644 "$(nix build --no-link --print-out-paths github:UnstoppableMango/nixos#brave-bookmarks-policy)" /etc/brave/policies/managed/bookmarks.json`.
   - `desktops/` - Desktop environment modules (currently GNOME only)
   - `hardware/` - Hardware-specific modules (currently NVIDIA config)
   - `ssh/` - System-level SSH behavior (currently just `ssh.inhibitSleepOnSsh`, a PAM hook that blocks suspend while an SSH session is open).

@@ -29,6 +29,7 @@ in
 
   imports = [
     ./disk-config.nix
+    ../../modules/brave
     ../../modules/desktops
     ../../modules/dns
     ../../modules/nix
@@ -259,6 +260,7 @@ in
   programs.zsh.enable = true;
   users.defaultUserShell = pkgs.bash;
 
+  host.brave.enable = true;
   host.gnome.enable = true;
   ssh.inhibitSleepOnSsh.enable = true;
 
