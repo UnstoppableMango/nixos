@@ -154,7 +154,15 @@
             ];
           };
 
-          packages = lib.optionalAttrs (system == "aarch64-linux") {
+          packages = {
+            # ./modules/brave installs this on hades. Hosts outside this clan
+            # (darter) have no Nix-managed /etc, so they copy this file into
+            # /etc/brave/policies/managed/ by hand.
+            brave-bookmarks-policy = pkgs.writeText "bookmarks.json" (
+              builtins.toJSON { ManagedBookmarks = import ./modules/brave/bookmarks.nix; }
+            );
+          }
+          // lib.optionalAttrs (system == "aarch64-linux") {
             rpi-kernel =
               # Copy the kernelPackages config so we can build + cache the aarch64 kernel
               # https://github.com/NixOS/nixos-hardware/blob/master/raspberry-pi/4/default.nix#L31-L33
