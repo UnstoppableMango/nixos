@@ -1,0 +1,22 @@
+{
+	"nix.enableLanguageServer": true,
+	"nix.serverPath": "nil",
+	"nix.serverSettings": {
+		"nil": {
+			"formatting": {
+				"command": [
+					"nixfmt"
+				],
+			}
+		}
+	},
+	"[json]": {
+		"editor.defaultFormatter": "dprint.dprint"
+	},
+	"[jsonc]": {
+		"editor.defaultFormatter": "vscode.json-language-features"
+	},
+	"[nix]": {
+		"editor.defaultFormatter": "jnoortheen.nix-ide"
+	}
+}

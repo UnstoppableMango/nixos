@@ -1,0 +1,19 @@
+{
+  "machines": {
+    "agreus": {
+      "installedAt": 1777846691
+    },
+    "pollux": {
+      "installedAt": 1787603194
+    },
+    "castor": {
+      "installedAt": 1787981707
+    },
+    "gaea": {
+      "installedAt": 1788108232
+    },
+    "zeus": {
+      "installedAt": 1788120935
+    }
+  }
+}

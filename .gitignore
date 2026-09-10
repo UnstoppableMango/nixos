@@ -1,0 +1,11 @@
+/result*
+.direnv/
+*.bak
+*.img
+*.zst
+.claude/*
+!.claude/settings.json
+!.claude/skills/*
+bin/
+.kube/
+*kubeconfig
