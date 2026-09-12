@@ -135,7 +135,9 @@ in
       # so reaching a server does not depend on LAN DNS.
       roles.server.machines = {
         gaea.settings.address = managed.gaea.ip;
-        hades.settings.address = managed.hades.ip;
+        # managed.hades.ip is hades's VLAN 1 address, which the VLAN 20
+        # machines cannot reach. See NETWORK.md.
+        hades.settings.address = "10.0.69.69";
         zeus.settings.address = managed.zeus.ip;
       };
 
