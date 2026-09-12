@@ -45,6 +45,16 @@
     };
   };
 
+  hardware.facter.detected.dhcp.enable = false;
+
+  # enp2s0 is cabled to the same LAN as eno1 but has no address. MetalLB's L2
+  # speaker answers ARP on every up link, so clients reaching a VIP through
+  # enp2s0 hit the strict reverse-path filter and are dropped.
+  systemd.network.networks."10-enp2s0" = {
+    matchConfig.Name = "enp2s0";
+    linkConfig.ActivationPolicy = "down";
+  };
+
   environment.systemPackages = with pkgs; [
     curl
     gitMinimal
