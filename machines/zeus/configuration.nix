@@ -5,6 +5,7 @@
     ../../modules/dns
     ../../modules/nix
     ./disk-config.nix
+    ./resources.nix
   ];
 
   nixpkgs.hostPlatform = "x86_64-linux";
