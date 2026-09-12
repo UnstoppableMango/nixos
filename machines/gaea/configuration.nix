@@ -2,12 +2,22 @@
 {
   imports = [
     ../../modules/ceph
+    ../../modules/ci-limits
     ../../modules/dns
     ../../modules/nix
     ./disk-config.nix
   ];
 
   nixpkgs.hostPlatform = "x86_64-linux";
+
+  # 128 threads, 503 GB, shared with OSDs and the Actions runner pods.
+  ciLimits = {
+    memoryMax = 128;
+    agentMemoryMax = 16;
+    maxJobs = 16;
+    cores = 8;
+    reservedCpu = 16;
+  };
 
   # EPYC 7502 rack box whose firmware is in UEFI mode, so it takes
   # systemd-boot rather than zeus's legacy-BIOS grub.
