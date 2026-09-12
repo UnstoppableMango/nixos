@@ -54,6 +54,9 @@ in
 
   modules."@UnstoppableMango/base" = import ./modules/service/base;
   modules."@UnstoppableMango/harmonia" = import ./modules/service/harmonia;
+  modules."@UnstoppableMango/hercules-ci-agent" =
+    inputs.nixpkgs.lib.modules.importApply ./modules/service/hercules-ci-agent
+      { inherit inputs; };
   modules."@UnstoppableMango/k3s" = import ./modules/service/k3s;
   modules."@UnstoppableMango/pi" = import ./modules/service/pi;
   modules."@UnstoppableMango/trouble" = import ./modules/service/trouble;
@@ -140,6 +143,29 @@ in
       };
 
       roles.client.tags.all = { };
+    };
+
+    # Host agents for both Hercules CI accounts. Each account also runs an agent
+    # in rosequartz (apps/hercules-ci/helm-release-*.yml in the-cluster), and
+    # they share its binary-caches.json.
+    hercules-ci-unmango = {
+      module.name = "@UnstoppableMango/hercules-ci-agent";
+      module.input = "self";
+      roles.agent.settings.account = "unmango";
+      roles.agent.machines = {
+        gaea = { };
+        zeus = { };
+      };
+    };
+
+    hercules-ci-unstoppablemango = {
+      module.name = "@UnstoppableMango/hercules-ci-agent";
+      module.input = "self";
+      roles.agent.settings.account = "unstoppablemango";
+      roles.agent.machines = {
+        gaea = { };
+        zeus = { };
+      };
     };
 
     internet = {
