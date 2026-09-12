@@ -43,7 +43,6 @@ Also treat as intentional, with the reasoning already in the file's comments:
 
 - The five-member etcd quorum (pik8s1, pik8s2, pik8s4-6) with pik8s3 as a worker. A sixth control-plane machine would make the quorum even and buy no extra failure tolerance.
 - `services.loadbalancer.machines` pinned to pik8s4-6, because pik8s1 and pik8s2 still have VLAN 1 untagged ports and keepalived would advertise the VIP on the wrong network.
-- `services.inoculant.machines` pinned to the control plane rather than defaulting to every machine.
 - The VIP `10.0.69.100` is deliberately not in the hosts flake. It is not a machine.
 
 ## Generated trees and secrets
