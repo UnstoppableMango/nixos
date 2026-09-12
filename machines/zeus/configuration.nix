@@ -2,13 +2,22 @@
 {
   imports = [
     ../../modules/ceph
+    ../../modules/ci-limits
     ../../modules/dns
     ../../modules/nix
     ./disk-config.nix
-    ./resources.nix
   ];
 
   nixpkgs.hostPlatform = "x86_64-linux";
+
+  # 32 threads, 125 GB, fifteen OSDs at 4 GiB each.
+  ciLimits = {
+    memoryMax = 48;
+    agentMemoryMax = 8;
+    maxJobs = 8;
+    cores = 4;
+    reservedCpu = 4;
+  };
 
   # Dual Xeon E5-2670 tower whose firmware is in legacy BIOS mode, so it takes
   # grub rather than gaea's systemd-boot. efiSupport keeps the hybrid layout

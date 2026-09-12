@@ -53,6 +53,9 @@ Other machines (agreus, pollux, castor, zeus, gaea, pik8s1–6) follow the same 
     Brave itself is installed by the dotfiles repo's home-manager configuration; policy lives in `/etc`, which home-manager cannot write, so it is supplied here.
     The bookmark list is a plain data file (`modules/brave/bookmarks.nix`) shared with the `brave-bookmarks-policy` package in `flake.nix`, so darter, which is not a clan machine and has no Nix-managed `/etc`, installs the same file with
     `sudo install -Dm644 "$(nix build --no-link --print-out-paths github:UnstoppableMango/nixos#brave-bookmarks-policy)" /etc/brave/policies/managed/bookmarks.json`.
+  - `ci-limits/` - Memory and CPU limits for hosts running Hercules CI builds alongside rook-ceph pods (zeus, gaea).
+    Puts nix-daemon, the Hercules agents and harmonia in a capped `ci.slice`, sets nix `max-jobs`/`cores`, and reserves the slice ceiling from the kubelet.
+    Each host sizes it through `ciLimits.*` in its `configuration.nix`; per-agent `concurrentTasks` is set on the hercules-ci instances in `clan.nix`.
   - `desktops/` - Desktop environment modules (currently GNOME only)
   - `hardware/` - Hardware-specific modules (currently NVIDIA config)
   - `ssh/` - System-level SSH behavior (currently just `ssh.inhibitSleepOnSsh`, a PAM hook that blocks suspend while an SSH session is open).
