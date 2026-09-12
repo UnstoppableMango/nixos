@@ -93,6 +93,12 @@
       inputs.clan-core.follows = "clan-core";
     };
 
+    # nixpkgs is left unfollowed so the agent is the build upstream caches.
+    hercules-ci-agent = {
+      url = "github:hercules-ci/hercules-ci-agent";
+      inputs.flake-parts.follows = "flake-parts";
+    };
+
     hosts = {
       url = "github:UnstoppableMango/hosts";
       inputs.nixpkgs.follows = "nixpkgs";

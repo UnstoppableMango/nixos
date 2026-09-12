@@ -58,7 +58,7 @@ Other machines (agreus, pollux, castor, zeus, gaea, pik8s1–6) follow the same 
   - `ssh/` - System-level SSH behavior (currently just `ssh.inhibitSleepOnSsh`, a PAM hook that blocks suspend while an SSH session is open).
     SSH *client* config for erik lives in the dotfiles repo's `modules/ssh`.
   - `unifi/` - UniFi network module
-  - `service/` - Clan service modules (`base`, `k3s`, `pi`, `trouble`); the rosequartz cluster's services come from the `cairn` input
+  - `service/` - Clan service modules (`base`, `harmonia`, `hercules-ci-agent`, `k3s`, `pi`, `trouble`); the rosequartz cluster's services come from the `cairn` input
 - Machine metadata lives in the [hosts](https://github.com/UnstoppableMango/hosts) flake's `hosts` output, consumed here and by dotfiles (which follows the same input), so the `internet` clan service and erik's ssh client config never drift apart.
   Each entry is a record (`ip`, `arch`, `tags`).
   Tags are **not** defined in this repo: edit them in the hosts flake and `nix flake update hosts`.
@@ -87,6 +87,8 @@ Other machines (agreus, pollux, castor, zeus, gaea, pik8s1–6) follow the same 
 - `home-manager` - User environment management, integrated via `home-manager.nixosModules.home-manager`
 - `dotfiles` - Personal dotfiles flake; provides home-manager modules and overlays.
   Must follow `sops-nix`: the module system dedupes imports by path, so two sops-nix store paths would double-declare `options.sops.*` in the same home-manager configuration.
+- `hercules-ci-agent` - Provides `nixosModules.multi-agent-service`, which the `hercules-ci-agent` clan service imports to run one agent per Hercules CI account on zeus and gaea.
+  Its nixpkgs is not followed, so the agent package matches what upstream caches.
 - `hosts` - Machine inventory (name, ip, arch, role) shared with dotfiles, which follows this input
 - `disko` - Declarative disk partitioning (each host has a `disk-config.nix`)
 - `nixos-hardware` - Hardware-specific module presets
