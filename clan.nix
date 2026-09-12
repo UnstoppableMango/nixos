@@ -140,6 +140,13 @@ in
       };
 
       roles.client.tags.all = { };
+
+      # hades is a workstation that sleeps, and the Hercules CI agents on these
+      # machines fail their startup check when any substituter is unreachable.
+      roles.client.machines = {
+        gaea.settings.exclude = [ "hades" ];
+        zeus.settings.exclude = [ "hades" ];
+      };
     };
 
     internet = {
