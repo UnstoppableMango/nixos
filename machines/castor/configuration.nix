@@ -46,6 +46,16 @@
     };
   };
 
+  hardware.facter.detected.dhcp.enable = false;
+
+  # enp2s0 is cabled to VLAN 1 and would take a DHCP lease there, adding a
+  # second default route. Traffic from VLAN 1 then arrives on eno1 but routes
+  # back out enp2s0, and the strict reverse-path filter drops it.
+  systemd.network.networks."10-enp2s0" = {
+    matchConfig.Name = "enp2s0";
+    linkConfig.ActivationPolicy = "down";
+  };
+
   environment.systemPackages = with pkgs; [
     curl
     gitMinimal
