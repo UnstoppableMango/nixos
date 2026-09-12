@@ -189,11 +189,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1789093852,
-        "narHash": "sha256-2Veh30tdTA0OEuPwXpXX6cacuS4qPNIjiiY7haz1y3g=",
-        "rev": "4f4eac394f8de68cac799d4e17aaf6bacf8fa6b9",
+        "lastModified": 1789158371,
+        "narHash": "sha256-KUHSHt8iDJBt4gh2KRUZg5Hyf5qlpvS1kHlPelmeXYE=",
+        "rev": "7b7efabd70857ef43c21c1dfed9a1f17940a1b03",
         "type": "tarball",
-        "url": "https://git.clan.lol/api/v1/repos/clan/clan-core/archive/4f4eac394f8de68cac799d4e17aaf6bacf8fa6b9.tar.gz"
+        "url": "https://git.clan.lol/api/v1/repos/clan/clan-core/archive/7b7efabd70857ef43c21c1dfed9a1f17940a1b03.tar.gz"
       },
       "original": {
         "type": "tarball",
@@ -381,11 +381,11 @@
         "zed": "zed"
       },
       "locked": {
-        "lastModified": 1789105430,
-        "narHash": "sha256-eaur3kNbdQveqiFDy6sIrzvgF3pNEdT0Xyy9Loy1HqU=",
+        "lastModified": 1789233830,
+        "narHash": "sha256-PqukMITXXRreE8sGEzjYStD9eThOId1AaBGGfv0UyNs=",
         "owner": "unstoppablemango",
         "repo": "dotfiles",
-        "rev": "d55b1a67581e32adb1b20e9ea9ea1917bd21ac68",
+        "rev": "9c7f10dd10700d9a68d01d86d21dd2edbfe359bb",
         "type": "github"
       },
       "original": {
@@ -681,11 +681,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1789099078,
-        "narHash": "sha256-zzHj2wl69724lzx7DLAVziWbL75wRIk+xJ3duD0Bgrc=",
+        "lastModified": 1789230132,
+        "narHash": "sha256-u7aiV01Iu11NGOjXbxoCCrew6n0vo/LnULqOvZa+Agc=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "f10b3f2ad4aae9259617a1ff518cc921e3394228",
+        "rev": "17bf375751d457efa3897c7c3d68106616b1d469",
         "type": "github"
       },
       "original": {
@@ -1274,11 +1274,11 @@
         "nixpkgs": "nixpkgs_2"
       },
       "locked": {
-        "lastModified": 1788942796,
-        "narHash": "sha256-CLoJCCRi9sogsyGXYn8rOCWBLKAntfKUB9Rli/YXgEY=",
+        "lastModified": 1789127271,
+        "narHash": "sha256-vL/Fpo7Zxa7wvO8V5FAToUBvP+K3XsMB1wUglTtd/J0=",
         "owner": "nixos",
         "repo": "nixos-hardware",
-        "rev": "83bbc895120516d6e86885a188c04beced6535d9",
+        "rev": "24cfdc1f9344b90a1eee329a3906e2f39f4d0f1e",
         "type": "github"
       },
       "original": {
