@@ -163,7 +163,7 @@ in
       roles.agent.settings.account = "unmango";
       roles.agent.machines = {
         gaea = { };
-        zeus = { };
+        zeus.settings.concurrentTasks = 4;
       };
     };
 
@@ -173,7 +173,7 @@ in
       roles.agent.settings.account = "unstoppablemango";
       roles.agent.machines = {
         gaea = { };
-        zeus = { };
+        zeus.settings.concurrentTasks = 4;
       };
     };
 
