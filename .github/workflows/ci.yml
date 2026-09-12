@@ -41,6 +41,12 @@ jobs:
         with:
           name: unstoppablemango
           authToken: ${{ github.event_name == 'push' && secrets.CACHIX_AUTH_TOKEN || '' }}
+          # The runner image's nix is a static musl build, and musl's execvp
+          # does not fall back to /bin/sh for a script without a shebang. The
+          # post-build hook cachix-action writes for daemon mode starts with a
+          # blank line, so nix cannot exec it and fails the first local build.
+          # Store-scan mode pushes the store diff after the job instead.
+          useDaemon: false
 
       - run: nix flake check
       - run: nix build .#nixosConfigurations.hades.config.system.build.toplevel
