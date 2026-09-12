@@ -42,6 +42,17 @@
   roles.client = {
     description = "A machine that substitutes from the harmonia servers";
 
+    interface.options.exclude = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      default = [ ];
+      example = [ "hades" ];
+      description = ''
+        Servers this client does not substitute from. For machines that
+        cannot tolerate an unreachable substituter, such as a Hercules CI
+        agent, which fails its startup check when a server is down.
+      '';
+    };
+
     perInstance = import ./client.nix;
   };
 }

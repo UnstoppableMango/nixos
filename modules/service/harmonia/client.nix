@@ -1,4 +1,9 @@
-{ instanceName, roles, ... }:
+{
+  instanceName,
+  roles,
+  settings,
+  ...
+}:
 {
   nixosModule =
     {
@@ -13,7 +18,9 @@
 
       # A server is also a client, and substituting from itself is a
       # pointless round trip through the daemon.
-      others = lib.filterAttrs (name: _: name != config.networking.hostName) roles.server.machines;
+      others = lib.filterAttrs (
+        name: _: name != config.networking.hostName && !(lib.elem name settings.exclude)
+      ) roles.server.machines;
 
       url =
         name: machine:
