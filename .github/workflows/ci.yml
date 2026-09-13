@@ -17,16 +17,6 @@ jobs:
       # make that constant and harmless noise. Raise the interval past anything
       # an evaluation will hit.
       GC_LARGE_ALLOC_WARN_INTERVAL: 100000000
-      # The runner image ships a single-user nix, so install-nix-action would
-      # abort before writing any config; settings go through NIX_CONFIG instead.
-      # The runner pod is capped at 8 CPU / 8Gi (the-cluster's
-      # apps/arc-runners/helm-release.yml defaults). Nix sizes `max-jobs =
-      # auto` off the node's CPU count rather than the cgroup limit, so it has
-      # to be set explicitly or a big node spawns enough parallel builds to OOM
-      # the pod. 2 x 4 fills the CPU limit at ~4Gi per build.
-      NIX_CONFIG: |
-        max-jobs = 2
-        cores = 4
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
@@ -41,7 +31,18 @@ jobs:
           # Store-scan mode pushes the store diff after the job instead.
           useDaemon: false
 
-      - run: nix config show | grep -E '^(max-jobs|cores) '
+      # The runner image ships nix, so install-nix-action aborts before writing
+      # any config. NIX_CONFIG is left alone: the runner sets it to add the
+      # in-cluster ncps substituter, and a job-level value would replace it.
+      # The runner pod is capped at 8 CPU / 8Gi (the-cluster's
+      # apps/arc-runners/helm-release.yml defaults). Nix sizes `max-jobs =
+      # auto` off the node's CPU count rather than the cgroup limit, so it has
+      # to be set explicitly or a big node spawns enough parallel builds to OOM
+      # the pod. 2 x 4 fills the CPU limit at ~4Gi per build.
+      - run: |
+          mkdir -p ~/.config/nix
+          printf 'max-jobs = 2\ncores = 4\n' >> ~/.config/nix/nix.conf
+          nix config show | grep -E '^(max-jobs|cores|extra-substituters|substituters) '
       - run: nix flake check
       - run: nix build .#nixosConfigurations.hades.config.system.build.toplevel
 
