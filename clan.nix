@@ -138,6 +138,7 @@ in
       # Addresses come from the hosts flake rather than <machine>.thecluster.io,
       # so reaching a server does not depend on LAN DNS.
       roles.server.machines = {
+        apollo.settings.address = managed.apollo.ip;
         gaea.settings.address = managed.gaea.ip;
         # managed.hades.ip is hades's VLAN 1 address, which the VLAN 20
         # machines cannot reach. See NETWORK.md.
@@ -150,6 +151,7 @@ in
       # hades is a workstation that sleeps, and the Hercules CI agents on these
       # machines fail their startup check when any substituter is unreachable.
       roles.client.machines = {
+        apollo.settings.exclude = [ "hades" ];
         gaea.settings.exclude = [ "hades" ];
         zeus.settings.exclude = [ "hades" ];
       };
@@ -163,6 +165,7 @@ in
       module.input = "self";
       roles.agent.settings.account = "unmango";
       roles.agent.machines = {
+        apollo.settings.concurrentTasks = 2;
         gaea.settings.concurrentTasks = 8;
         zeus.settings.concurrentTasks = 4;
       };
@@ -173,6 +176,7 @@ in
       module.input = "self";
       roles.agent.settings.account = "unstoppablemango";
       roles.agent.machines = {
+        apollo.settings.concurrentTasks = 2;
         gaea.settings.concurrentTasks = 8;
         zeus.settings.concurrentTasks = 4;
       };
