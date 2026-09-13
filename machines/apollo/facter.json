@@ -4691,7 +4691,7 @@
         "resources": [
           {
             "type": "hwaddr",
-            "address": 98
+            "address": 97
           },
           {
             "type": "phwaddr",
@@ -5097,7 +5097,7 @@
         "resources": [
           {
             "type": "hwaddr",
-            "address": 98
+            "address": 97
           },
           {
             "type": "phwaddr",
