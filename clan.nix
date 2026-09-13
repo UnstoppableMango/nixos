@@ -20,6 +20,7 @@ let
   clanMachines = {
     hades = { };
     agreus = { };
+    apollo = { };
     castor = { };
     gaea = { };
     pollux = { };

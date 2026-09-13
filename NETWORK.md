@@ -89,6 +89,7 @@ The rosequartz service CIDR is `10.0.0.0/24` and the pod CIDR is `10.244.0.0/16`
 | hades (`enp7s0`) | `10.0.69.69` | 20 | GS108T | Unverified | Workstation |
 | zeus | `10.0.69.10` | 20 | GS724Tv4 | `g18` | rosequartz worker |
 | gaea | `10.0.69.11` | 20 | GS724Tv4 | `g1` | rosequartz worker |
+| apollo | `10.0.69.12` | 20 | GS724Tv4 | `g2` | Clan server; not yet in rosequartz |
 | pik8s1 | `192.168.1.101` + `10.0.69.101` | 1 + 20 | UniFi 24p | Unverified | rosequartz control plane; dual-homed during cutover |
 | pik8s2 | `192.168.1.102` + `10.0.69.102` | 1 + 20 | UniFi 24p | Unverified | rosequartz control plane; dual-homed during cutover |
 | pik8s3 | `192.168.1.103` + `10.0.69.103` | 1 + 20 | UniFi 24p | Unverified | rosequartz worker; dual-homed during cutover |
