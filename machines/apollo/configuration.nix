@@ -2,10 +2,20 @@
 {
   imports = [
     ../../modules/ceph
+    ../../modules/ci-limits
     ./disk-config.nix
   ];
 
   nixpkgs.hostPlatform = "x86_64-linux";
+
+  # 32 threads, 32 GiB.
+  ciLimits = {
+    memoryMax = 12;
+    agentMemoryMax = 4;
+    maxJobs = 4;
+    cores = 8;
+    reservedCpu = 2;
+  };
 
   # Firmware mode unverified, so take castor's dual-mode grub: BIOS grub on the
   # disk plus an EFI removable-path loader on the ESP.
