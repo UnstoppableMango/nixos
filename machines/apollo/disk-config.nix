@@ -2,7 +2,8 @@
   disko.devices = {
     disk.main = {
       type = "disk";
-      device = "/dev/disk/by-id/TODO";
+      # The two 960 EVOs are left out, kept blank for later use.
+      device = "/dev/disk/by-id/nvme-Samsung_SSD_970_EVO_500GB_S5H7NC0MB45374M";
       content = {
         type = "gpt";
         partitions = {

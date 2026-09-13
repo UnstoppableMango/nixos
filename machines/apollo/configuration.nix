@@ -35,6 +35,13 @@
     gateway = [ "10.0.69.1" ];
   };
 
+  # The second onboard NIC is cabled and would take a DHCP lease, adding a
+  # second default route the strict reverse-path filter then trips over.
+  systemd.network.networks."10-unused" = {
+    matchConfig.MACAddress = "40:b0:76:d7:f6:07";
+    linkConfig.ActivationPolicy = "down";
+  };
+
   environment.systemPackages = with pkgs; [
     curl
     gitMinimal
