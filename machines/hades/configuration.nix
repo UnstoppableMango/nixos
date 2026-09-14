@@ -389,13 +389,8 @@ in
     ubuntu-classic
   ];
 
-  # Some programs need SUID wrappers, can be configured further or are
-  # started in user sessions.
-  # programs.mtr.enable = true;
-  programs.gnupg.agent = {
-    enable = true;
-    enableSSHSupport = true;
-  };
+  # gpg-agent comes from dotfiles' modules/gnupg (signing only). SSH goes
+  # through GNOME's gcr-ssh-agent, which dotfiles points SSH_AUTH_SOCK at.
 
   # The system half of dotfiles' modules/yubikey: scdaemon, ykman, and Yubico
   # Authenticator reach the key through pcscd, and the udev rules grant the
