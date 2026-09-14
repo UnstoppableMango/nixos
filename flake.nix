@@ -130,6 +130,7 @@
       systems = import inputs.systems;
 
       imports = with inputs; [
+        systems.flakeModule
         flake-parts.flakeModules.modules
         treefmt-nix.flakeModule
         disko.flakeModules.default
