@@ -397,6 +397,12 @@ in
     enableSSHSupport = true;
   };
 
+  # The system half of dotfiles' modules/yubikey: scdaemon, ykman, and Yubico
+  # Authenticator reach the key through pcscd, and the udev rules grant the
+  # logged-in user access to the device.
+  services.pcscd.enable = true;
+  services.udev.packages = [ pkgs.yubikey-personalization ];
+
   services.lldpd.enable = true;
 
   # Provide /bin/bash (and other FHS paths) so tools that hardcode /bin/bash work.
