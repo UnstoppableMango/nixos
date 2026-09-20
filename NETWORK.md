@@ -89,7 +89,7 @@ The rosequartz service CIDR is `10.0.0.0/24` and the pod CIDR is `10.244.0.0/16`
 | hades (`enp7s0`) | `10.0.69.69` | 20 | GS108T | Unverified | Workstation |
 | zeus | `10.0.69.10` | 20 | GS724Tv4 | `g18` | rosequartz worker |
 | gaea | `10.0.69.11` | 20 | GS724Tv4 | `g1` | rosequartz worker |
-| apollo | `10.0.69.12` | 20 | GS724Tv4 | `g2` | rosequartz worker |
+| apollo | `10.0.69.12` | 20 | GS724Tv4 | `g10` | rosequartz worker |
 | pik8s1 | `192.168.1.101` + `10.0.69.101` | 1 + 20 | UniFi 24p | Unverified | rosequartz control plane; dual-homed during cutover |
 | pik8s2 | `192.168.1.102` + `10.0.69.102` | 1 + 20 | UniFi 24p | Unverified | rosequartz control plane; dual-homed during cutover |
 | pik8s3 | `192.168.1.103` + `10.0.69.103` | 1 + 20 | UniFi 24p | Unverified | rosequartz worker; dual-homed during cutover |
@@ -110,6 +110,10 @@ gaea, pollux, and castor each have a second NIC on the GS724Tv4 that no config u
 zeus's other five NICs are all down and hold no address.
 `g19` is the trunk uplink to the UniFi 24p.
 
+apollo's second onboard NIC (`40:b0:76:d7:f6:07`) is cabled to the GS724Tv4 but held down by `linkConfig.ActivationPolicy`, so it emits no frames and no port ever learns its address.
+Its port is therefore not identifiable from the switch and is not recorded here.
+Leave whichever port it occupies on VLAN 1: the interface is down precisely because a second default route breaks the strict reverse-path filter, and a VLAN 20 access port there would re-create that hazard if the interface ever came up.
+
 hades holds two static addresses because `enp6s0` and `enp7s0` share a MAC address, which makes DHCP unreliable on both.
 NetworkManager leaves both wired interfaces unmanaged and handles only `wlp5s0`.
 
@@ -119,7 +123,7 @@ NetworkManager leaves both wired interfaces unmanaged and handles only `wlp5s0`.
 | --- | --- | --- | --- |
 | UniFi 24p | pfSense, trunk | VLAN 1 + 20 | GS108T trunk, GS724Tv4 trunk, UniFi APs, pik8s1-6, agreus |
 | GS108T | UniFi 24p, trunk | VLAN 1 + 20 | hades `enp6s0` on VLAN 1, hades `enp7s0` on VLAN 20 |
-| GS724Tv4 | UniFi 24p on `g19`, trunk | VLAN 1 + 20 | zeus `g18`, gaea `g1`, pollux `g7`, and castor `g5` on VLAN 20 access ports |
+| GS724Tv4 | UniFi 24p on `g19`, trunk | VLAN 1 + 20 | zeus `g18`, gaea `g1`, apollo `g10`, pollux `g7`, and castor `g5` on VLAN 20 access ports |
 
 Both Netgear switches answer SNMP v2c on community `public`: GS724Tv4 at `192.168.1.6`, GS108T at `192.168.1.5`.
 Walking `dot1qTpFdbPort` (`1.3.6.1.2.1.17.7.1.2.2.1.2`) maps VLAN plus MAC to port number, and `dot1qPvid` (`1.3.6.1.2.1.17.7.1.4.5.1.1`) gives each port's untagged VLAN.
