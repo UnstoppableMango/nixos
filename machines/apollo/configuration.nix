@@ -25,6 +25,13 @@
     efiInstallAsRemovable = true;
   };
 
+  # The GTX 1060 is the only VGA device, so it carries the local console.
+  # nouveau deactivates the firmware framebuffer on load and then fails to
+  # find a mode on it ("Cannot find any crtc or sizes"), leaving a black
+  # screen where the login prompt should be. Nothing here needs KMS, so keep
+  # the simpledrm console instead.
+  boot.blacklistedKernelModules = [ "nouveau" ];
+
   # https://nixos.wiki/wiki/Power_Management#systemd_sleep
   systemd.sleep.settings.Sleep = {
     AllowSuspend = "no";
