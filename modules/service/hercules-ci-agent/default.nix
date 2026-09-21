@@ -40,7 +40,20 @@
   # The upstream module is an attrset with no key, so the module system cannot
   # dedupe it; importing it per instance would declare its options once per
   # account on the same machine.
-  perMachine.nixosModule.imports = [
-    inputs.hercules-ci-agent.nixosModules.multi-agent-service
-  ];
+  perMachine.nixosModule =
+    { config, ... }:
+    {
+      imports = [
+        inputs.hercules-ci-agent.nixosModules.multi-agent-service
+      ];
+
+      # See README.md: a collection mid-task deletes paths the task still needs.
+      programs.nh.clean.enable = lib.mkForce false;
+      assertions = [
+        {
+          assertion = !config.nix.gc.automatic;
+          message = "nix.gc.automatic must stay off on Hercules CI agent machines.";
+        }
+      ];
+    };
 }
