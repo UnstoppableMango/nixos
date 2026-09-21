@@ -1,6 +1,7 @@
 { pkgs, ... }:
 {
   imports = [
+    ../../modules/arc-runner-store
     ../../modules/ceph
     ../../modules/ci-limits
     ../../modules/dns
@@ -9,6 +10,8 @@
   ];
 
   nixpkgs.hostPlatform = "x86_64-linux";
+
+  arcRunnerStore.enable = true;
 
   # 128 threads, 503 GB, shared with OSDs and the Actions runner pods.
   ciLimits = {

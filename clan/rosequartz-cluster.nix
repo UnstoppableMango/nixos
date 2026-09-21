@@ -77,6 +77,9 @@
     apollo = {
       role = "worker";
       ip = "10.0.69.12";
+      # The runner pods mount a node-local nix store, so they only run
+      # where `arcRunnerStore.enable` holds.
+      nodeLabels."thecluster.lan/ci-runner" = "true";
     };
 
     zeus = {
@@ -87,6 +90,9 @@
     gaea = {
       role = "worker";
       ip = "10.0.69.11";
+      # The runner pods mount a node-local nix store, so they only run
+      # where `arcRunnerStore.enable` holds.
+      nodeLabels."thecluster.lan/ci-runner" = "true";
     };
   };
 
