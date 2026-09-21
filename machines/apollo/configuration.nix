@@ -43,7 +43,7 @@
 
   hardware.facter.detected.dhcp.enable = false;
 
-  # Matched by MAC rather than interface name. GS724Tv4 g2 must be a VLAN 20
+  # Matched by MAC rather than interface name. GS724Tv4 g10 must be a VLAN 20
   # access port for this address to be reachable.
   systemd.network.networks."10-lan" = {
     matchConfig.MACAddress = "40:b0:76:d7:f6:06";
