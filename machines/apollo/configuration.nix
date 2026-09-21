@@ -1,12 +1,15 @@
 { pkgs, ... }:
 {
   imports = [
+    ../../modules/arc-runner-store
     ../../modules/ceph
     ../../modules/ci-limits
     ./disk-config.nix
   ];
 
   nixpkgs.hostPlatform = "x86_64-linux";
+
+  arcRunnerStore.enable = true;
 
   # 32 threads, 32 GiB.
   ciLimits = {
