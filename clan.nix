@@ -165,7 +165,6 @@ in
       module.input = "self";
       roles.agent.settings.account = "unmango";
       roles.agent.machines = {
-        apollo.settings.concurrentTasks = 2;
         gaea.settings.concurrentTasks = 8;
         zeus.settings.concurrentTasks = 4;
       };
@@ -176,7 +175,6 @@ in
       module.input = "self";
       roles.agent.settings.account = "unstoppablemango";
       roles.agent.machines = {
-        apollo.settings.concurrentTasks = 2;
         gaea.settings.concurrentTasks = 8;
         zeus.settings.concurrentTasks = 4;
       };
