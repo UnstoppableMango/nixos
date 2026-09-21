@@ -7,6 +7,7 @@
     description = "Configuration every machine in the clan carries";
     perInstance.nixosModule.imports = [
       ../../dns
+      ../../gc
       ../../nix
     ];
   };
