@@ -79,7 +79,7 @@ The dashed VIP link is a keepalived advertisement rather than a cable.
 | 20 | Homelab | `10.0.69.0/24` | `10.0.69.1` | rosequartz Kubernetes cluster |
 
 Neither subnet overlaps the cluster's internal ranges.
-The rosequartz service CIDR is `10.0.0.0/24` and the pod CIDR is `10.244.0.0/16`.
+The rosequartz service CIDR is `10.0.0.0/24` and the pod CIDR is `10.1.0.0/16`, per the kube-apiserver and kube-controller-manager flags on the control-plane nodes.
 
 ## Hosts
 
