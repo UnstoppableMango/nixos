@@ -3,7 +3,6 @@
   imports = [
     ../../modules/arc-runner-store
     ../../modules/ceph
-    ../../modules/ci-limits
     ./disk-config.nix
   ];
 
@@ -11,14 +10,35 @@
 
   arcRunnerStore.enable = true;
 
-  # 32 threads, 32 GiB.
-  ciLimits = {
-    memoryMax = 12;
-    agentMemoryMax = 4;
-    maxJobs = 4;
-    cores = 8;
-    reservedCpu = 2;
+  # 32 threads, 32 GiB. No ciLimits, and no Hercules agents in clan.nix.
+  #
+  # apollo carries eight OSDs, six 14 TB drives plus two NVMe, and an OSD's
+  # memory request is what the scheduler reserves. Eight of them need more than
+  # this host has, so the CI slice cannot also hold 12 GiB. ci-limits reserved
+  # memoryMax + 4 as systemReserved plus 2 kubeReserved, which left 11.2 GiB of
+  # the 31.2 GiB allocatable and no room for a third OSD.
+  #
+  # gaea and zeus absorb both roles at 504 GiB and 126 GiB. apollo does not, so
+  # it is a storage host only.
+  #
+  # The reservations below replace the ones ci-limits supplied. Dropping them
+  # entirely would hand the scheduler every byte and leave the OSDs to contend
+  # with the kernel, which is what ci-limits existed to prevent.
+  services.kubernetes.kubelet.extraConfig = {
+    systemReserved = {
+      cpu = "2";
+      memory = "2Gi";
+    };
+    kubeReserved = {
+      cpu = "1";
+      memory = "1Gi";
+    };
+    evictionHard."memory.available" = "1Gi";
   };
+
+  # harmonia took its ceiling from ci.slice, which no longer exists here. It
+  # serves this machine's store to the clan and is not a build.
+  systemd.services.harmonia.serviceConfig.MemoryMax = "2G";
 
   # Firmware mode unverified, so take castor's dual-mode grub: BIOS grub on the
   # disk plus an EFI removable-path loader on the ESP.
