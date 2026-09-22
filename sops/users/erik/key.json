@@ -4,7 +4,15 @@
     "type": "age"
   },
   {
-    "publickey": "age1jnndq4jl03mc7f5vtlyh24rr6e2pxe8y9nlk6yt9ztpmpahqhuwqmz639k",
+    "publickey": "age1jz7tthllca32pw95jwfq8fhm4vy5j43p4akc3d54ae5evqvtpgmql8z53d",
+    "type": "age"
+  },
+  {
+    "publickey": "age1yubikey1q2yk76pht3jv3ekcl3nmf94hls9d4v4zw6655rkm7d2sevnmp4s3zndun8g",
+    "type": "age"
+  },
+  {
+    "publickey": "age1yubikey1qvagvtdammwnfa24wvzpwzrvtkjfz9vytxv475yzgssz3576yf9f7nxep7g",
     "type": "age"
   }
 ]
