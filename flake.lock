@@ -262,11 +262,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1789964102,
-        "narHash": "sha256-0mw4PnfGiN2ScPdpKGz2uNISNjlZp8UHnSpPT8xQgZY=",
+        "lastModified": 1790093205,
+        "narHash": "sha256-/de6TwJnlxazHN7oweprOplH65Vg2VioPMsBd4AW1Xk=",
         "owner": "UnstoppableMango",
         "repo": "cairn",
-        "rev": "e4ebaafeb68a7a95925cd7853ed85b3441422ea7",
+        "rev": "664e92118288a1a25047248347e528cf6bec3a11",
         "type": "github"
       },
       "original": {
@@ -1092,11 +1092,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1789448139,
-        "narHash": "sha256-6ReQ30AVr0jEXJjkhW40iCDZvLx48Ri4I7M7HCFcpnE=",
+        "lastModified": 1789965866,
+        "narHash": "sha256-baP/qgiMHd8hzOkozgU08Zdb1r55XrBFDJX9JX2zxMA=",
         "owner": "UnstoppableMango",
         "repo": "inoculant",
-        "rev": "c235b2887cf162875815c6edabe5ba0c89e43847",
+        "rev": "48e8c5d7b1178c0e952f435f6b8e7cf0a8728d10",
         "type": "github"
       },
       "original": {

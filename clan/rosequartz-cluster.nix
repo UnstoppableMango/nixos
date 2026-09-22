@@ -114,6 +114,10 @@
       # them) rather than minting a fresh set under cairn's default "cairn-"
       # prefix.
       generatorPrefix = "rosequartz";
+
+      # The cluster CA (thecluster.io) is an intermediate. Without its root,
+      # OpenSSL-based clients in pods reject kube-root-ca.crt.
+      caChain = [ (builtins.readFile ../certs/unmango-authority.crt) ];
     };
 
     loadbalancer = {
