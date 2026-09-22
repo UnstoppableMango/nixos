@@ -103,6 +103,25 @@ in
       };
     };
 
+    tz = {
+      module.name = "users";
+
+      roles.default = {
+        machines.hades = { };
+
+        settings = {
+          user = "tz";
+          prompt = true;
+          groups = [
+            "networkmanager"
+            "video"
+            "input"
+            "audio"
+          ];
+        };
+      };
+    };
+
     sshd = {
       module.name = "sshd";
       module.input = "clan-core";
