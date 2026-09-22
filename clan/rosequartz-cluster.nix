@@ -74,17 +74,26 @@
       ip = "10.0.69.13";
     };
 
+    # The three x86 workers raise cairn's 110-pod default, which the pi
+    # nodes keep. Each is sized against its own CPU and memory rather than
+    # set uniformly; 250 is the ceiling either way, since each node gets a
+    # /24 podCIDR and a pod admitted past 254 would have no address.
     apollo = {
       role = "worker";
       ip = "10.0.69.12";
       # The runner pods mount a node-local nix store, so they only run
       # where `arcRunnerStore.enable` holds.
       nodeLabels."thecluster.lan/ci-runner" = "true";
+      # 32 threads, 32 GiB: the memory is what runs out first here.
+      maxPods = 150;
     };
 
     zeus = {
       role = "worker";
       ip = "10.0.69.10";
+      # 32 threads, 125 GiB, minus the ci.slice ceiling modules/ci-limits
+      # reserves from the kubelet.
+      maxPods = 200;
     };
 
     gaea = {
@@ -93,6 +102,9 @@
       # The runner pods mount a node-local nix store, so they only run
       # where `arcRunnerStore.enable` holds.
       nodeLabels."thecluster.lan/ci-runner" = "true";
+      # 128 threads, 503 GiB. It sat at 109 pods against the 110 cap with
+      # under half its CPU and a third of its memory requested.
+      maxPods = 250;
     };
   };
 
