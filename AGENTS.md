@@ -57,7 +57,7 @@ Other machines (agreus, pollux, castor, zeus, gaea, pik8s1–6) follow the same 
     Puts nix-daemon, the Hercules agents and harmonia in a capped `ci.slice`, sets nix `max-jobs`/`cores`, and reserves the slice ceiling from the kubelet.
     Each host sizes it through `ciLimits.*` in its `configuration.nix`; per-agent `concurrentTasks` is set on the hercules-ci instances in `clan.nix`.
   - `gc/` - Weekly `nh clean` (keeps the last 5 generations and anything under 14 days), attached to every machine by the `base` instance.
-    The `hercules-ci-agent` service forces it off on agent machines (apollo, gaea, zeus), since a collection mid-task deletes paths the task still needs.
+    The `hercules-ci-agent` service forces it off on agent machines (gaea, hades, zeus), since a collection mid-task deletes paths the task still needs.
   - `desktops/` - Desktop environment modules (currently GNOME only)
   - `hardware/` - Hardware-specific modules (currently NVIDIA config)
   - `ssh/` - System-level SSH behavior (currently just `ssh.inhibitSleepOnSsh`, a PAM hook that blocks suspend while an SSH session is open).
@@ -122,7 +122,7 @@ Other machines (agreus, pollux, castor, zeus, gaea, pik8s1–6) follow the same 
 
 | Host          | Hardware              | Notes                                                     |
 | ------------- | --------------------- | ---------------------------------------------------------- |
-| hades         | ASUS ROG Strix X570-E | Primary desktop; AMD GPU; BTRFS; clan-managed              |
+| hades         | ASUS ROG Strix X570-E | Primary desktop; AMD GPU; BTRFS; clan-managed; Hercules CI agent for both accounts at two tasks each |
 | agreus        | Generic x86_64        | Office mini PC; clan-managed; facter hardware config; rosequartz worker |
 | pollux        | Sandy Bridge i5, legacy BIOS | Basement rack server; clan-managed; facter hardware config; rosequartz worker |
 | castor        | Sandy Bridge i5-2500  | Basement rack server; pollux's twin; rosequartz worker; firmware mode unverified, so it takes pollux's dual-mode grub |
