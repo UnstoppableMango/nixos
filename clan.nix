@@ -180,12 +180,18 @@ in
     # Host agents for both Hercules CI accounts. Each account also runs an agent
     # in rosequartz (apps/hercules-ci/helm-release-*.yml in the-cluster), and
     # they share its binary-caches.json.
+    #
+    # hades is a workstation, so its agents stay at two tasks each: the desktop
+    # comes first, and a machine that sleeps is opportunistic capacity either
+    # way. It has no ciLimits, since modules/ci-limits sizes the slice against
+    # the kubelet and the OSDs, neither of which hades runs.
     hercules-ci-unmango = {
       module.name = "@UnstoppableMango/hercules-ci-agent";
       module.input = "self";
       roles.agent.settings.account = "unmango";
       roles.agent.machines = {
         gaea.settings.concurrentTasks = 8;
+        hades.settings.concurrentTasks = 2;
         zeus.settings.concurrentTasks = 4;
       };
     };
@@ -196,6 +202,7 @@ in
       roles.agent.settings.account = "unstoppablemango";
       roles.agent.machines = {
         gaea.settings.concurrentTasks = 8;
+        hades.settings.concurrentTasks = 2;
         zeus.settings.concurrentTasks = 4;
       };
     };
