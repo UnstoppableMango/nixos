@@ -1,6 +1,7 @@
 # nixos
 
 [![CI](https://github.com/UnstoppableMango/nixos/actions/workflows/ci.yml/badge.svg)](https://github.com/UnstoppableMango/nixos/actions/workflows/ci.yml)
+[![Hercules CI](https://hercules-ci.com/api/v1/site/github/account/UnstoppableMango/project/nixos/badge)](https://hercules-ci.com/github/UnstoppableMango/nixos)
 
 My NixOS configurations for every machine I run, from a desktop to a rack of servers to a pile of Raspberry Pis.
 
