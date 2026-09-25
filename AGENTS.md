@@ -60,6 +60,10 @@ Other machines (agreus, pollux, castor, zeus, gaea, pik8s1–6) follow the same 
     The `hercules-ci-agent` service forces it off on agent machines (gaea, hades, zeus), since a collection mid-task deletes paths the task still needs.
   - `desktops/` - Desktop environment modules (currently GNOME only)
   - `hardware/` - Hardware-specific modules (currently NVIDIA config)
+  - `htpc/` - Kodi under the cage kiosk compositor on agreus, started and stopped with the TV's power.
+    The TV keeps HDMI hotplug asserted in standby, so `htpc-tv-power` polls the TV's network API instead, which stops answering in standby; a game controller connecting also starts Kodi.
+    The poll crosses from VLAN 20 to VLAN 1, so it depends on the pfSense rule listed in `NETWORK.md`.
+    Capped in kodi's `user-1001.slice` and not reserved from the kubelet, so pods keep the memory while Kodi is not running.
   - `ssh/` - System-level SSH behavior (currently just `ssh.inhibitSleepOnSsh`, a PAM hook that blocks suspend while an SSH session is open).
     SSH *client* config for erik lives in the dotfiles repo's `modules/ssh`.
   - `unifi/` - UniFi network module
@@ -123,7 +127,7 @@ Other machines (agreus, pollux, castor, zeus, gaea, pik8s1–6) follow the same 
 | Host          | Hardware              | Notes                                                     |
 | ------------- | --------------------- | ---------------------------------------------------------- |
 | hades         | ASUS ROG Strix X570-E | Primary desktop; AMD GPU; BTRFS; clan-managed; Hercules CI agent for both accounts at two tasks each |
-| agreus        | Generic x86_64        | Office mini PC; clan-managed; facter hardware config; rosequartz worker |
+| agreus        | Generic x86_64        | Office mini PC; clan-managed; facter hardware config; rosequartz worker; HTPC (Kodi, follows the TV's power) |
 | pollux        | Sandy Bridge i5, legacy BIOS | Basement rack server; clan-managed; facter hardware config; rosequartz worker |
 | castor        | Sandy Bridge i5-2500  | Basement rack server; pollux's twin; rosequartz worker; firmware mode unverified, so it takes pollux's dual-mode grub |
 | zeus          | Dual Xeon E5-2670 tower, legacy BIOS | Basement tower; clan-managed; rosequartz worker; grub with `efiSupport` so the hybrid layout survives a firmware switch |
