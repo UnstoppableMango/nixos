@@ -287,6 +287,11 @@ in
     ];
   };
 
+  # tz's account comes from the `tz` users instance in clan.nix. Like erik's,
+  # tz's home is a standalone Home Manager install from the dotfiles repo; this
+  # only supplies the CLI to bootstrap it.
+  users.users.tz.packages = [ pkgs.home-manager ];
+
   # Enable automatic login for the user.
   services.displayManager.autoLogin.enable = true;
   services.displayManager.autoLogin.user = primaryUser;
