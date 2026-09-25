@@ -123,7 +123,7 @@
     # Containers inherit containerd's soft nofile limit, systemd's 1024 when
     # unset. radosgw never raises its own, and at 1024 it stops accepting on
     # :443 under an ncps burst. Drop this once the cairn input sets the same
-    # default (UnstoppableMango/cairn fix/containerd-nofile).
+    # default (UnstoppableMango/cairn#93).
     kubelet.extraModules = [
       { systemd.services.containerd.serviceConfig.LimitNOFILE = 1048576; }
     ];
