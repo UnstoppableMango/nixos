@@ -120,12 +120,26 @@
       caChain = [ (builtins.readFile ../certs/unmango-authority.crt) ];
     };
 
-    # Containers inherit containerd's soft nofile limit, systemd's 1024 when
-    # unset. radosgw never raises its own, and at 1024 it stops accepting on
-    # :443 under an ncps burst. Drop this once the cairn input sets the same
-    # default (UnstoppableMango/cairn#93).
     kubelet.extraModules = [
+      # Containers inherit containerd's soft nofile limit, systemd's 1024 when
+      # unset. radosgw never raises its own, and at 1024 it stops accepting on
+      # :443 under an ncps burst. Drop this once the cairn input sets the same
+      # default (UnstoppableMango/cairn#93).
       { systemd.services.containerd.serviceConfig.LimitNOFILE = 1048576; }
+
+      # Handler for the nested-containers RuntimeClass in the-cluster. Pods in
+      # a user namespace that run their own container runtime (dind, podman,
+      # buildkitd) need a writable /sys/fs/cgroup, which runc then delegates to
+      # the namespace's root. Drop this once cairn can declare runtime handlers
+      # (UnstoppableMango/cairn#96).
+      {
+        virtualisation.containerd.settings.plugins."io.containerd.grpc.v1.cri".containerd.runtimes.runc-cgroup-writable =
+          {
+            runtime_type = "io.containerd.runc.v2";
+            cgroup_writable = true;
+            options.SystemdCgroup = true;
+          };
+      }
     ];
 
     loadbalancer = {
