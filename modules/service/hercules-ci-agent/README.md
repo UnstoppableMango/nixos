@@ -12,6 +12,9 @@ The shared `hercules-ci-agent-<account>` vars generator prompts for two secrets,
 - `binary-caches`: the account's `binary-caches.json`.
   Cache names must match the account's other agents, so use the same file the rosequartz agents mount.
 
-Nix auto-GC (`nix.gc`, `min-free`, `nh clean`) must stay off on agent machines.
-The service forces off the `nh clean` timer that `modules/gc` attaches to every machine, and asserts `nix.gc.automatic` is unset.
-The agent holds no GC root while a task is in flight, so a collection mid-task deletes derivations the task still needs (hercules-ci/hercules-ci-agent#105).
+The agent holds no GC root for a task's paths once the worker that created them exits, so a collection while tasks are in flight can delete paths a later step needs (hercules-ci/hercules-ci-agent#105).
+Agent machines therefore collect only while their agents are stopped.
+The service makes the weekly `nh-clean` unit that `modules/gc` attaches to every machine conflict with every agent unit on the machine, so starting `nh-clean` stops the agents, and restarts them once it exits.
+Tasks in flight when the agents stop are interrupted.
+The timer carries a 6h `RandomizedDelaySec`, so agent machines rarely collect at the same time.
+Other auto-GC (`nix.gc`, `min-free`) has no such hook and must stay off; the service asserts `nix.gc.automatic` is unset.

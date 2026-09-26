@@ -57,7 +57,7 @@ Other machines (agreus, pollux, castor, zeus, gaea, pik8s1–6) follow the same 
     Puts nix-daemon, the Hercules agents and harmonia in a capped `ci.slice`, sets nix `max-jobs`/`cores`, and reserves the slice ceiling from the kubelet.
     Each host sizes it through `ciLimits.*` in its `configuration.nix`; per-agent `concurrentTasks` is set on the hercules-ci instances in `clan.nix`.
   - `gc/` - Weekly `nh clean` (keeps the last 5 generations and anything under 14 days), attached to every machine by the `base` instance.
-    The `hercules-ci-agent` service forces it off on agent machines (gaea, hades, zeus), since a collection mid-task deletes paths the task still needs.
+    On agent machines (gaea, hades, zeus) the `hercules-ci-agent` service stops the agents while it runs, since a collection mid-task can delete paths the task still needs.
   - `desktops/` - Desktop environment modules (currently GNOME only)
   - `hardware/` - Hardware-specific modules (currently NVIDIA config)
   - `ssh/` - System-level SSH behavior (currently just `ssh.inhibitSleepOnSsh`, a PAM hook that blocks suspend while an SSH session is open).
