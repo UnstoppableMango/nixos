@@ -42,13 +42,26 @@
   # account on the same machine.
   perMachine.nixosModule =
     { config, ... }:
+    let
+      agentUnits = map (name: "hercules-ci-agent-${name}.service") (
+        lib.attrNames config.services.hercules-ci-agents
+      );
+    in
     {
       imports = [
         inputs.hercules-ci-agent.nixosModules.multi-agent-service
       ];
 
-      # See README.md: a collection mid-task deletes paths the task still needs.
-      programs.nh.clean.enable = lib.mkForce false;
+      # See README.md: a collection mid-task deletes paths the task still needs,
+      # so the agents are stopped for the duration of `nh clean`.
+      # Any ordering between a stopping and a starting unit puts the stop first.
+      systemd.services.nh-clean = lib.mkIf config.programs.nh.clean.enable {
+        conflicts = agentUnits;
+        after = agentUnits;
+        serviceConfig.ExecStopPost = "${config.systemd.package}/bin/systemctl start --no-block ${lib.escapeShellArgs agentUnits}";
+      };
+      # Spreads agent machines apart so they do not all stop at once.
+      systemd.timers.nh-clean.timerConfig.RandomizedDelaySec = "6h";
       assertions = [
         {
           assertion = !config.nix.gc.automatic;
