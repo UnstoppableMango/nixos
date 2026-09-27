@@ -169,6 +169,24 @@
               builtins.toJSON { ManagedBookmarks = import ./modules/brave/bookmarks.nix; }
             );
           }
+          // lib.optionalAttrs (system == "x86_64-linux") {
+            # Hybrid BIOS/UEFI installer for onboarding a machine: boot it, then
+            # `clan machines install <name> --target-host root@<ip>`. Carries no
+            # machine's config, unlike the per-host
+            # `system.build.images.iso-installer`, which runs that host's
+            # services on the live image.
+            installer-iso =
+              (inputs.nixpkgs.lib.nixosSystem {
+                modules = [
+                  "${inputs.nixpkgs}/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix"
+                  {
+                    nixpkgs.hostPlatform = system;
+                    environment.systemPackages = [ pkgs.nixos-facter ];
+                    users.users.root.openssh.authorizedKeys.keys = builtins.attrValues (import ./clan/ssh-keys.nix);
+                  }
+                ];
+              }).config.system.build.isoImage;
+          }
           // lib.optionalAttrs (system == "aarch64-linux") {
             rpi-kernel =
               # Copy the kernelPackages config so we can build + cache the aarch64 kernel
