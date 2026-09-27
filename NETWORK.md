@@ -47,6 +47,7 @@ flowchart TB
     AGREUS["agreus 10.0.69.187<br/>worker"]
     POLLUX["pollux 10.0.69.14<br/>worker"]
     CASTOR["castor 10.0.69.13<br/>worker"]
+    IRIS["iris 10.0.69.15<br/>worker"]
     GAEA["gaea 10.0.69.11<br/>worker"]
     ZEUS["zeus 10.0.69.10<br/>worker"]
   end
@@ -63,6 +64,7 @@ flowchart TB
   U24 -.-> PRN
   U24 -.-> MED
   GS724 --> POLLUX
+  GS724 -.-> IRIS
 
   CP -.->|advertises| VIP
 ```
@@ -98,6 +100,7 @@ The rosequartz service CIDR is `10.0.0.0/24` and the pod CIDR is `10.1.0.0/16`, 
 | pik8s6 | `10.0.69.106` | 20 | UniFi 24p | Unverified | rosequartz control plane |
 | agreus | `10.0.69.187` | 20 | UniFi 24p | Unverified | rosequartz worker |
 | pollux | `10.0.69.14` | 20 | GS724Tv4 | `g7` | rosequartz worker |
+| iris | `10.0.69.15` | 20 | Unverified | Unverified | rosequartz worker; not yet cabled |
 | castor (`eno1`) | `10.0.69.13` | 20 | GS724Tv4 | `g5` | rosequartz worker |
 | castor (`enp2s0`) | DHCP | 1 | GS724Tv4 | `g11` | Second NIC, unused by any config |
 | Samsung TV (UN50KU630D) | `192.168.1.75` | 1 | Wireless | n/a | agreus's HDMI display; agreus polls `:8001/api/v2/` to detect power, which needs a pfSense pass rule from `10.0.69.187` to `192.168.1.75:8001` |

@@ -19,6 +19,7 @@ let
     apollo = { };
     castor = { };
     gaea = { };
+    iris = { };
     pollux = { };
     zeus = { };
     pik8s1 = { };
