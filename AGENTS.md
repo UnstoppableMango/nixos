@@ -64,6 +64,7 @@ Other machines (agreus, pollux, castor, zeus, gaea, pik8s1–6) follow the same 
     The TV keeps HDMI hotplug asserted in standby, so `htpc-tv-power` polls the TV's network API instead, which stops answering in standby; a game controller connecting also starts Kodi.
     The poll crosses from VLAN 20 to VLAN 1, so it depends on the pfSense rule listed in `NETWORK.md`.
     Capped in kodi's `user-1001.slice` and not reserved from the kubelet, so pods keep the memory while Kodi is not running.
+    Media sources are WebDAV shares from copyparty in the-cluster (`apps/media`), written to a store-linked `sources.xml`, so sources added in Kodi's UI do not persist.
   - `ssh/` - System-level SSH behavior (currently just `ssh.inhibitSleepOnSsh`, a PAM hook that blocks suspend while an SSH session is open).
     SSH *client* config for erik lives in the dotfiles repo's `modules/ssh`.
   - `unifi/` - UniFi network module

@@ -12,6 +12,35 @@ let
   # Samsung UN50KU630D on VLAN 1. pfSense must pass agreus to it on 8001.
   tv = "192.168.1.75";
 
+  # copyparty in the-cluster (apps/media) serves each media claim read-only over WebDAV.
+  # The content type Kodi scrapes each source as lives in its database, so it
+  # is set once from "Set content" rather than here.
+  sources = {
+    video = [
+      "movies"
+      "movies4k"
+      "tv"
+      "tv4k"
+      "anime"
+      "youtube"
+    ];
+    music = [ "music" ];
+  };
+  source = dir: ''
+    <source>
+      <name>${dir}</name>
+      <path pathversion="1">davs://copyparty.thecluster.lan/${dir}/</path>
+      <allowsharing>true</allowsharing>
+    </source>
+  '';
+  sourcesXml = pkgs.writeText "sources.xml" ''
+    <sources>
+    ${lib.concatMapAttrsStringSep "\n" (
+      type: dirs: "<${type}>\n${lib.concatMapStrings source dirs}</${type}>"
+    ) sources}
+    </sources>
+  '';
+
   tvPower = pkgs.writeShellApplication {
     name = "htpc-tv-power";
     runtimeInputs = with pkgs; [
@@ -49,6 +78,13 @@ in
       "video"
     ];
   };
+
+  # A symlink into the store, so sources added from Kodi's UI do not persist.
+  systemd.tmpfiles.rules = [
+    "d /home/kodi/.kodi 0755 kodi users -"
+    "d /home/kodi/.kodi/userdata 0755 kodi users -"
+    "L+ /home/kodi/.kodi/userdata/sources.xml - - - - ${sourcesXml}"
+  ];
 
   services.cage = {
     enable = true;
