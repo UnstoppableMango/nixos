@@ -125,6 +125,16 @@
       caChain = [ (builtins.readFile ../certs/unmango-authority.crt) ];
     };
 
+    etcd.extraModules = [
+      # etcd must never swap. Its latency budget is a raft heartbeat, and a
+      # member paged out to the zram from modules/memory-pressure misses them:
+      # the symptom is `took too long` on every apply, repeated pre-vote
+      # rounds, and finally a cluster with no leader while every member is
+      # nominally running. The apiserver on the same machine is what creates
+      # the memory pressure, so excluding etcd from the relief is the point.
+      { systemd.services.etcd.serviceConfig.MemorySwapMax = 0; }
+    ];
+
     apiserver.extraModules = [
       # Every control-plane machine is a 4 GiB pi. An apiserver here reaches
       # 2.7 GiB and is still climbing when the machine stops responding, which
@@ -135,14 +145,19 @@
       # Bounded, the apiserver is what dies instead of the machine: HAProxy
       # takes it out of rotation on the `/readyz` check, the other members keep
       # the quorum, and it comes back into a cluster that has a leader.
-      # `MemoryHigh` reclaims into the zram from modules/memory-pressure first,
-      # and only reaches `MemoryMax` if that cannot keep up.
+      #
+      # `MemoryMax` alone, deliberately. A `MemoryHigh` below it throttles
+      # instead of killing: reclaim runs, the zram from
+      # modules/memory-pressure fills, and once it is full there is nowhere
+      # left to reclaim to, so the process stalls at the throttle instead of
+      # ever reaching `MemoryMax`. Measured on all three machines at once,
+      # pinned to the byte at a 1800M `MemoryHigh` with swap 1886/1886 MiB
+      # used, `NRestarts=0`, and an apiserver that had served nothing for
+      # hours. A stalled apiserver is worse than a killed one, because nothing
+      # restarts it and `/readyz` never answers for HAProxy to act on.
       {
         systemd.services.kube-apiserver = {
-          serviceConfig = {
-            MemoryHigh = "1800M";
-            MemoryMax = "2200M";
-          };
+          serviceConfig.MemoryMax = "2200M";
           # Without this, systemd's default rate limit stops restarting the
           # unit after five kills and leaves the machine with no apiserver at
           # all, which is the outcome the ceiling exists to avoid.
