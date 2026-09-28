@@ -33,6 +33,7 @@ flowchart TB
     direction TB
     AP["UniFi APs<br/>wireless clients"]
     HADES1["hades enp6s0<br/>192.168.1.69"]
+    IRIS1["iris eno2<br/>192.168.1.15"]
     PRN["Printer<br/>DHCP"]
     MED["Media / consoles<br/>DHCP"]
   end
@@ -47,6 +48,7 @@ flowchart TB
     AGREUS["agreus 10.0.69.187<br/>worker"]
     POLLUX["pollux 10.0.69.14<br/>worker"]
     CASTOR["castor 10.0.69.13<br/>worker"]
+    IRIS["iris eno1<br/>10.0.69.15<br/>worker"]
     GAEA["gaea 10.0.69.11<br/>worker"]
     ZEUS["zeus 10.0.69.10<br/>worker"]
   end
@@ -63,6 +65,8 @@ flowchart TB
   U24 -.-> PRN
   U24 -.-> MED
   GS724 --> POLLUX
+  GS724 -.-> IRIS
+  GS724 -.-> IRIS1
 
   CP -.->|advertises| VIP
 ```
@@ -98,6 +102,8 @@ The rosequartz service CIDR is `10.0.0.0/24` and the pod CIDR is `10.1.0.0/16`, 
 | pik8s6 | `10.0.69.106` | 20 | UniFi 24p | Unverified | rosequartz control plane |
 | agreus | `10.0.69.187` | 20 | UniFi 24p | Unverified | rosequartz worker |
 | pollux | `10.0.69.14` | 20 | GS724Tv4 | `g7` | rosequartz worker |
+| iris (`eno1`) | `10.0.69.15` | 20 | Unverified | Unverified | rosequartz worker; not yet cabled |
+| iris (`eno2`) | `192.168.1.15` | 1 | Unverified | Unverified | On-link only, no gateway; firewalled to iris's own traffic |
 | castor (`eno1`) | `10.0.69.13` | 20 | GS724Tv4 | `g5` | rosequartz worker |
 | castor (`enp2s0`) | DHCP | 1 | GS724Tv4 | `g11` | Second NIC, unused by any config |
 | Samsung TV (UN50KU630D) | `192.168.1.75` | 1 | Wireless | n/a | agreus's HDMI display; agreus polls `:8001/api/v2/` to detect power, which needs a pfSense pass rule from `10.0.69.187` to `192.168.1.75:8001` |
@@ -117,6 +123,12 @@ Leave whichever port it occupies on VLAN 1: the interface is down precisely beca
 
 hades holds two static addresses because `enp6s0` and `enp7s0` share a MAC address, which makes DHCP unreliable on both.
 NetworkManager leaves both wired interfaces unmanaged and handles only `wlp5s0`.
+
+iris is dual-homed the other way round from hades: its default route is `10.0.69.1` on `eno1`, and `eno2` holds `192.168.1.15` on-link with no gateway.
+VLAN 1 clients should use `192.168.1.15` and VLAN 20 clients `10.0.69.15`.
+A VLAN 1 client connecting to `10.0.69.15` goes out through pfSense but gets its replies straight from `eno2`, an asymmetric path that pfSense's state tracking can break.
+Mangle rules drop anything on `eno2` not to or from `192.168.1.15`, so iris, which forwards for Kubernetes, never routes between the VLANs around pfSense.
+Pod traffic for `192.168.1.0/24` takes a policy route through `10.0.69.1` instead of `eno2`.
 
 ## Switches
 
