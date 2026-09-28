@@ -1,6 +1,7 @@
 HOST ?= $(shell hostname)
 NIX  ?= nix
 PIS  := pik8s1 pik8s2 pik8s3 pik8s4 pik8s5 pik8s6
+X86  := hades agreus apollo castor gaea pollux zeus
 
 # The default location of the weird sd-card adapter I have
 DISK ?= /dev/sdi
@@ -53,9 +54,26 @@ bin/%-sd-card.img: bin/%-sd-card | bin
 bin/%-sd-card: | bin
 	$(NIX) build --out-link $@ .#nixosConfigurations.$*.config.system.build.images.sd-card
 
+# Generic installer with no machine config. See installer-iso in flake.nix.
+iso: bin/installer.iso
+
+# A host's own config on an installer ISO, services included.
+${X86:%=%-iso}: %-iso: bin/%.iso
+
+bin/%.iso: bin/%-iso | bin
+	ln -sf $$(readlink -f $$(find -L $< -name '*.iso')) $@
+
+.SECONDARY: bin/installer-iso ${X86:%=bin/%-iso}
+bin/installer-iso: | bin
+	$(NIX) build --out-link $@ .#installer-iso
+
+bin/%-iso: | bin
+	$(NIX) build --out-link $@ .#nixosConfigurations.$*.config.system.build.images.iso-installer
+
 ${PIS:%=%-flash}: %-flash: bin/%-sd-card.img
 	sudo dd if=$< of=$(DISK) bs=4M status=progress conv=fsync
 
 .PHONY: build hades agreus pollux castor zeus gaea check format fmt update system sd-images \
         pik8s1-sd pik8s2-sd pik8s3-sd pik8s4-sd pik8s5-sd pik8s6-sd \
-        pik8s1-flash pik8s2-flash pik8s3-flash pik8s4-flash pik8s5-flash pik8s6-flash
+        pik8s1-flash pik8s2-flash pik8s3-flash pik8s4-flash pik8s5-flash pik8s6-flash \
+        iso ${X86:%=%-iso}

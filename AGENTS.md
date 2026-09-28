@@ -6,6 +6,8 @@ This file provides guidance to AI agents when working with code in this reposito
 
 - `make build` - Build configuration for current hostname
 - `make hades` / `make agreus` - Build a specific host configuration
+- `make iso` - Build a generic hybrid BIOS/UEFI installer ISO (`bin/installer.iso`) for onboarding a machine with `clan machines install`
+- `make <host>-iso` - Build an x86_64 host's own config as an installer ISO; it runs that host's services on the live image
 - `make check` - Run `nix flake check` locally
 - `make fmt` / `make format` - Format all Nix files with nixfmt
 - `make update` - Update all flake inputs
