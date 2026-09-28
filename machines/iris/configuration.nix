@@ -7,12 +7,13 @@
 
   nixpkgs.hostPlatform = "x86_64-linux";
 
-  # Dell R410. Firmware mode unverified, so take castor's dual-mode grub: BIOS
-  # grub on the disk plus an EFI removable-path loader on the ESP.
-  boot.loader.grub = {
-    enable = true;
-    efiSupport = true;
-    efiInstallAsRemovable = true;
+  # Dell R410 with its firmware in UEFI mode, so it takes gaea's systemd-boot.
+  boot.loader = {
+    efi.canTouchEfiVariables = true;
+    systemd-boot = {
+      enable = true;
+      configurationLimit = 25;
+    };
   };
 
   # https://nixos.wiki/wiki/Power_Management#systemd_sleep

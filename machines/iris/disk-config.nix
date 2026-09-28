@@ -7,13 +7,6 @@
       content = {
         type = "gpt";
         partitions = {
-          # grub's BIOS boot partition, paired with the ESP below so the disk
-          # boots whichever mode the firmware is in.
-          boot = {
-            name = "boot";
-            size = "1M";
-            type = "EF02";
-          };
           esp = {
             priority = 1;
             name = "ESP";
