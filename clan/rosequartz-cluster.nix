@@ -125,6 +125,32 @@
       caChain = [ (builtins.readFile ../certs/unmango-authority.crt) ];
     };
 
+    apiserver.extraModules = [
+      # Every control-plane machine is a 4 GiB pi. An apiserver here reaches
+      # 2.7 GiB and is still climbing when the machine stops responding, which
+      # takes the local etcd member with it; the quorum that would let the
+      # apiserver settle then cannot form, and the machine that inherits the
+      # VIP does the same thing twenty minutes later.
+      #
+      # Bounded, the apiserver is what dies instead of the machine: HAProxy
+      # takes it out of rotation on the `/readyz` check, the other members keep
+      # the quorum, and it comes back into a cluster that has a leader.
+      # `MemoryHigh` reclaims into the zram from modules/memory-pressure first,
+      # and only reaches `MemoryMax` if that cannot keep up.
+      {
+        systemd.services.kube-apiserver = {
+          serviceConfig = {
+            MemoryHigh = "1800M";
+            MemoryMax = "2200M";
+          };
+          # Without this, systemd's default rate limit stops restarting the
+          # unit after five kills and leaves the machine with no apiserver at
+          # all, which is the outcome the ceiling exists to avoid.
+          unitConfig.StartLimitIntervalSec = 0;
+        };
+      }
+    ];
+
     kubelet.extraModules = [
       # Containers inherit containerd's soft nofile limit, systemd's 1024 when
       # unset. radosgw never raises its own, and at 1024 it stops accepting on
