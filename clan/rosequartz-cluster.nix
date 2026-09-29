@@ -166,24 +166,14 @@
       }
     ];
 
-    # The pi control-plane machines bootstrap the CoreDNS manifests, but the
-    # pods are pinned to the x86 workers. Every lookup in the cluster resolves
-    # here, and a 4 GiB machine sharing its memory with a kube-apiserver that
-    # wants over 2 GiB of it is the wrong place for that: when the apiserver
-    # takes the machine down it takes cluster DNS with it.
-    #
-    # `nodeNames` is node affinity on the generated Deployment, so it is the
-    # placement that moves while the bootstrapping stays with the control
-    # plane. iris is left out until it joins as a node.
-    coredns.nodeNames = [
-      "agreus"
-      "apollo"
-      "castor"
-      "gaea"
-      "pollux"
-      "zeus"
-    ];
-
+    # `coredns.nodeNames` stays unset, so the pods run on the machines that
+    # bootstrap the manifests. The generated Deployment pulls
+    # `coredns:<store hash>` with `imagePullPolicy: Never`, and that image
+    # reaches a node only through its own kubelet's pre-start seeding, from the
+    # generation that node runs. Naming machines here that are not on the same
+    # generation as the bootstrapping ones leaves the pods on
+    # `ErrImageNeverPull`, so moving CoreDNS off the control plane needs the
+    # target nodes to match generations, not just to run kubelets.
     kubelet.extraModules = [
       # Containers inherit containerd's soft nofile limit, systemd's 1024 when
       # unset. radosgw never raises its own, and at 1024 it stops accepting on
