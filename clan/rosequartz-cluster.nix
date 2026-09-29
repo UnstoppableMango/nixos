@@ -166,6 +166,24 @@
       }
     ];
 
+    # The pi control-plane machines bootstrap the CoreDNS manifests, but the
+    # pods are pinned to the x86 workers. Every lookup in the cluster resolves
+    # here, and a 4 GiB machine sharing its memory with a kube-apiserver that
+    # wants over 2 GiB of it is the wrong place for that: when the apiserver
+    # takes the machine down it takes cluster DNS with it.
+    #
+    # `nodeNames` is node affinity on the generated Deployment, so it is the
+    # placement that moves while the bootstrapping stays with the control
+    # plane. iris is left out until it joins as a node.
+    coredns.nodeNames = [
+      "agreus"
+      "apollo"
+      "castor"
+      "gaea"
+      "pollux"
+      "zeus"
+    ];
+
     kubelet.extraModules = [
       # Containers inherit containerd's soft nofile limit, systemd's 1024 when
       # unset. radosgw never raises its own, and at 1024 it stops accepting on
@@ -190,19 +208,10 @@
 
     loadbalancer = {
       enable = true;
+      # Every control-plane machine reaches VLAN 20 untagged on `end0`, so VRRP
+      # advertises on the right network everywhere and `machines` keeps its
+      # default of every control-plane machine.
       interface = "end0";
-
-      # `machines` defaults to every control-plane machine. pik8s1 and pik8s2
-      # stay out while their UniFi 24p ports are still VLAN 1 untagged with
-      # VLAN 20 tagged: VRRP runs on the cluster-wide `interface`, so
-      # keepalived there would advertise on VLAN 1 and put the VIP on the
-      # wrong network. Drop this pin once their ports become VLAN 20 access
-      # ports and their `end0.20` collapses into `end0`.
-      machines = [
-        "pik8s4"
-        "pik8s5"
-        "pik8s6"
-      ];
     };
 
     flux = {

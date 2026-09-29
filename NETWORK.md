@@ -44,7 +44,7 @@ flowchart TB
     HADES2["hades enp7s0<br/>10.0.69.69"]
     CP["pik8s1 · pik8s2 · pik8s4 · pik8s5 · pik8s6<br/>10.0.69.101-102, 104-106<br/>control plane"]
     PIW["pik8s3 10.0.69.103<br/>worker"]
-    NOTE["pik8s1-3 also hold their old<br/>192.168.1.101-103 on VLAN 1<br/>until the port cutover"]
+    NOTE["pik8s3 also holds its old<br/>192.168.1.103 on VLAN 1<br/>until the port cutover"]
     AGREUS["agreus 10.0.69.187<br/>worker"]
     POLLUX["pollux 10.0.69.14<br/>worker"]
     CASTOR["castor 10.0.69.13<br/>worker"]
@@ -94,13 +94,13 @@ The rosequartz service CIDR is `10.0.0.0/24` and the pod CIDR is `10.1.0.0/16`, 
 | zeus | `10.0.69.10` | 20 | GS724Tv4 | `g18` | rosequartz worker |
 | gaea | `10.0.69.11` | 20 | GS724Tv4 | `g1` | rosequartz worker |
 | apollo | `10.0.69.12` | 20 | GS724Tv4 | `g10` | rosequartz worker |
-| pik8s1 | `192.168.1.101` + `10.0.69.101` | 1 + 20 | UniFi 24p | Unverified | rosequartz control plane; dual-homed during cutover |
-| pik8s2 | `192.168.1.102` + `10.0.69.102` | 1 + 20 | UniFi 24p | Unverified | rosequartz control plane; dual-homed during cutover |
+| pik8s1 | `10.0.69.101` | 20 | UniFi 24p | `22` | rosequartz control plane |
+| pik8s2 | `10.0.69.102` | 20 | UniFi 24p | `20` | rosequartz control plane |
 | pik8s3 | `192.168.1.103` + `10.0.69.103` | 1 + 20 | UniFi 24p | Unverified | rosequartz worker; dual-homed during cutover |
-| pik8s4 | `10.0.69.104` | 20 | UniFi 24p | Unverified | rosequartz control plane |
-| pik8s5 | `10.0.69.105` | 20 | UniFi 24p | Unverified | rosequartz control plane |
-| pik8s6 | `10.0.69.106` | 20 | UniFi 24p | Unverified | rosequartz control plane |
-| agreus | `10.0.69.187` | 20 | UniFi 24p | Unverified | rosequartz worker |
+| pik8s4 | `10.0.69.104` | 20 | UniFi 24p | `2` | rosequartz control plane |
+| pik8s5 | `10.0.69.105` | 20 | UniFi 24p | `4` | rosequartz control plane |
+| pik8s6 | `10.0.69.106` | 20 | UniFi 24p | `6` | rosequartz control plane |
+| agreus | `10.0.69.187` | 20 | UniFi 24p | `9` | rosequartz worker |
 | pollux | `10.0.69.14` | 20 | GS724Tv4 | `g7` | rosequartz worker |
 | iris (`eno1`) | `10.0.69.15` | 20 | Unverified | Unverified | rosequartz worker; not yet cabled |
 | iris (`eno2`) | `192.168.1.15` | 1 | Unverified | Unverified | On-link only, no gateway; firewalled to iris's own traffic |
@@ -172,11 +172,11 @@ The apiserver is fronted by a keepalived VIP at `10.0.69.100`, held by whichever
 | pik8s4 | 100 |
 | pik8s5 | 90 |
 | pik8s6 | 80 |
-| pik8s1 | 70 (not yet running keepalived) |
-| pik8s2 | 60 (not yet running keepalived) |
+| pik8s1 | 70 |
+| pik8s2 | 60 |
 
 pik8s4 holds the VIP by default.
-pik8s1 and pik8s2 are pinned out of the loadbalancer service while their ports still carry VLAN 20 tagged: VRRP runs on `end0`, which is VLAN 1 on those two until the cutover, so keepalived there would advertise on the wrong network.
+Every control-plane machine runs keepalived on `end0`, which carries VLAN 20 untagged on all five.
 The VIP is intentionally absent from the `hosts` flake, since it is not a machine.
 
 ## Known gaps
@@ -186,10 +186,9 @@ Its sole default gateway is `192.168.1.1` via `enp6s0`.
 `10.0.69.0/24` is reachable as a directly connected subnet through `enp7s0`, not by routing through pfSense.
 Any VLAN 20 address outside that `/24` is unreachable from hades.
 
-**pik8s1-3 sit on the UniFi 24p, port unknown.**
-Walking `dot1qTpFdbPort` on both Netgear switches finds their MACs (pik8s1 `d8:3a:dd:42:41:01`, pik8s2 `d8:3a:dd:75:d5:1e`) only on the uplinks, GS108T bridge port 8 and GS724Tv4 `g19`, so neither Netgear has them directly attached.
-That places them downstream of the UniFi 24p, whose ports are managed by the UniFi controller rather than by SNMP, so the individual port numbers are not recorded here.
-pik8s3 was powered off when this was measured and appears in no FDB.
+**pik8s3's UniFi 24p port is unknown.**
+It appears in no FDB and the controller's port table learns no MAC for it, so it is either powered off or uncabled.
+The other UniFi 24p port numbers come from the controller's own `port_table`, read out of its MongoDB rather than by SNMP, since those ports are controller-managed.
 
 **Switch attachment for the printer and media devices is unverified.**
 They are confirmed on VLAN 1 by their addresses, but which switch port each occupies is not recorded.
