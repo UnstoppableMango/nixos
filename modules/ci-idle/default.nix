@@ -42,17 +42,19 @@ in
       after = [ "systemd-logind.service" ];
       path = [ config.systemd.package ];
       serviceConfig.Restart = "always";
-      # GNOME reports IdleHint to logind once the screen blanks.
+      # GNOME reports IdleHint to logind once the screen blanks. A session
+      # switched to the background can keep IdleHint=no, so Active, logind's
+      # foreground flag, is checked too.
       script = ''
         desktop_active() {
           local session props
           while read -r session _; do
-            props=$(loginctl show-session "$session" -p Type -p IdleHint -p LockedHint) || continue
+            props=$(loginctl show-session "$session" -p Type -p Active -p IdleHint -p LockedHint) || continue
             case $props in
               *Type=wayland* | *Type=x11*) ;;
               *) continue ;;
             esac
-            if [[ $props == *IdleHint=no* && $props == *LockedHint=no* ]]; then
+            if [[ $props == *Active=yes* && $props == *IdleHint=no* && $props == *LockedHint=no* ]]; then
               return 0
             fi
           done < <(loginctl list-sessions --no-legend)
