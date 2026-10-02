@@ -181,7 +181,8 @@ in
     # hades is a workstation, so its agents stay at two tasks each: the desktop
     # comes first, and a machine that sleeps is opportunistic capacity either
     # way. It has no ciLimits, since modules/ci-limits sizes the slice against
-    # the kubelet and the OSDs, neither of which hades runs.
+    # the kubelet and the OSDs, neither of which hades runs. modules/ci-idle
+    # limits its agents' memory while the desktop is in use instead.
     hercules-ci-unmango = {
       module.name = "@UnstoppableMango/hercules-ci-agent";
       module.input = "self";

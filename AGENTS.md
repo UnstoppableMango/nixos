@@ -58,6 +58,9 @@ Other machines (agreus, pollux, castor, zeus, gaea, iris, pik8s1–6) follow the
   - `ci-limits/` - Memory and CPU limits for hosts running Hercules CI builds alongside rook-ceph pods (zeus, gaea).
     Puts nix-daemon, the Hercules agents and harmonia in a capped `ci.slice`, sets nix `max-jobs`/`cores`, and reserves the slice ceiling from the kubelet.
     Each host sizes it through `ciLimits.*` in its `configuration.nix`; per-agent `concurrentTasks` is set on the hercules-ci instances in `clan.nix`.
+  - `ci-idle/` - Hercules CI agents on hades, in a low-weight `ci.slice` whose `MemoryHigh` drops to `ciIdle.activeMemoryHigh` while a graphical session is active and unlocked.
+    The agents' evaluator heap is never returned to the kernel, so zram is enabled for the kernel to reclaim it into.
+    nix-daemon stays outside the slice, since it also runs the desktop user's builds.
   - `gc/` - Weekly `nh clean` (keeps the last 5 generations and anything under 14 days), attached to every machine by the `base` instance.
     On agent machines (gaea, hades, zeus) the `hercules-ci-agent` service stops the agents while it runs, since a collection mid-task can delete paths the task still needs.
   - `desktops/` - Desktop environment modules (currently GNOME only)
