@@ -30,6 +30,7 @@ in
   imports = [
     ./disk-config.nix
     ../../modules/brave
+    ../../modules/ci-idle
     ../../modules/desktops
     ../../modules/dns
     ../../modules/nix
@@ -259,6 +260,8 @@ in
 
   programs.zsh.enable = true;
   users.defaultUserShell = pkgs.bash;
+
+  ciIdle.activeMemoryHigh = 4;
 
   host.brave.enable = true;
   host.gnome.enable = true;
