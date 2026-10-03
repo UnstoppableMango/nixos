@@ -1,4 +1,9 @@
-{ inputs, ... }:
+{
+  inputs,
+  lib,
+  options,
+  ...
+}:
 let
   # flashrom 1.8.0's cmocka suite fails on aarch64 (write_chip_bad_status_test,
   # plus the leak check), and nixpkgs gates doCheck only on Darwin, so the
@@ -45,15 +50,24 @@ in
   nixpkgs.buildPlatform = "aarch64-linux";
   nixpkgs.hostPlatform = "aarch64-linux";
 
-  hardware = {
-    raspberry-pi."4".apply-overlays-dtmerge.enable = true;
+  hardware = lib.mkMerge [
+    { raspberry-pi."4".apply-overlays-dtmerge.enable = true; }
 
-    # The PoE HAT uses the stock rpi-poe overlay. All of its fan-curve
-    # parameters are optional and the defaults are what we want.
-    raspberry-pi.configtxt.deviceTreeOverlays."board-type=0x11" = [
-      { rpi-poe = { }; }
-    ];
-  };
+    # SD images build against an older nixos-hardware (see PI_NIXOS_HARDWARE in
+    # the Makefile) that has `poe-hat` instead of `configtxt.deviceTreeOverlays`.
+    (
+      if options.hardware.raspberry-pi.configtxt ? deviceTreeOverlays then
+        {
+          # The PoE HAT uses the stock rpi-poe overlay. All of its fan-curve
+          # parameters are optional and the defaults are what we want.
+          raspberry-pi.configtxt.deviceTreeOverlays."board-type=0x11" = [
+            { rpi-poe = { }; }
+          ];
+        }
+      else
+        { raspberry-pi."4".poe-hat.enable = true; }
+    )
+  ];
 
   # TODO: make sure everything works before disabling
   # console.enable = false;
