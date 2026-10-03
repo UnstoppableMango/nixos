@@ -73,7 +73,8 @@ Other machines (agreus, pollux, castor, zeus, gaea, iris, pik8s1–6) follow the
   - `ssh/` - System-level SSH behavior (currently just `ssh.inhibitSleepOnSsh`, a PAM hook that blocks suspend while an SSH session is open).
     SSH *client* config for erik lives in the dotfiles repo's `modules/ssh`.
   - `unifi/` - UniFi network module
-  - `service/` - Clan service modules (`base`, `harmonia`, `hercules-ci-agent`, `k3s`, `pi`, `trouble`); the rosequartz cluster's services come from the `cairn` input
+  - `service/` - Clan service modules (`base`, `harmonia`, `hercules-ci-agent`, `k3s`, `pi`, `trouble`); the rosequartz cluster's services come from the `cairn` input.
+    The `pi` service also trims the Pis to a minimal OS (`modules/service/pi/minimal.nix`): no linux-firmware, installer tools or docs, plus a debugging toolset for erik.
 - Machine metadata lives in the [hosts](https://github.com/UnstoppableMango/hosts) flake's `hosts` output, consumed here and by dotfiles (which follows the same input), so the `internet` clan service and erik's ssh client config never drift apart.
   Each entry is a record (`ip`, `arch`, `tags`).
   Tags are **not** defined in this repo: edit them in the hosts flake and `nix flake update hosts`.
