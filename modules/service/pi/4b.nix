@@ -50,24 +50,17 @@ in
     raspberry-pi.firmware.enable = true;
     raspberry-pi.firmware.uboot.enable = true;
 
-    # The firmware partition is 30 MiB, and the full set (boot code for every
-    # board, about 25 MiB) leaves no room for the temp file each copy writes
-    # beside its target. A copy that fails after start4.elf but before
-    # fixup4.dat leaves a mismatched pair the Pi cannot boot from. The Pi 4
-    # files alone are about 4 MiB.
-    raspberry-pi.firmware.package = pkgs.runCommand "raspberrypi-firmware-pi4" { } ''
-      src=${pkgs.raspberrypifw}/share/raspberrypi/boot
-      dst=$out/share/raspberrypi/boot
-      mkdir -p $dst
-      cp -r $src/start4.elf $src/fixup4.dat $src/bcm2711-*.dtb $src/overlays $dst/
-    '';
-
     # The PoE HAT uses the stock rpi-poe overlay. All of its fan-curve
     # parameters are optional and the defaults are what we want.
     raspberry-pi.configtxt.deviceTreeOverlays."board-type=0x11" = [
       { rpi-poe = { }; }
     ];
   };
+
+  # sd-image's 30 MiB default fits the old U-Boot-only layout. The firmware
+  # staged by nixos-hardware is about 25 MiB, and activation rewrites each file
+  # through a temp copy beside it, so the partition needs the headroom.
+  image.modules.sd-card.sdImage.firmwareSize = 256;
 
   # TODO: make sure everything works before disabling
   # console.enable = false;
