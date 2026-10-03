@@ -3,6 +3,12 @@ NIX  ?= nix
 PIS  := pik8s1 pik8s2 pik8s3 pik8s4 pik8s5 pik8s6
 X86  := hades agreus apollo castor gaea iris pollux zeus
 
+# SD images build against the nixos-hardware that flashed pik8s4-6. Later
+# revisions replace the sd-image firmware partition with one that ships no
+# kernel unless U-Boot staging is enabled, and with it enabled U-Boot fails
+# to read the SD card. Only the image is pinned; deploys use the locked input.
+PI_NIXOS_HARDWARE ?= github:NixOS/nixos-hardware/a9cf7546a938c737b079e738de73934a13de9784
+
 # The default location of the weird sd-card adapter I have
 DISK ?= /dev/sdi
 
@@ -55,7 +61,8 @@ bin/%-sd-card.img: bin/%-sd-card | bin
 
 .SECONDARY: ${PIS:%=%-sd-card}
 bin/%-sd-card: | bin
-	$(NIX) build --out-link $@ .#nixosConfigurations.$*.config.system.build.images.sd-card
+	$(NIX) build --out-link $@ --override-input nixos-hardware $(PI_NIXOS_HARDWARE) \
+		.#nixosConfigurations.$*.config.system.build.images.sd-card
 
 # Generic installer with no machine config. See installer-iso in flake.nix.
 iso: bin/installer.iso

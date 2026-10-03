@@ -47,8 +47,6 @@ in
 
   hardware = {
     raspberry-pi."4".apply-overlays-dtmerge.enable = true;
-    raspberry-pi.firmware.enable = true;
-    raspberry-pi.firmware.uboot.enable = true;
 
     # The PoE HAT uses the stock rpi-poe overlay. All of its fan-curve
     # parameters are optional and the defaults are what we want.
