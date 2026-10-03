@@ -13,7 +13,7 @@ This file provides guidance to AI agents when working with code in this reposito
 - `make update` - Update all flake inputs
 - `make system` - Update the local flake and rebuild/switch (`sudo nixos-rebuild switch --flake /etc/nixos --cores 12`)
 - `make sd-images` / `make pik8sN-sd` - Build SD card images for Pi nodes
-- `make pik8sN-flash` - Flash an SD card image to `$DISK` (default `/dev/sdi`)
+- `make pik8sN-flash` - Write a Pi image to `$DISK` (default `/dev/sdi`). The Pis boot from a USB SSD with no SD card, so `$DISK` is the SSD attached to the workstation.
 - `nix flake check --all-systems` - What CI runs (checks all systems)
 
 ## Architecture
