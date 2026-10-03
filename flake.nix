@@ -11,6 +11,10 @@
     nixpkgs-stable.url = "github:nixos/nixpkgs?ref=nixos-25.11";
     systems.url = "github:UnstoppableMango/nix-systems";
     nixos-hardware.url = "github:nixos/nixos-hardware?ref=master";
+    nixos-raspberrypi = {
+      url = "github:nvmd/nixos-raspberrypi/main";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     flake-parts.url = "github:hercules-ci/flake-parts";
 
     flake-utils = {
@@ -188,14 +192,9 @@
               }).config.system.build.isoImage;
           }
           // lib.optionalAttrs (system == "aarch64-linux") {
-            rpi-kernel =
-              # Copy the kernelPackages config so we can build + cache the aarch64 kernel
-              # https://github.com/NixOS/nixos-hardware/blob/master/raspberry-pi/4/default.nix#L31-L33
-              (pkgs.linuxPackagesFor (
-                pkgs.callPackage "${inputs.nixos-hardware}/raspberry-pi/common/kernel.nix" {
-                  rpiVersion = 4;
-                }
-              )).kernel;
+            # The kernel the Pis boot. nixos-raspberrypi follows our nixpkgs, so its
+            # cache does not have this build; CI builds it and pushes it to Cachix.
+            rpi-kernel = inputs.nixos-raspberrypi.packages.${system}.linuxPackages_rpi4.kernel;
           };
 
           devShells = {

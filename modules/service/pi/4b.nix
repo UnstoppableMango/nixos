@@ -15,55 +15,39 @@ let
   );
 in
 {
-  imports = with inputs; [
-    # Not confident about mixing facter + nixos-hardware, but it
-    # doesn't seem like facter does any rpi configuration at the moment?
-    #
-    # NOTE: this switches boot.kernelPackages to linux_rpi4 (RPi Foundation's
-    # downstream kernel fork), which isn't reliably cached by Hydra the way the
-    # default linuxPackages kernel is, so it tends to build from source.
-    nixos-hardware.nixosModules.raspberry-pi-4
+  imports = with inputs.nixos-raspberrypi; [
+    lib.int.default-nixos-raspberrypi-config
+    nixosModules.raspberry-pi-4.base
   ];
 
-  boot = {
-    # https://discourse.nixos.org/t/cannot-build-raspberry-pi-sdimage-module-dw-hdmi-not-found/71804/5
-    initrd.allowMissingModules = true;
-    initrd.availableKernelModules = [
-      "xhci_pci"
-      "usbhid"
-      "usb_storage"
-    ];
+  # The board modules read the flake from this argument, which
+  # nixos-raspberrypi.lib.nixosSystem would otherwise pass in specialArgs.
+  _module.args.nixos-raspberrypi = inputs.nixos-raspberrypi;
 
-    loader = {
-      grub.enable = false;
-      generic-extlinux-compatible.enable = true;
-    };
+  # The GPU firmware loads the kernel straight from the firmware partition, so
+  # USB SSD boot needs nothing past the EEPROM bootloader. Older generations
+  # boot by pointing `os_prefix=` in config.txt at their directory under
+  # /boot/firmware/nixos.
+  boot.loader.raspberry-pi.bootloader = "kernel";
 
-    zfs.forceImportRoot = false;
+  boot.zfs.forceImportRoot = false;
+
+  # The PoE HAT uses the stock rpi-poe overlay. All of its fan-curve parameters
+  # are optional and the defaults are what we want.
+  hardware.raspberry-pi.config.pi4.dt-overlays.rpi-poe = {
+    enable = true;
+    params = { };
   };
 
-  nixpkgs.buildPlatform = "aarch64-linux";
-  nixpkgs.hostPlatform = "aarch64-linux";
-
-  hardware = {
-    raspberry-pi."4".apply-overlays-dtmerge.enable = true;
-    raspberry-pi.firmware.enable = true;
-    raspberry-pi.firmware.uboot.enable = true;
-
-    # The PoE HAT uses the stock rpi-poe overlay. All of its fan-curve
-    # parameters are optional and the defaults are what we want.
-    raspberry-pi.configtxt.deviceTreeOverlays."board-type=0x11" = [
-      { rpi-poe = { }; }
-    ];
-  };
+  # nixos-raspberrypi's sd-image sizes the firmware partition (1024 MiB) for
+  # the kernels and initrds the `kernel` bootloader keeps there. Build with
+  # `make pik8sN-sd`.
+  image.modules.raspberry-pi = inputs.nixos-raspberrypi.nixosModules.sd-image;
 
   # TODO: make sure everything works before disabling
   # console.enable = false;
 
-  environment.systemPackages = with pkgs; [
-    libraspberrypi
-    raspberrypi-eeprom
-  ];
+  environment.systemPackages = [ pkgs.raspberrypi-eeprom ];
 
   networking.useDHCP = false;
 }

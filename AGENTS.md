@@ -12,7 +12,7 @@ This file provides guidance to AI agents when working with code in this reposito
 - `make fmt` / `make format` - Format all Nix files with nixfmt
 - `make update` - Update all flake inputs
 - `make system` - Update the local flake and rebuild/switch (`sudo nixos-rebuild switch --flake /etc/nixos --cores 12`)
-- `make sd-images` / `make pik8sN-sd` - Build SD card images for Pi nodes
+- `make sd-images` / `make pik8sN-sd` - Build Pi images (nixos-raspberrypi's sd-image, 1024 MiB firmware partition)
 - `make pik8sN-flash` - Write a Pi image to `$DISK` (default `/dev/sdi`). The Pis boot from a USB SSD with no SD card, so `$DISK` is the SSD attached to the workstation.
 - `nix flake check --all-systems` - What CI runs (checks all systems)
 
@@ -103,7 +103,8 @@ Other machines (agreus, pollux, castor, zeus, gaea, iris, pik8s1–6) follow the
   Its nixpkgs is not followed, so the agent package matches what upstream caches.
 - `hosts` - Machine inventory (name, ip, arch, role) shared with dotfiles, which follows this input
 - `disko` - Declarative disk partitioning (each host has a `disk-config.nix`)
-- `nixos-hardware` - Hardware-specific module presets
+- `nixos-hardware` - Hardware-specific module presets (hades)
+- `nixos-raspberrypi` - Raspberry Pi kernel, firmware, `config.txt` and the `kernel` bootloader for pik8s1-6, via `modules/service/pi/4b.nix`. It follows nixpkgs, since its 26.05 kernel lacks attributes our 26.11 NixOS reads; the `rpi-kernel` CI job builds and caches that kernel.
 - `clan-core` (26.05) - Clan cluster management framework; manages all machines via `clan.nix`
 - `sops-nix` - SOPS secrets management; followed by both `clan-core` and `dotfiles`
 - `nixos-facter` - Hardware detection for facter-based configs
