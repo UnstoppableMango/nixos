@@ -55,7 +55,7 @@ bin/%-sd-card.img: bin/%-sd-card | bin
 
 .SECONDARY: ${PIS:%=%-sd-card}
 bin/%-sd-card: | bin
-	$(NIX) build --out-link $@ .#nixosConfigurations.$*.config.system.build.images.sd-card
+	$(NIX) build --out-link $@ .#nixosConfigurations.$*.config.system.build.images.raspberry-pi
 
 # Generic installer with no machine config. See installer-iso in flake.nix.
 iso: bin/installer.iso

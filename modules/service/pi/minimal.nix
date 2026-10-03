@@ -1,12 +1,18 @@
 # Trims the Pis down to what a rosequartz node needs, plus a debugging toolset
 # for erik.
-{ modulesPath, pkgs, ... }:
+{
+  lib,
+  modulesPath,
+  pkgs,
+  ...
+}:
 {
   imports = [ "${modulesPath}/profiles/minimal.nix" ];
 
-  # facter turns this on for every bare-metal machine. The Pi 4's ethernet, the
-  # PoE HAT and the VL805 USB controller load no blobs from linux-firmware.
-  hardware.enableRedistributableFirmware = false;
+  # facter and nixos-raspberrypi's board module turn this on. The Pi 4's
+  # ethernet, the PoE HAT and the VL805 USB controller load no blobs from
+  # linux-firmware.
+  hardware.enableRedistributableFirmware = lib.mkForce false;
 
   # clan deploys by running switch-to-configuration directly, so nothing on the
   # target calls nixos-rebuild.
