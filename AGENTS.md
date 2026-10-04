@@ -70,6 +70,8 @@ Other machines (agreus, pollux, castor, zeus, gaea, iris, pik8s1–6) follow the
     The poll crosses from VLAN 20 to VLAN 1, so it depends on the pfSense rule listed in `NETWORK.md`.
     Capped in kodi's `user-1001.slice` and not reserved from the kubelet, so pods keep the memory while Kodi is not running.
     Media sources are WebDAV shares from copyparty in the-cluster (`apps/media`), written to a store-linked `sources.xml`, so sources added in Kodi's UI do not persist.
+  - `kiosk/` - A web page in Firefox kiosk mode under cage, always on, on pik8s3's display.
+    Its user slice is capped at `kiosk.memoryMax`, and pik8s3 reserves that much plus OS headroom from the kubelet.
   - `ssh/` - System-level SSH behavior (currently just `ssh.inhibitSleepOnSsh`, a PAM hook that blocks suspend while an SSH session is open).
     SSH *client* config for erik lives in the dotfiles repo's `modules/ssh`.
   - `unifi/` - UniFi network module
@@ -138,7 +140,7 @@ Other machines (agreus, pollux, castor, zeus, gaea, iris, pik8s1–6) follow the
 | gaea          | EPYC 7502 rack box, UEFI | Basement rack server; clan-managed; rosequartz worker; systemd-boot |
 | iris          | Dell R410, UEFI       | Basement rack server; clan-managed; rosequartz worker; systemd-boot; NIC names and install disk unverified |
 | apollo        | ASUS board, firmware mode unverified | Basement server; clan-managed; rosequartz worker; takes castor's dual-mode grub |
-| pik8s1–6      | Raspberry Pi 4B       | k8s cluster nodes; clan-managed; aarch64; pik8s1, pik8s2 and pik8s4–6 are the rosequartz control plane (five-member etcd quorum), pik8s3 is a rosequartz worker |
+| pik8s1–6      | Raspberry Pi 4B       | k8s cluster nodes; clan-managed; aarch64; pik8s1, pik8s2 and pik8s4–6 are the rosequartz control plane (five-member etcd quorum), pik8s3 is a rosequartz worker with a web kiosk on its display |
 
 ## Sub-Agent Guidance
 

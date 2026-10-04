@@ -2,37 +2,17 @@
   imports = [
     ./disk-config.nix
     ../../modules/dns
+    ../../modules/kiosk
     ../../modules/nix
   ];
 
-  # Transitional dual-homing. The UniFi 24p port carries VLAN 1 untagged and
-  # VLAN 20 tagged, so this machine keeps its old address and default route
-  # while gaining the VLAN 20 address rosequartz advertises for it
-  # (clan/rosequartz-cluster.nix). Once every cluster path is confirmed over
-  # 10.0.69.0/24, the port becomes a VLAN 20 access port and the VLAN 1
-  # address and `end0.20` here collapse into a plain `end0` on VLAN 20.
   networking = {
     hostName = "pik8s3";
     defaultGateway = {
-      address = "192.168.1.1";
+      address = "10.0.69.1";
       interface = "end0";
     };
     interfaces.end0 = {
-      useDHCP = false;
-      ipv4.addresses = [
-        {
-          address = "192.168.1.103";
-          prefixLength = 24;
-        }
-      ];
-    };
-
-    vlans."end0.20" = {
-      id = 20;
-      interface = "end0";
-    };
-
-    interfaces."end0.20" = {
       useDHCP = false;
       ipv4.addresses = [
         {
@@ -42,4 +22,40 @@
       ];
     };
   };
+
+  kiosk = {
+    enable = true;
+    url = "https://thecluster.lan";
+  };
+
+  # Covers the kiosk slice's MemoryMax plus headroom for the OS.
+  cluster.cairn.kubelet.systemReserved.memory = "1Gi";
+
+  security.pki.certificates = [
+    # thecluster.lan Nginx CA
+    ''
+      -----BEGIN CERTIFICATE-----
+      MIIDqTCCA1ugAwIBAgIRAP3DFbRphLU1I5G7SgUWB8cwBQYDK2VwMDsxCzAJBgNV
+      BAYTAlVTMRAwDgYDVQQKEwdVbk1hbmdvMRowGAYDVQQDExFVbk1hbmdvIEF1dGhv
+      cml0eTAeFw0yNDA3MjIwNTI1NTdaFw00OTA3MTYwNTI1NTdaMFIxCzAJBgNVBAYT
+      AlVTMRAwDgYDVQQKEwdVbk1hbmdvMRkwFwYDVQQLExBVbnN0b3BwYWJsZU1hbmdv
+      MRYwFAYDVQQDEw10aGVjbHVzdGVyLmlvMIICIjANBgkqhkiG9w0BAQEFAAOCAg8A
+      MIICCgKCAgEAxdhA+xxuQYucY2eDgHg5paLEOT6dHGTlULhu5n3HwmGy8PDUSFPR
+      hMUwWgurKEZlNdA77I2DP2pBfyT3FqGosbWtke2HFq3zOaap1UCHkd6NuYb7rEwI
+      Nlcd3cTw+/U8yUGJsjkaS2VBbbTyuWAcGvguQmpf/r5Su8ilDN/4MFMan6qRCGoB
+      yTPB8DfBsqcGUgu94mNaE1onnAisMYERWeED1lnlZKuo+Ff8dp9uS+xM/zFTRtSs
+      BYtF/RALUrH964UiXW3vLA0kzfXDc3b6RKTGT0jl5/oLHHSi38sRLdXxogVdZLFm
+      XLYm4fuHJRCMHm0/ejM2KvIK9DT05QsqQCw1IMtbZxsLGG7PgoheaDIiXavx0A/c
+      yCwG+8WrRJearruHb1JDVAVMufFcHQX+UlUvIXQrjeVSfsPLiVbYLSg/VLjwLPgP
+      /EkF14lxLxObkKLOmLbyOHP6KybdATgHJeZVK9BA6awmlQASSKwvrmwkdze7ESkG
+      JTh495w3N3qcQ2DidQ2pn59moN43nGTU6cvPgqDR2UZzxUvh10fk45Ayj4LVXdsp
+      APKOW1dHkk55VYEI9+MMzjlV+qPlH4Am2R40o/B+KQh1HkpUXz7lsFpkjEraBBia
+      qMdDxT2qdbR9nyBR01lcXujcGa/pXqNNV93fVrrPT9VakcngFiqQ1i0CAwEAAaNj
+      MGEwDgYDVR0PAQH/BAQDAgGGMA8GA1UdEwEB/wQFMAMBAf8wHQYDVR0OBBYEFJdi
+      KvNTkRcWLmJ8vcD2/AmuCOKiMB8GA1UdIwQYMBaAFOYurdBkToYbj1m0tvjcDvQY
+      j7dUMAUGAytlcANBALA6/GiSW3js9iarFiqloS+jI9kfqHABufe4XDuiZXL6sB9K
+      1bJtYQRzzKLOfQ5/GPf44JIhJPR5k2h4nkZ17gE=
+      -----END CERTIFICATE-----
+    ''
+  ];
 }
