@@ -6,17 +6,17 @@
 # at its gateway cannot resolve the `ncps.thecluster.lan` substituter in
 # ../cache and silently falls through to the public caches instead.
 #
-# Both are full recursors and serve public names too, so this pair is the
-# complete list rather than an internal-only prefix. They sit on VLAN 20,
-# on-link for every machine there and reachable over enp7s0 from hades.
-#
 # Both addresses front the pihole deployment in rosequartz, so they share a
-# failure domain: with the cluster down, no name resolves anywhere in the clan.
-# A gateway is deliberately not listed as a third resolver. resolved stays on
-# whichever server last answered, so after the outage a machine would keep
-# using the gateway and silently lose thecluster.lan, the failure this module
-# exists to prevent. NETWORK.md, "DNS and service addressing", has the
-# reasoning and what the clan can still do without DNS.
+# failure domain. Each machine's gateway is therefore a second resolver for
+# public names only, in its own resolved scope so it never sees
+# thecluster.lan. With both piholes down, public names keep resolving, and the
+# cluster nodes can still pull the pihole image that brings DNS back
+# (the-cluster#4458). NETWORK.md, "DNS and service addressing", has the
+# reasoning.
+{ config, lib, ... }:
+let
+  gateway = config.networking.defaultGateway;
+in
 {
   networking.nameservers = [
     "10.0.69.201"
@@ -24,13 +24,19 @@
   ];
 
   # Every machine runs systemd-resolved, so the pair above lands in the global
-  # scope and anything a link supplies of its own is scoped to that link. Only
-  # hades has such a link today: NetworkManager on wlp5s0, the wireless
-  # fallback behind the two wired interfaces, whose DHCP lease carries public
-  # resolvers that know nothing about thecluster.lan.
-  #
-  # A routing-only domain (the `~` prefix contributes no search suffix) sends
-  # thecluster.lan to the global scope explicitly, instead of leaving the
-  # choice of scope to resolved while the fallback is associated.
+  # scope and anything a link supplies is scoped to that link. A routing-only
+  # domain (the `~` prefix contributes no search suffix) sends thecluster.lan
+  # to the global scope alone. Every other name goes to the global scope and
+  # each default-route link in parallel, and the first answer wins.
   services.resolved.settings.Resolve.Domains = [ "~thecluster.lan" ];
+
+  # `40-<interface>` is the unit NixOS generates for `networking.interfaces`
+  # under networkd, so this merges into it. Public lookups that the gateway
+  # answers first bypass pihole blocking.
+  systemd.network.networks = lib.mkIf (gateway != null && gateway.interface != null) {
+    "40-${gateway.interface}" = {
+      dns = [ gateway.address ];
+      networkConfig.DNSDefaultRoute = true;
+    };
+  };
 }

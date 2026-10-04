@@ -151,15 +151,17 @@ Both are full recursors, and they are the only resolvers that carry the `theclus
 The pfSense gateways (`192.168.1.1` on VLAN 1, `10.0.69.1` on VLAN 20) resolve public names and the rest of the LAN, but answer NXDOMAIN inside `thecluster.lan`, so a machine pointed at its gateway cannot reach the `ncps.thecluster.lan` substituter in `modules/cache`.
 
 The resolvers sit on VLAN 20, on-link for every machine there and reachable over `enp7s0` from hades.
-Both are the pihole deployment in rosequartz (the-cluster `apps/pihole/rosequartz`), exposed on two load-balancer addresses, so they are one failure domain: if rosequartz is down, every clan machine loses resolution for all names, including public ones.
-That is a deliberate trade.
-A gateway listed as a third resolver would keep public names working through an outage, but systemd-resolved stays on whichever server last answered, so after the outage the machine would keep asking the gateway and silently lose `thecluster.lan` again, the same failure this layout exists to prevent.
-The clan tolerates the outage because nothing it needs to recover resolves through DNS: clan deployments and harmonia reach machines by address from the hosts flake, and the cluster nodes hold static addresses and cached images.
-hades keeps public resolution regardless through the per-link resolvers on `wlp5s0`.
+Both are the pihole deployment in rosequartz (the-cluster `apps/pihole/rosequartz`), exposed on two load-balancer addresses, so they are one failure domain.
+Each machine's default gateway is a second resolver for public names, set by `modules/dns` on the interface named in `networking.defaultGateway`.
+It sits in that link's systemd-resolved scope rather than the global one, so it never answers for `thecluster.lan` (see below).
+With both piholes down, public names still resolve, which the cluster nodes need to pull the pihole image that brings DNS back (the-cluster#4458).
+The cost is that a public lookup the gateway answers first bypasses pihole blocking.
 
 Every machine resolves through systemd-resolved and configures its wired interfaces with networkd, both from clan-core's recommended defaults.
-The resolvers above are systemd-resolved's global scope, so anything a link supplies of its own is scoped to that link.
-Only hades has such a link, NetworkManager on wlp5s0, so `modules/dns` also sets the routing-only domain `~thecluster.lan` to keep internal names on the global scope while the wireless fallback is associated.
+The piholes are systemd-resolved's global scope, and anything a link supplies is scoped to that link: the gateway on every machine, plus NetworkManager's DHCP resolvers on hades' `wlp5s0`.
+`modules/dns` sets the routing-only domain `~thecluster.lan` on the global scope, so internal names go to the piholes alone.
+Every other name goes to the global scope and each default-route link in parallel, and the first answer wins.
+Adding the gateway to the global scope instead would break `thecluster.lan`: resolved stays on whichever server in a scope last answered, so after an outage a machine would keep asking the gateway and get NXDOMAIN.
 
 CoreDNS runs inside rosequartz and resolves cluster-internal names.
 It is reached through the cluster, not through the LAN resolver.
