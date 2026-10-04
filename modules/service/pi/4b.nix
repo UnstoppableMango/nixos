@@ -1,4 +1,4 @@
-{ inputs, ... }:
+{ inputs, lib, ... }:
 let
   # flashrom 1.8.0's cmocka suite fails on aarch64 (write_chip_bad_status_test,
   # plus the leak check), and nixpkgs gates doCheck only on Darwin, so the
@@ -15,9 +15,9 @@ let
   );
 in
 {
-  imports = with inputs.nixos-raspberrypi; [
-    lib.int.default-nixos-raspberrypi-config
-    nixosModules.raspberry-pi-4.base
+  imports = [
+    inputs.nixos-raspberrypi.lib.int.default-nixos-raspberrypi-config
+    inputs.nixos-raspberrypi.nixosModules.raspberry-pi-4.base
   ];
 
   # The board modules read the flake from this argument, which
@@ -49,7 +49,14 @@ in
   # nixos-raspberrypi's sd-image sizes the firmware partition (1024 MiB) for
   # the kernels and initrds the `kernel` bootloader keeps there. Build with
   # `make pik8sN-sd`.
-  image.modules.raspberry-pi = inputs.nixos-raspberrypi.nixosModules.sd-image;
+  image.modules.raspberry-pi = {
+    imports = [ inputs.nixos-raspberrypi.nixosModules.sd-image ];
+
+    # The sd-image imports nixpkgs' profiles/base.nix, which turns on ZFS and
+    # so builds zfs-kernel against the Pi kernel. The installed system has no
+    # ZFS, so the image doesn't need it either.
+    boot.supportedFilesystems.zfs = lib.mkForce false;
+  };
 
   # TODO: make sure everything works before disabling
   # console.enable = false;
