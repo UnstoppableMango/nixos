@@ -1,4 +1,4 @@
-{ lib, ... }:
+{ ... }:
 {
   imports = [
     ./disk-config.nix
@@ -23,10 +23,4 @@
       ];
     };
   };
-
-  # This node joined after the initial quorum was formed. mkForce wins over
-  # the rosequartz cluster module's cluster-wide "new" default
-  # (clan/rosequartz-cluster.nix), which has no per-machine override for
-  # this option.
-  cluster.cairn.etcd.initialClusterState = lib.mkForce "existing";
 }
