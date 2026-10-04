@@ -44,7 +44,6 @@ flowchart TB
     HADES2["hades enp7s0<br/>10.0.69.69"]
     CP["pik8s1 · pik8s2 · pik8s4 · pik8s5 · pik8s6<br/>10.0.69.101-102, 104-106<br/>control plane"]
     PIW["pik8s3 10.0.69.103<br/>worker"]
-    NOTE["pik8s3 also holds its old<br/>192.168.1.103 on VLAN 1<br/>until the port cutover"]
     AGREUS["agreus 10.0.69.187<br/>worker"]
     POLLUX["pollux 10.0.69.14<br/>worker"]
     CASTOR["castor 10.0.69.13<br/>worker"]
@@ -96,7 +95,7 @@ The rosequartz service CIDR is `10.0.0.0/24` and the pod CIDR is `10.1.0.0/16`, 
 | apollo | `10.0.69.12` | 20 | GS724Tv4 | `g10` | rosequartz worker |
 | pik8s1 | `10.0.69.101` | 20 | UniFi 24p | `22` | rosequartz control plane |
 | pik8s2 | `10.0.69.102` | 20 | UniFi 24p | `20` | rosequartz control plane |
-| pik8s3 | `192.168.1.103` + `10.0.69.103` | 1 + 20 | UniFi 24p | Unverified | rosequartz worker; dual-homed during cutover |
+| pik8s3 | `10.0.69.103` | 20 | UniFi 24p | Unverified | rosequartz worker; web kiosk on its display |
 | pik8s4 | `10.0.69.104` | 20 | UniFi 24p | `2` | rosequartz control plane |
 | pik8s5 | `10.0.69.105` | 20 | UniFi 24p | `4` | rosequartz control plane |
 | pik8s6 | `10.0.69.106` | 20 | UniFi 24p | `6` | rosequartz control plane |
