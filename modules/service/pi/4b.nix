@@ -32,6 +32,13 @@ in
 
   boot.zfs.forceImportRoot = false;
 
+  # The Raspberry Pi kernel ships with the memory cgroup controller disabled.
+  # Without it runc can't apply memory settings, so no container starts.
+  boot.kernelParams = [
+    "cgroup_enable=memory"
+    "cgroup_memory=1"
+  ];
+
   # The PoE HAT uses the stock rpi-poe overlay. All of its fan-curve parameters
   # are optional and the defaults are what we want.
   hardware.raspberry-pi.config.pi4.dt-overlays.rpi-poe = {
