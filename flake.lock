@@ -265,6 +265,7 @@
         "flake-parts": [
           "flake-parts"
         ],
+        "globset": "globset",
         "inoculant": "inoculant",
         "kubepkgs": "kubepkgs",
         "nixpkgs": [
@@ -278,11 +279,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1790301909,
-        "narHash": "sha256-VkSZV2oHTZYPPmPYWEdaVkkx717M1IXak88w6OZOGYc=",
+        "lastModified": 1791169269,
+        "narHash": "sha256-1+6TpWyx59P4NB0RuKup8kjTgGgkcVPFXIErJbzXbpE=",
         "owner": "UnstoppableMango",
         "repo": "cairn",
-        "rev": "357ade0d6020293f2b8abc11451c1bd58b1d8bd8",
+        "rev": "99ed5cb37468496b78f51b3cdac5b712462b4e66",
         "type": "github"
       },
       "original": {
@@ -761,7 +762,6 @@
       "inputs": {
         "nixpkgs-lib": [
           "cairn",
-          "inoculant",
           "nixpkgs"
         ]
       },
@@ -780,6 +780,28 @@
       }
     },
     "globset_2": {
+      "inputs": {
+        "nixpkgs-lib": [
+          "cairn",
+          "inoculant",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1756146523,
+        "narHash": "sha256-dn8WNgwVQe0xBJ/d4CiRRcEVSgNclG6WSbqFEf6V024=",
+        "owner": "pdtpartners",
+        "repo": "globset",
+        "rev": "62da8904981f01dc7c97f56c3ea4f131a8393411",
+        "type": "github"
+      },
+      "original": {
+        "owner": "pdtpartners",
+        "repo": "globset",
+        "type": "github"
+      }
+    },
+    "globset_3": {
       "inputs": {
         "nixpkgs-lib": "nixpkgs-lib"
       },
@@ -1047,7 +1069,7 @@
           "cairn",
           "flake-parts"
         ],
-        "globset": "globset",
+        "globset": "globset_2",
         "gomod2nix": [
           "cairn",
           "a2b",
@@ -1094,7 +1116,7 @@
           "cairn",
           "flake-parts"
         ],
-        "globset": "globset_2",
+        "globset": "globset_3",
         "gomod2nix": "gomod2nix_3",
         "nixpkgs": [
           "cairn",
