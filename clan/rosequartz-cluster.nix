@@ -17,8 +17,7 @@
 
   machines = {
     # pik8s1 and pik8s2 joined after pik8s4-6 formed the cluster, so they take
-    # the lowest VIP priorities and carry an `initialClusterState = "existing"`
-    # override in their own machines/<name>/configuration.nix.
+    # the lowest VIP priorities.
     #
     # They bring the quorum to five: odd, and one more failure tolerated than
     # the three it replaces. pik8s3 is a worker rather than a sixth
@@ -124,6 +123,11 @@
       # OpenSSL-based clients in pods reject kube-root-ca.crt.
       caChain = [ (builtins.readFile ../certs/unmango-authority.crt) ];
     };
+
+    # The quorum formed long ago, so a member always joins it. With "new", a
+    # member starting on an empty data directory (after a reflash) bootstraps
+    # a cluster of its own instead, and the others reject it on cluster ID.
+    etcd.initialClusterState = "existing";
 
     etcd.extraModules = [
       # etcd must never swap. Its latency budget is a raft heartbeat, and a
