@@ -34,9 +34,16 @@ in
 
   # The Raspberry Pi kernel ships with the memory cgroup controller disabled.
   # Without it runc can't apply memory settings, so no container starts.
+  #
+  # The SSDs' Sabrent enclosures use a JMicron JMS578 bridge (152d:a578),
+  # which drops off the bus under UAS on the USB 3 ports. On a USB 2 port
+  # instead, etcd's fsyncs queue behind reads; plain usb-storage keeps the
+  # drive on USB 3.
+  # https://forums.raspberrypi.com/viewtopic.php?f=28&t=245931
   boot.kernelParams = [
     "cgroup_enable=memory"
     "cgroup_memory=1"
+    "usb-storage.quirks=152d:a578:u"
   ];
 
   # The PoE HAT uses the stock rpi-poe overlay. All of its fan-curve parameters
