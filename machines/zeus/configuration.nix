@@ -2,6 +2,7 @@
 {
   imports = [
     ../../modules/ceph
+    ../../modules/ceph-cluster-network
     ../../modules/ci-limits
     ../../modules/dns
     ../../modules/nix
@@ -36,9 +37,18 @@
     AllowSuspendThenHibernate = "no";
   };
 
-  # enp6s0 is the port cabled to GS724Tv4 `g18`. The board's other five NICs
-  # stay unconfigured; two of them carried the previous cluster's 10.69.0.0/16
-  # network.
+  # enp3s0f0 and enp3s0f1 are the two ports of the SFP+ card.
+  cephClusterNetwork = {
+    enable = true;
+    interface = "enp3s0f0";
+    address = "10.0.70.10";
+    rangeStart = "10.0.70.64";
+    rangeEnd = "10.0.70.95";
+  };
+
+  # enp6s0 is the port cabled to GS724Tv4 `g18`. enp7s0, enp11s0, and enp12s0
+  # stay unconfigured; two of the board's NICs carried the previous cluster's
+  # 10.69.0.0/16 network.
   networking = {
     hostName = "zeus";
     useDHCP = false;

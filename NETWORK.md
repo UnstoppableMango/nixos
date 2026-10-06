@@ -81,7 +81,7 @@ The dashed VIP link is a keepalived advertisement rather than a cable.
 | 1 (native) | Personal | `192.168.1.0/24` | `192.168.1.1` | Workstation, wireless, consumer devices |
 | 20 | Homelab | `10.0.69.0/24` | `10.0.69.1` | rosequartz Kubernetes cluster |
 
-Neither subnet overlaps the cluster's internal ranges.
+Neither subnet, nor the untagged Ceph cluster network `10.0.70.0/24`, overlaps the cluster's internal ranges.
 The rosequartz service CIDR is `10.0.0.0/24` and the pod CIDR is `10.1.0.0/16`, per the kube-apiserver and kube-controller-manager flags on the control-plane nodes.
 
 ## Hosts
@@ -113,7 +113,8 @@ The rosequartz service CIDR is `10.0.0.0/24` and the pod CIDR is `10.1.0.0/16`, 
 | Media / consoles | DHCP | 1 | Unverified | Unverified | Consumer |
 
 gaea, pollux, and castor each have a second NIC on the GS724Tv4 that no config uses: gaea on `g3` and castor on `g11`, both on VLAN 1, and pollux on `g9`, which carries PVID 20 and is up with a link-local address only (`fe80::20b:abff:fe71:dae3`).
-zeus's other five NICs are all down and hold no address.
+zeus's SFP+ card is `enp3s0f0` and `enp3s0f1`, with `enp3s0f0` on the [Ceph cluster network](#ceph-cluster-network).
+Its other three NICs, `enp7s0`, `enp11s0`, and `enp12s0`, are down and hold no address.
 `g19` is the trunk uplink to the UniFi 24p.
 
 apollo's second onboard NIC (`40:b0:76:d7:f6:07`) is cabled to the GS724Tv4 but held down by `linkConfig.ActivationPolicy`, so it emits no frames and no port ever learns its address.
@@ -143,6 +144,21 @@ That pair is how the port assignments above were established, and is faster than
 
 The UniFi APs sit on VLAN 1 access ports, so wireless clients land on `192.168.1.0/24` with no path onto VLAN 20.
 The UniFi controller itself runs on hades via `modules/unifi`, started on demand rather than at boot.
+
+## Ceph cluster network
+
+`10.0.70.0/24` is Ceph's cluster network, carrying OSD replication, recovery, and heartbeats among gaea, zeus, and apollo.
+It runs on a UniFi SFP+ aggregator with no uplink to any other switch, so it has no gateway, no VLAN tag, and no route to or from the rest of the network.
+The aggregator must have jumbo frames enabled, since every port and interface on it uses MTU 9000.
+
+| Host | SFP+ port | Host address (`ceph0`) | OSD pod range |
+| --- | --- | --- | --- |
+| zeus | `enp3s0f0` | `10.0.70.10` | `10.0.70.64`-`10.0.70.95` |
+| gaea | Card not installed | `10.0.70.11` | `10.0.70.96`-`10.0.70.127` |
+| apollo | Card not installed | `10.0.70.12` | `10.0.70.128`-`10.0.70.159` |
+
+`modules/ceph-cluster-network` puts the host address on `ceph0`, a macvlan shim on the SFP+ port, and runs multus as the host CNI plugin so OSD pods get a macvlan interface in the host's range.
+The Rook side, and why the host address sits on a shim rather than the port, is in the-cluster's `docs/storage.md`.
 
 ## DNS and service addressing
 
