@@ -42,10 +42,10 @@
   # comes up, and fails with "Error loading firmware" without it.
   hardware.enableRedistributableFirmware = true;
 
-  # enp3s0f0 is the port cabled to the aggregator.
+  # enp3s0f1 is the port cabled to the aggregator.
   cephClusterNetwork = {
     enable = true;
-    interface = "enp3s0f0";
+    interface = "enp3s0f1";
     address = "10.0.70.10";
     rangeStart = "10.0.70.64";
     rangeEnd = "10.0.70.95";

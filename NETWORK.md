@@ -113,7 +113,7 @@ The rosequartz service CIDR is `10.0.0.0/24` and the pod CIDR is `10.1.0.0/16`, 
 | Media / consoles | DHCP | 1 | Unverified | Unverified | Consumer |
 
 gaea, pollux, and castor each have a second NIC on the GS724Tv4 that no config uses: gaea on `g3` and castor on `g11`, both on VLAN 1, and pollux on `g9`, which carries PVID 20 and is up with a link-local address only (`fe80::20b:abff:fe71:dae3`).
-zeus's SFP+ card is `enp3s0f0` and `enp3s0f1`, with `enp3s0f0` on the [Ceph cluster network](#ceph-cluster-network).
+zeus's SFP+ card is `enp3s0f0` and `enp3s0f1`, with `enp3s0f1` on the [Ceph cluster network](#ceph-cluster-network).
 Its other three NICs, `enp7s0`, `enp11s0`, and `enp12s0`, are down and hold no address.
 `g19` is the trunk uplink to the UniFi 24p.
 
@@ -153,7 +153,7 @@ The aggregator must have jumbo frames enabled, since every port and interface on
 
 | Host | SFP+ port | Host address (`ceph0`) | OSD pod range |
 | --- | --- | --- | --- |
-| zeus | `enp3s0f0` | `10.0.70.10` | `10.0.70.64`-`10.0.70.95` |
+| zeus | `enp3s0f1` | `10.0.70.10` | `10.0.70.64`-`10.0.70.95` |
 | gaea | Card not installed | `10.0.70.11` | `10.0.70.96`-`10.0.70.127` |
 | apollo | Card not installed | `10.0.70.12` | `10.0.70.128`-`10.0.70.159` |
 
