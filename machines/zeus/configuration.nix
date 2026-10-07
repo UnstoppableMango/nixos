@@ -37,7 +37,12 @@
     AllowSuspendThenHibernate = "no";
   };
 
-  # enp3s0f0 and enp3s0f1 are the two ports of the SFP+ card.
+  # enp3s0f0 and enp3s0f1 are the two ports of the SFP+ card, a Broadcom
+  # BCM57810. bnx2x loads the card's firmware from linux-firmware when a port
+  # comes up, and fails with "Error loading firmware" without it.
+  hardware.enableRedistributableFirmware = true;
+
+  # enp3s0f0 is the port cabled to the aggregator.
   cephClusterNetwork = {
     enable = true;
     interface = "enp3s0f0";
