@@ -198,6 +198,10 @@
             options.SystemdCgroup = true;
           };
       }
+
+      # Pulls go through Harbor's proxy caches, with the upstream registry as
+      # the fallback.
+      ../modules/registry-mirror
     ];
 
     loadbalancer = {

@@ -75,6 +75,8 @@ Other machines (agreus, pollux, castor, zeus, gaea, iris, pik8s1–6) follow the
     Media sources are WebDAV shares from copyparty in the-cluster (`apps/media`), written to a store-linked `sources.xml`, so sources added in Kodi's UI do not persist.
   - `kiosk/` - A web page in Firefox kiosk mode under cage, always on, on pik8s3's display.
     Its user slice is capped at `kiosk.memoryMax`, and pik8s3 reserves that much plus OS headroom from the kubelet.
+  - `registry-mirror/` - containerd `hosts.toml` mirrors on every rosequartz kubelet node (through `kubelet.extraModules` in `clan/rosequartz-cluster.nix`), sending docker.io, ghcr.io, quay.io and registry.k8s.io pulls through Harbor's proxy-cache projects in the-cluster with the upstream as fallback.
+    The project names must match `CACHES` in the-cluster's `apps/harbor-system/proxy-cache/proxy-cache.py`; the-cluster's `docs/harbor.md` has the failover runbook.
   - `ssh/` - System-level SSH behavior (currently just `ssh.inhibitSleepOnSsh`, a PAM hook that blocks suspend while an SSH session is open).
     SSH *client* config for erik lives in the dotfiles repo's `modules/ssh`.
   - `unifi/` - UniFi network module
