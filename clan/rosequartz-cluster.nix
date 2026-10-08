@@ -15,10 +15,10 @@
   # `rosequartz-pki`, `rosequartz-etcd`, etc.
   instancePrefix = "rosequartz-";
 
-  # Kubernetes and etcd come from kubepkgs' 1.36 set rather than whatever
+  # Kubernetes and etcd come from kubepkgs' 1.37 set rather than whatever
   # nixpkgs is locked to, so a `nix flake update` no longer moves the
   # cluster. Bump one minor at a time, per cairn's docs/UPGRADES.md.
-  versions.kubernetes = "1.36";
+  versions.kubernetes = "1.37";
 
   machines = {
     # pik8s1 and pik8s2 joined after pik8s4-6 formed the cluster, so they take
