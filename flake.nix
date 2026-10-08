@@ -172,6 +172,9 @@
             brave-bookmarks-policy = pkgs.writeText "bookmarks.json" (
               builtins.toJSON { ManagedBookmarks = import ./modules/brave/bookmarks.nix; }
             );
+            brave-certificates-policy = pkgs.writeText "certificates.json" (
+              builtins.toJSON (import ./modules/brave/certificates.nix)
+            );
           }
           // lib.optionalAttrs (system == "x86_64-linux") {
             # Hybrid BIOS/UEFI installer for onboarding a machine: boot it, then
