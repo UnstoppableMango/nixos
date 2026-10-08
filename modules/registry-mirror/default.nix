@@ -54,6 +54,10 @@ let
         ];
         override_path = true;
         ca = "${ca}";
+        # containerd waits 30s by default for a connection before falling
+        # back, and a dead Gateway VIP drops SYNs rather than refusing them.
+        # The Gateway is on the node's own VLAN, so 2s is generous.
+        dial_timeout = "2s";
       };
     };
 in
