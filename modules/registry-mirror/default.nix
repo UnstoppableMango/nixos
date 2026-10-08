@@ -23,7 +23,8 @@ let
   ca = ../../certs/unmango-authority.crt;
 
   # Upstream host -> its registry API endpoint and Harbor project. The project
-  # names are the keys of CACHES in the-cluster's proxy-cache.py.
+  # names are the ProxyCache names in the-cluster's
+  # apps/harbor-system/proxy-cache/proxy-caches.yml.
   mirrors = {
     "docker.io" = {
       server = "https://registry-1.docker.io";
