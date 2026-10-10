@@ -58,7 +58,7 @@ Other machines (agreus, pollux, castor, zeus, gaea, iris, pik8s1–9) follow the
     `certificates.nix` is the `CACertificates` policy carrying the same root as `pki/`, since Chromium on Linux ignores the system bundle; darter installs it the same way from `#brave-certificates-policy` as `certificates.json`.
   - `pki/` - Trusts the UnMango Root CA G2 from [pki](https://github.com/UnstoppableMango/pki) system-wide; `ca.pem` is a copy of that repo's `certs/ca.pem`.
     Every `*.thecluster.lan` cert chains to it through UnMango Private CA 01.
-    The per-host `security.pki.certificates` entries labelled "thecluster.lan Nginx CA" are the pre-ceremony CA, kept until the-cluster's gateway serves the new chain.
+    `thecluster-lan-nginx-ca.pem` is the pre-ceremony CA, trusted on every machine alongside it until the-cluster's gateway serves the new chain.
   - `ceph-cluster-network/` - Ceph's cluster network on the SFP+ aggregator (`cephClusterNetwork.*`): a macvlan shim holding the host's `10.0.70.0/24` address, and multus as the host CNI plugin wrapping flannel, so Rook's OSD pods get a macvlan interface from the host's `host-local` range.
     multus runs from NixOS rather than its DaemonSet because the kubelet module relinks `/opt/cni/bin` on every start and `/etc/cni/net.d` is a store path.
     Addresses per host are in `NETWORK.md`.
