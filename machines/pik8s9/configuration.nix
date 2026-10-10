@@ -1,4 +1,3 @@
-{ ... }:
 {
   imports = [
     ./disk-config.nix
