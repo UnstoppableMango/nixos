@@ -1,5 +1,5 @@
-# THECLUSTER's vanilla-Kubernetes cluster, "rosequartz": pik8s1, pik8s2,
-# pik8s4-6 and pik8s7 as an HA control plane behind a keepalived VIP, with pik8s3,
+# THECLUSTER's vanilla-Kubernetes cluster, "rosequartz": pik8s1, pik8s4-6
+# and pik8s7 as an HA control plane behind a keepalived VIP, with pik8s3,
 # agreus, pollux, castor, iris, apollo, zeus, and gaea as workers. Lowered
 # by cairn's `cairn.clusters` option tree (flakeModules/cluster/lower.nix)
 # into the same per-service inventory instances this used to be hand-wired
@@ -20,13 +20,13 @@
   versions.kubernetes = "1.37";
 
   machines = {
-    # pik8s1 and pik8s2 joined after pik8s4-6 formed the cluster, so they take
-    # the lowest VIP priorities.
+    # pik8s1 joined after pik8s4-6 formed the cluster, so it takes a lower VIP
+    # priority.
     #
-    # They bring the quorum to five: odd, and one more failure tolerated than
-    # the three it replaces. pik8s3 is a worker rather than a sixth
-    # control-plane machine, which would make the quorum even and buy no
-    # tolerance. An apiserver that is not also an etcd member is not a shape
+    # The quorum stays at five: odd, and one more failure tolerated than three.
+    # pik8s2, a 4 GiB pi, left once pik8s7 joined, bringing it back from six.
+    # pik8s3 is a worker rather than a sixth control-plane machine, which
+    # would make the quorum even and buy no tolerance. An apiserver that is not also an etcd member is not a shape
     # cairn models: `etcd-client-cert` comes from the etcd member module, and
     # HAProxy fronts only the apiserver port, so flannel reaching etcd through
     # the raw VIP assumes whoever holds it runs etcd locally.
@@ -34,11 +34,6 @@
       role = "control-plane";
       ip = "10.0.69.101";
       keepalivedPriority = 70;
-    };
-    pik8s2 = {
-      role = "control-plane";
-      ip = "10.0.69.102";
-      keepalivedPriority = 60;
     };
     pik8s3 = {
       role = "worker";
