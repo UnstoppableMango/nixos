@@ -96,7 +96,14 @@
       ip = "10.0.69.12";
       # The runner pods mount a node-local nix store, so they only run
       # where `arcRunnerStore.enable` holds.
-      nodeLabels."thecluster.lan/ci-runner" = "true";
+      nodeLabels = {
+        "thecluster.lan/ci-runner" = "true";
+        # The GTX 1060. The nvidia-device-plugin chart's default affinity and
+        # the-cluster's nvidia RuntimeClass both select on this label, and the
+        # `nvidia` containerd handler exists only here
+        # (machines/apollo/configuration.nix).
+        "nvidia.com/gpu.present" = "true";
+      };
       # 32 threads, 32 GiB: the memory is what runs out first here.
       maxPods = 150;
     };

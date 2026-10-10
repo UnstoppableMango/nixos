@@ -1,4 +1,9 @@
-{ pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 {
   imports = [
     ../../modules/arc-runner-store
@@ -48,12 +53,69 @@
     efiInstallAsRemovable = true;
   };
 
-  # The GTX 1060 is the only VGA device, so it carries the local console.
-  # nouveau deactivates the firmware framebuffer on load and then fails to
-  # find a mode on it ("Cannot find any crtc or sizes"), leaving a black
-  # screen where the login prompt should be. Nothing here needs KMS, so keep
-  # the simpledrm console instead.
+  # The GTX 1060 (GP106, Pascal) is the only VGA device, so it carries the
+  # local console. nouveau deactivates the firmware framebuffer on load and
+  # then fails to find a mode on it ("Cannot find any crtc or sizes"), leaving
+  # a black screen where the login prompt should be. The nvidia module below
+  # blacklists it too; this stays so dropping the GPU config cannot bring the
+  # black screen back.
   boot.blacklistedKernelModules = [ "nouveau" ];
+
+  # The GPU is for pods, through the nvidia RuntimeClass and the
+  # nvidia-device-plugin in the-cluster (infrastructure/controllers/nvidia-system).
+  #
+  # `videoDrivers` is how nixpkgs enables the driver; it does not start an X
+  # server. Without one, nothing loads the module eagerly, so it is listed
+  # here rather than left to modalias, and nvidia-uvm follows through the
+  # module's softdep.
+  services.xserver.videoDrivers = [ "nvidia" ];
+  boot.kernelModules = [ "nvidia" ];
+  hardware.nvidia = {
+    # 590 and later dropped Pascal. 580 is NVIDIA's long-term branch for it,
+    # supported until August 2028. Its CUDA 13 userspace no longer targets
+    # Pascal either, so workloads need a CUDA 12 image.
+    branch = "legacy_580";
+    # The open kernel modules support Turing and later only.
+    open = false;
+    # No display server holds the device open, so without this the driver
+    # tears down its state whenever the last client exits and every pod start
+    # pays for reinitialising it.
+    nvidiaPersistenced = true;
+    # A GTK settings app, for a machine with no desktop.
+    nvidiaSettings = false;
+  };
+
+  # The driver is unfree. Allow just it, rather than everything, on a machine
+  # that otherwise builds nothing unfree.
+  nixpkgs.config.allowUnfreePredicate =
+    pkg:
+    builtins.elem (lib.getName pkg) [
+      "nvidia-x11"
+      "nvidia-persistenced"
+      "nvidia-kernel-modules"
+    ];
+
+  # Writes the CDI spec to /run/cdi on boot, which the `nvidia` handler below
+  # reads. The device plugin hands each pod NVIDIA_VISIBLE_DEVICES=<GPU UUID>,
+  # and the runtime looks that up as `nvidia.com/gpu=<UUID>`, so the spec has
+  # to name devices by UUID rather than the default index.
+  hardware.nvidia-container-toolkit = {
+    enable = true;
+    device-name-strategy = "uuid";
+  };
+
+  # Handler for the nvidia RuntimeClass in the-cluster. It is runc behind
+  # nvidia-container-runtime in CDI mode, which turns the container's
+  # NVIDIA_VISIBLE_DEVICES into the device nodes, driver libraries and
+  # nvidia-smi from the spec above. runc itself is found on containerd's PATH.
+  virtualisation.containerd.settings.plugins."io.containerd.grpc.v1.cri".containerd.runtimes.nvidia =
+    {
+      runtime_type = "io.containerd.runc.v2";
+      options = {
+        BinaryName = "${lib.getOutput "tools" config.hardware.nvidia-container-toolkit.package}/bin/nvidia-container-runtime.cdi";
+        SystemdCgroup = true;
+      };
+    };
 
   # https://nixos.wiki/wiki/Power_Management#systemd_sleep
   systemd.sleep.settings.Sleep = {
