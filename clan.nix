@@ -28,6 +28,9 @@ let
     pik8s4 = { };
     pik8s5 = { };
     pik8s6 = { };
+    pik8s7 = { };
+    pik8s8 = { };
+    pik8s9 = { };
   };
 
   # intersectAttrs drops unmatched names silently, so a typo above would quietly
