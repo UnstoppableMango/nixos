@@ -1,5 +1,5 @@
-# THECLUSTER's vanilla-Kubernetes cluster, "rosequartz": pik8s1, pik8s2 and
-# pik8s4-6 as an HA control plane behind a keepalived VIP, with pik8s3,
+# THECLUSTER's vanilla-Kubernetes cluster, "rosequartz": pik8s1, pik8s2,
+# pik8s4-6 and pik8s7 as an HA control plane behind a keepalived VIP, with pik8s3,
 # agreus, pollux, castor, iris, apollo, zeus, and gaea as workers. Lowered
 # by cairn's `cairn.clusters` option tree (flakeModules/cluster/lower.nix)
 # into the same per-service inventory instances this used to be hand-wired
@@ -56,6 +56,16 @@
       role = "control-plane";
       ip = "10.0.69.106";
       keepalivedPriority = 80;
+    };
+
+    # 8 GiB pis taking over the control plane from the 4 GiB ones, joining
+    # etcd one at a time through `etcd.autoJoin`. Each join makes the quorum
+    # even for as long as it takes to remove a 4 GiB member. They take the
+    # lowest VIP priorities until the 4 GiB machines leave.
+    pik8s7 = {
+      role = "control-plane";
+      ip = "10.0.69.107";
+      keepalivedPriority = 50;
     };
 
     agreus = {
@@ -128,6 +138,11 @@
     # member starting on an empty data directory (after a reflash) bootstraps
     # a cluster of its own instead, and the others reject it on cluster ID.
     etcd.initialClusterState = "existing";
+
+    # Register a machine with no etcd data as a learner before its etcd
+    # starts, and promote it once caught up, rather than an `etcdctl member
+    # add` by hand. Machines already holding data are left alone.
+    etcd.autoJoin = true;
 
     etcd.extraModules = [
       # etcd must never swap. Its latency budget is a raft heartbeat, and a
