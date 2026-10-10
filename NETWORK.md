@@ -44,6 +44,7 @@ flowchart TB
     HADES2["hades enp7s0<br/>10.0.69.69"]
     CP["pik8s1 · pik8s2 · pik8s4 · pik8s5 · pik8s6<br/>10.0.69.101-102, 104-106<br/>control plane"]
     PIW["pik8s3 10.0.69.103<br/>worker"]
+    NEWPI["pik8s7 · pik8s8 · pik8s9<br/>10.0.69.107-109<br/>not yet joined"]
     AGREUS["agreus 10.0.69.187<br/>worker"]
     POLLUX["pollux 10.0.69.14<br/>worker"]
     CASTOR["castor 10.0.69.13<br/>worker"]
@@ -61,6 +62,7 @@ flowchart TB
   GS724 --> GAEA
   GS724 --> CASTOR
   U24 -.-> PIW
+  U24 -.-> NEWPI
   U24 -.-> PRN
   U24 -.-> MED
   GS724 --> POLLUX
@@ -99,6 +101,9 @@ The rosequartz service CIDR is `10.0.0.0/24` and the pod CIDR is `10.1.0.0/16`, 
 | pik8s4 | `10.0.69.104` | 20 | UniFi 24p | `2` | rosequartz control plane |
 | pik8s5 | `10.0.69.105` | 20 | UniFi 24p | `4` | rosequartz control plane |
 | pik8s6 | `10.0.69.106` | 20 | UniFi 24p | `6` | rosequartz control plane |
+| pik8s7 | `10.0.69.107` | 20 | UniFi 24p | Unverified | Not yet in rosequartz; destined for its control plane |
+| pik8s8 | `10.0.69.108` | 20 | UniFi 24p | Unverified | Not yet in rosequartz; destined for its control plane |
+| pik8s9 | `10.0.69.109` | 20 | UniFi 24p | Unverified | Not yet in rosequartz; destined for its control plane |
 | agreus | `10.0.69.187` | 20 | UniFi 24p | `9` | rosequartz worker |
 | pollux | `10.0.69.14` | 20 | GS724Tv4 | `g7` | rosequartz worker |
 | iris (`eno1`) | `10.0.69.15` | 20 | Unverified | Unverified | rosequartz worker; not yet cabled |
@@ -134,7 +139,7 @@ Pod traffic for `192.168.1.0/24` takes a policy route through `10.0.69.1` instea
 
 | Switch | Uplink | Carries | Downstream |
 | --- | --- | --- | --- |
-| UniFi 24p | pfSense, trunk | VLAN 1 + 20 | GS108T trunk, GS724Tv4 trunk, UniFi APs, pik8s1-6, agreus |
+| UniFi 24p | pfSense, trunk | VLAN 1 + 20 | GS108T trunk, GS724Tv4 trunk, UniFi APs, pik8s1-9, agreus |
 | GS108T | UniFi 24p, trunk | VLAN 1 + 20 | hades `enp6s0` on VLAN 1, hades `enp7s0` on VLAN 20 |
 | GS724Tv4 | UniFi 24p on `g19`, trunk | VLAN 1 + 20 | zeus `g18`, gaea `g1`, apollo `g10`, pollux `g7`, and castor `g5` on VLAN 20 access ports |
 
