@@ -27,5 +27,8 @@ in
     environment.etc."brave/policies/managed/bookmarks.json".text = builtins.toJSON {
       ManagedBookmarks = cfg.managedBookmarks;
     };
+    environment.etc."brave/policies/managed/certificates.json".text = builtins.toJSON (
+      import ./certificates.nix
+    );
   };
 }

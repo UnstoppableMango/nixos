@@ -23,7 +23,7 @@ This is a NixOS configuration flake using **flake-parts** and **clan-core** for 
 ### Module System
 
 Plain NixOS modules live under `modules/` and are composed into machine configs via direct `imports`. Clan service modules (role-based, multi-machine) live under `modules/service/` and are registered as clan inventory modules in `clan.nix`.
-Modules every machine needs (`modules/dns`, `modules/gc`, `modules/nix`) are not imported per machine: the `base` instance in `clan.nix` attaches them to every inventory member through its `tags.all` role, the same way the `clan-cache` instance attaches `modules/cache`.
+Modules every machine needs (`modules/dns`, `modules/gc`, `modules/nix`, `modules/pki`) are not imported per machine: the `base` instance in `clan.nix` attaches them to every inventory member through its `tags.all` role, the same way the `clan-cache` instance attaches `modules/cache`.
 
 The `rosequartz` Kubernetes cluster (pik8s4–6 control plane, agreus worker) is **not** defined in this repo. It runs on [cairn](https://github.com/UnstoppableMango/cairn), a library flake that registers one clan service per cluster component (`@UnstoppableMango/{pki,etcd,apiserver,kubelet,loadbalancer,network,kubeconfig,inoculant,coredns,flux}`). `clan.nix` declares a `rosequartz-<component>` instance per service with `module.input = "cairn"`; the services coordinate via clan exports. Cairn's `docs/USAGE.md` and per-service `modules/service/<name>/README.md` are the reference for their options.
 
@@ -55,6 +55,10 @@ Other machines (agreus, pollux, castor, zeus, gaea, iris, pik8s1–9) follow the
     Brave itself is installed by the dotfiles repo's home-manager configuration; policy lives in `/etc`, which home-manager cannot write, so it is supplied here.
     The bookmark list is a plain data file (`modules/brave/bookmarks.nix`) shared with the `brave-bookmarks-policy` package in `flake.nix`, so darter, which is not a clan machine and has no Nix-managed `/etc`, installs the same file with
     `sudo install -Dm644 "$(nix build --no-link --print-out-paths github:UnstoppableMango/nixos#brave-bookmarks-policy)" /etc/brave/policies/managed/bookmarks.json`.
+    `certificates.nix` is the `CACertificates` policy carrying the same root as `pki/`, since Chromium on Linux ignores the system bundle; darter installs it the same way from `#brave-certificates-policy` as `certificates.json`.
+  - `pki/` - Trusts the UnMango Root CA G2 from [pki](https://github.com/UnstoppableMango/pki) system-wide; `ca.pem` is a copy of that repo's `certs/ca.pem`.
+    Every `*.thecluster.lan` cert chains to it through UnMango Private CA 01.
+    The per-host `security.pki.certificates` entries labelled "thecluster.lan Nginx CA" are the pre-ceremony CA, kept until the-cluster's gateway serves the new chain.
   - `ceph-cluster-network/` - Ceph's cluster network on the SFP+ aggregator (`cephClusterNetwork.*`): a macvlan shim holding the host's `10.0.70.0/24` address, and multus as the host CNI plugin wrapping flannel, so Rook's OSD pods get a macvlan interface from the host's `host-local` range.
     multus runs from NixOS rather than its DaemonSet because the kubelet module relinks `/opt/cni/bin` on every start and `/etc/cni/net.d` is a store path.
     Addresses per host are in `NETWORK.md`.
