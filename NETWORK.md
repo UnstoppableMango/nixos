@@ -42,7 +42,7 @@ flowchart TB
     direction TB
     VIP["rosequartz VIP<br/>10.0.69.100<br/>keepalived"]
     HADES2["hades enp7s0<br/>10.0.69.69"]
-    CP["pik8s1 · pik8s4 · pik8s5 · pik8s6 · pik8s7 · pik8s8<br/>10.0.69.101, 104-108<br/>control plane"]
+    CP["pik8s4 · pik8s5 · pik8s6 · pik8s7 · pik8s8<br/>10.0.69.104-108<br/>control plane"]
     PIW["pik8s3 10.0.69.103<br/>worker"]
     NEWPI["pik8s9<br/>10.0.69.109<br/>not yet joined"]
     AGREUS["agreus 10.0.69.187<br/>worker"]
@@ -95,7 +95,7 @@ The rosequartz service CIDR is `10.0.0.0/24` and the pod CIDR is `10.1.0.0/16`, 
 | zeus | `10.0.69.10` | 20 | GS724Tv4 | `g18` | rosequartz worker |
 | gaea | `10.0.69.11` | 20 | GS724Tv4 | `g1` | rosequartz worker |
 | apollo | `10.0.69.12` | 20 | GS724Tv4 | `g10` | rosequartz worker |
-| pik8s1 | `10.0.69.101` | 20 | UniFi 24p | `22` | rosequartz control plane |
+| pik8s1 | `10.0.69.101` | 20 | UniFi 24p | `22` | not in rosequartz; planned pihole host |
 | pik8s2 | `10.0.69.102` | 20 | UniFi 24p | `20` | not in rosequartz; planned pihole host |
 | pik8s3 | `10.0.69.103` | 20 | UniFi 24p | Unverified | rosequartz worker; web kiosk on its display |
 | pik8s4 | `10.0.69.104` | 20 | UniFi 24p | `2` | rosequartz control plane |
@@ -111,7 +111,7 @@ The rosequartz service CIDR is `10.0.0.0/24` and the pod CIDR is `10.1.0.0/16`, 
 | castor (`eno1`) | `10.0.69.13` | 20 | GS724Tv4 | `g5` | rosequartz worker |
 | castor (`enp2s0`) | DHCP | 1 | GS724Tv4 | `g11` | Second NIC, unused by any config |
 | Samsung TV (UN50KU630D) | `192.168.1.75` | 1 | Wireless | n/a | agreus's HDMI display; agreus polls `:8001/api/v2/` to detect power, which needs a pfSense pass rule from `10.0.69.187` to `192.168.1.75:8001` |
-| rosequartz VIP | `10.0.69.100` | 20 | keepalived on pik8s1, pik8s4-7 | n/a | apiserver endpoint |
+| rosequartz VIP | `10.0.69.100` | 20 | keepalived on pik8s4-8 | n/a | apiserver endpoint |
 | Unidentified (`d0:50:99:e1:dc:92`) | `192.168.1.9` | 1 | GS724Tv4 | `g22` | Answers SSH with `ssh-rsa`/`ssh-dss` host keys only |
 | Unidentified (`d0:50:99:e1:dd:1e`) | `192.168.1.7` | 1 | GS724Tv4 | `g24` | Answers SSH with `ssh-rsa`/`ssh-dss` host keys only |
 | Printer | DHCP | 1 | Unverified | Unverified | Consumer |
@@ -194,12 +194,11 @@ The apiserver is fronted by a keepalived VIP at `10.0.69.100`, held by whichever
 | pik8s4 | 100 |
 | pik8s5 | 90 |
 | pik8s6 | 80 |
-| pik8s1 | 70 |
 | pik8s7 | 50 |
 | pik8s8 | 40 |
 
 pik8s4 holds the VIP by default.
-Every control-plane machine runs keepalived on `end0`, which carries VLAN 20 untagged on all six.
+Every control-plane machine runs keepalived on `end0`, which carries VLAN 20 untagged on all five.
 The VIP is intentionally absent from the `hosts` flake, since it is not a machine.
 
 ## Known gaps
