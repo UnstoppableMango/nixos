@@ -1,5 +1,5 @@
 # THECLUSTER's vanilla-Kubernetes cluster, "rosequartz": pik8s1, pik8s4-6
-# and pik8s7 as an HA control plane behind a keepalived VIP, with pik8s3,
+# and pik8s7-8 as an HA control plane behind a keepalived VIP, with pik8s3,
 # agreus, pollux, castor, iris, apollo, zeus, and gaea as workers. Lowered
 # by cairn's `cairn.clusters` option tree (flakeModules/cluster/lower.nix)
 # into the same per-service inventory instances this used to be hand-wired
@@ -65,6 +65,11 @@
       role = "control-plane";
       ip = "10.0.69.107";
       keepalivedPriority = 50;
+    };
+    pik8s8 = {
+      role = "control-plane";
+      ip = "10.0.69.108";
+      keepalivedPriority = 40;
     };
 
     agreus = {
