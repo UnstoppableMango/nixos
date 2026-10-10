@@ -298,6 +298,25 @@ in
   # Enable automatic login for the user.
   services.displayManager.autoLogin.enable = true;
   services.displayManager.autoLogin.user = primaryUser;
+  # GDM otherwise autologs into whichever session was picked last.
+  services.displayManager.defaultSession = "gnome";
+
+  # The i3 session from dotfiles' modules/i3, picked from GDM's gear menu.
+  # NixOS' GDM Xsession wrapper `eval`s Exec, so $HOME expands at login.
+  services.displayManager.sessionPackages = [
+    (
+      pkgs.writeTextDir "share/xsessions/i3-hm.desktop" ''
+        [Desktop Entry]
+        Name=i3 (Home Manager)
+        Exec=$HOME/.hm-xsession
+        Type=Application
+        DesktopNames=i3
+      ''
+      // {
+        providedSessions = [ "i3-hm" ];
+      }
+    )
+  ];
 
   # https://github.com/NixOS/nixpkgs/issues/240444#issuecomment-1977617644
   programs.nix-ld.enable = true;
