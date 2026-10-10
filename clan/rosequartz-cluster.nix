@@ -15,6 +15,10 @@
   # `rosequartz-pki`, `rosequartz-etcd`, etc.
   instancePrefix = "rosequartz-";
 
+  # Kubernetes and etcd come from kubepkgs.
+  # Bump one minor at a time, per cairn's docs/UPGRADES.md.
+  versions.kubernetes = "1.37";
+
   machines = {
     # pik8s1 and pik8s2 joined after pik8s4-6 formed the cluster, so they take
     # the lowest VIP priorities.
