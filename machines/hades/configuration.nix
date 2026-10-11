@@ -13,7 +13,13 @@ in
       "zed.cachix.org-1:/pHQ6dpMsAZk2DiP4WCL0p9YDNKWj2Q5FL20bNmw1cU="
     ];
 
-    system-features = [ "kvm" ];
+    # gccarch-x86-64-v3 marks AVX2 for Hercules scheduling: derivations
+    # that need it (nixpkgs' bun) require the feature, so they skip zeus,
+    # whose Sandy Bridge Xeon lacks AVX2 (#416).
+    system-features = [
+      "kvm"
+      "gccarch-x86-64-v3"
+    ];
 
     trusted-users = [ primaryUser ];
   };

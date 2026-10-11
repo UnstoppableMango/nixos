@@ -13,6 +13,10 @@
 
   arcRunnerStore.enable = true;
 
+  # EPYC (Zen 2) has AVX2. Advertised so the Hercules agents here take the
+  # derivations that require it (nixpkgs' bun), which zeus cannot run (#416).
+  nix.settings.extra-system-features = [ "gccarch-x86-64-v3" ];
+
   # 128 threads, 503 GB, shared with OSDs and the Actions runner pods.
   ciLimits = {
     memoryMax = 128;
