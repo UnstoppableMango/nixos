@@ -147,7 +147,7 @@ Other machines (agreus, pollux, castor, zeus, gaea, iris, pik8s1–9) follow the
 | gaea          | EPYC 7502 rack box, UEFI | Basement rack server; clan-managed; rosequartz worker; systemd-boot |
 | iris          | Dell R410, UEFI       | Basement rack server; clan-managed; rosequartz worker; systemd-boot; NIC names and install disk unverified |
 | apollo        | ASUS board, firmware mode unverified | Basement server; clan-managed; rosequartz worker; takes castor's dual-mode grub |
-| pik8s1–9      | Raspberry Pi 4B       | k8s cluster nodes; clan-managed; aarch64; pik8s4–5 and pik8s7–9 are the rosequartz control plane (five etcd members; the 8GB pik8s7–9 have replaced the other 4GB ones), pik8s3 is a rosequartz worker with a web kiosk on its display; pik8s1, pik8s2 and pik8s6 have left rosequartz and are planned pihole hosts |
+| pik8s1–9      | Raspberry Pi 4B       | k8s cluster nodes; clan-managed; aarch64; pik8s7–9 (8GB) are the rosequartz control plane and pik8s4–5 (4GB) are etcd-only members (five etcd members in all); pik8s3 is a rosequartz worker with a web kiosk on its display; pik8s1, pik8s2 and pik8s6 have left rosequartz and are planned pihole hosts |
 
 ## Sub-Agent Guidance
 

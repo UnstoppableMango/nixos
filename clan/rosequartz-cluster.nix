@@ -1,68 +1,67 @@
-# THECLUSTER's vanilla-Kubernetes cluster, "rosequartz": pik8s4-5 and
-# pik8s7-9 as an HA control plane behind a keepalived VIP, with pik8s3,
-# agreus, pollux, castor, iris, apollo, zeus, and gaea as workers. Lowered
-# by cairn's `cairn.clusters` option tree (flakeModules/cluster/lower.nix)
-# into the same per-service inventory instances this used to be hand-wired
-# as in clan.nix.
-{
-  vip = "10.0.69.100";
+# THECLUSTER's vanilla-Kubernetes cluster, "rosequartz": pik8s7-9 as an HA
+# control plane behind a keepalived VIP, pik8s4-5 as etcd-only members, and
+# pik8s3, agreus, pollux, castor, iris, apollo, zeus, and gaea as workers.
+# Lowered by cairn's `cairn.clusters` option tree
+# (flakeModules/cluster/lower.nix) into the same per-service inventory
+# instances this used to be hand-wired as in clan.nix.
+let
+  # The 8 GiB pis. Everything a control-plane machine runs besides etcd is
+  # pinned here, since a 4 GiB pi cannot hold the apiserver.
+  controlPlane = [
+    "pik8s7"
+    "pik8s8"
+    "pik8s9"
+  ];
 
-  # `clusterName` defaults to the attribute name ("rosequartz" in flake.nix),
-  # so it isn't set here.
+  # The 4 GiB pis left in the quorum. They run etcd and nothing else.
+  etcdOnly = [
+    "pik8s4"
+    "pik8s5"
+  ];
 
-  # Two-machine-cluster-flake naming, kept stable rather than left to the
-  # (single-cluster) auto-detected default, so instance ids stay exactly
-  # `rosequartz-pki`, `rosequartz-etcd`, etc.
-  instancePrefix = "rosequartz-";
-
-  # Kubernetes and etcd come from kubepkgs.
-  # Bump one minor at a time, per cairn's docs/UPGRADES.md.
-  versions.kubernetes = "1.37";
+  # Every Kubernetes node: every machine but the etcd-only ones, which run no
+  # kubelet and so are not nodes at all. Derived, so a new worker needs no
+  # entry here.
+  nodes = builtins.filter (m: !builtins.elem m etcdOnly) (builtins.attrNames machines);
 
   machines = {
     # The quorum stays at five: odd, and one more failure tolerated than three.
-    # Each 8 GiB pi that joins takes it to six until a 4 GiB one leaves:
-    # pik8s2 after pik8s7, pik8s1 after pik8s8, and pik8s6 after pik8s9.
-    # pik8s3 is a worker rather than a sixth control-plane machine, which
-    # would make the quorum even and buy no tolerance. An apiserver that is
-    # not also an etcd member is not a shape cairn models: `etcd-client-cert` comes from the etcd member module,
-    # and HAProxy fronts only the apiserver port, so flannel reaching etcd
-    # through the raw VIP assumes whoever holds it runs etcd locally.
+    # pik8s3 is a worker rather than a sixth etcd member, which would make the
+    # quorum even and buy no tolerance. Every apiserver machine is also an
+    # etcd member: HAProxy fronts only the apiserver port, so flannel reaching
+    # etcd through the raw VIP assumes whoever holds it runs etcd locally.
     pik8s3 = {
       role = "worker";
       ip = "10.0.69.103";
     };
 
+    # `etcdOnly`. Their `control-plane` role only places them in etcd's
+    # default machine list; every other control-plane service is pinned to
+    # `controlPlane` under `services`.
     pik8s4 = {
       role = "control-plane";
       ip = "10.0.69.104";
-      # Staggered so pik8s4 wins the VIP by default.
-      keepalivedPriority = 100;
     };
     pik8s5 = {
       role = "control-plane";
       ip = "10.0.69.105";
-      keepalivedPriority = 90;
     };
 
-    # 8 GiB pis taking over the control plane from the 4 GiB ones, joining
-    # etcd one at a time through `etcd.autoJoin`. Each join makes the quorum
-    # even for as long as it takes to remove a 4 GiB member. They take the
-    # lowest VIP priorities until the 4 GiB machines leave.
     pik8s7 = {
       role = "control-plane";
       ip = "10.0.69.107";
-      keepalivedPriority = 50;
+      # Staggered so pik8s7 wins the VIP by default.
+      keepalivedPriority = 100;
     };
     pik8s8 = {
       role = "control-plane";
       ip = "10.0.69.108";
-      keepalivedPriority = 40;
+      keepalivedPriority = 90;
     };
     pik8s9 = {
       role = "control-plane";
       ip = "10.0.69.109";
-      keepalivedPriority = 30;
+      keepalivedPriority = 80;
     };
 
     agreus = {
@@ -130,6 +129,23 @@
       nixSnapshotter = true;
     };
   };
+in
+{
+  vip = "10.0.69.100";
+
+  # `clusterName` defaults to the attribute name ("rosequartz" in flake.nix),
+  # so it isn't set here.
+
+  # Two-machine-cluster-flake naming, kept stable rather than left to the
+  # (single-cluster) auto-detected default, so instance ids stay exactly
+  # `rosequartz-pki`, `rosequartz-etcd`, etc.
+  instancePrefix = "rosequartz-";
+
+  # Kubernetes and etcd come from kubepkgs.
+  # Bump one minor at a time, per cairn's docs/UPGRADES.md.
+  versions.kubernetes = "1.37";
+
+  inherit machines;
 
   services = {
     pki = {
@@ -168,12 +184,24 @@
       { systemd.services.etcd.serviceConfig.MemorySwapMax = 0; }
     ];
 
+    # pik8s4-5 stay etcd members (the default, every `control-plane`
+    # machine) and run nothing else. The services that default to every
+    # control-plane machine are pinned to the 8 GiB pis, and the ones that
+    # default to every machine to the Kubernetes nodes.
+    apiserver.machines = controlPlane;
+    coredns.machines = controlPlane;
+    kubelet.machines = nodes;
+    network.machines = nodes;
+    kubeconfig.machines = nodes;
+    inoculant.machines = nodes;
+
     apiserver.extraModules = [
-      # Every control-plane machine is a 4 GiB pi. An apiserver here reaches
-      # 2.7 GiB and is still climbing when the machine stops responding, which
-      # takes the local etcd member with it; the quorum that would let the
-      # apiserver settle then cannot form, and the machine that inherits the
-      # VIP does the same thing twenty minutes later.
+      # On the 4 GiB pis that used to run it, an apiserver reached 2.7 GiB and
+      # was still climbing when the machine stopped responding, which took the
+      # local etcd member with it; the quorum that would let the apiserver
+      # settle then could not form, and the machine that inherited the VIP did
+      # the same thing twenty minutes later. The 8 GiB pis have the room for
+      # it, but not without limit.
       #
       # Bounded, the apiserver is what dies instead of the machine: HAProxy
       # takes it out of rotation on the `/readyz` check, the other members keep
@@ -190,7 +218,8 @@
       # restarts it and `/readyz` never answers for HAProxy to act on.
       {
         systemd.services.kube-apiserver = {
-          serviceConfig.MemoryMax = "2200M";
+          # Leaves an 8 GiB pi about 3 GiB for etcd, the kubelet and the OS.
+          serviceConfig.MemoryMax = "5G";
           # Without this, systemd's default rate limit stops restarting the
           # unit after five kills and leaves the machine with no apiserver at
           # all, which is the outcome the ceiling exists to avoid.
@@ -231,14 +260,15 @@
 
     loadbalancer = {
       enable = true;
+      machines = controlPlane;
       # Every control-plane machine reaches VLAN 20 untagged on `end0`, so VRRP
-      # advertises on the right network everywhere and `machines` keeps its
-      # default of every control-plane machine.
+      # advertises on the right network everywhere.
       interface = "end0";
     };
 
     flux = {
       enable = true;
+      machines = controlPlane;
       url = "https://github.com/UnstoppableMango/the-cluster";
       branch = "main";
       path = "./clusters/rosequartz";
