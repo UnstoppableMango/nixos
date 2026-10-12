@@ -1,5 +1,5 @@
 # THECLUSTER's vanilla-Kubernetes cluster, "rosequartz": pik8s4-6 and
-# pik8s7-8 as an HA control plane behind a keepalived VIP, with pik8s3,
+# pik8s7-9 as an HA control plane behind a keepalived VIP, with pik8s3,
 # agreus, pollux, castor, iris, apollo, zeus, and gaea as workers. Lowered
 # by cairn's `cairn.clusters` option tree (flakeModules/cluster/lower.nix)
 # into the same per-service inventory instances this used to be hand-wired
@@ -22,9 +22,9 @@
   machines = {
     # The quorum stays at five: odd, and one more failure tolerated than three.
     # Each 8 GiB pi that joins takes it to six until a 4 GiB one leaves:
-    # pik8s2 after pik8s7, pik8s1 after pik8s8. pik8s3 is a worker rather than
-    # a sixth control-plane machine, which would make the quorum even and buy
-    # no tolerance. An apiserver that is not also an etcd member is not a
+    # pik8s2 after pik8s7, pik8s1 after pik8s8, and one of pik8s4-6 after
+    # pik8s9. pik8s3 is a worker rather than a sixth control-plane machine,
+    # which would make the quorum even and buy no tolerance. An apiserver that is not also an etcd member is not a
     # shape cairn models: `etcd-client-cert` comes from the etcd member module,
     # and HAProxy fronts only the apiserver port, so flannel reaching etcd
     # through the raw VIP assumes whoever holds it runs etcd locally.
@@ -63,6 +63,11 @@
       role = "control-plane";
       ip = "10.0.69.108";
       keepalivedPriority = 40;
+    };
+    pik8s9 = {
+      role = "control-plane";
+      ip = "10.0.69.109";
+      keepalivedPriority = 30;
     };
 
     agreus = {
@@ -152,11 +157,6 @@
     # starts, and promote it once caught up, rather than an `etcdctl member
     # add` by hand. Machines already holding data are left alone.
     etcd.autoJoin = true;
-
-    # Members that have left the inventory, removed from etcd by whichever
-    # remaining member is deployed first. A name can go once every member has
-    # been deployed with it.
-    etcd.removedMembers = [ "pik8s1" ];
 
     etcd.extraModules = [
       # etcd must never swap. Its latency budget is a raft heartbeat, and a
