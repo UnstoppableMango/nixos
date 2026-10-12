@@ -54,6 +54,7 @@ in
   };
 
   modules."@UnstoppableMango/base" = import ./modules/service/base;
+  modules."@UnstoppableMango/build-host" = import ./modules/service/build-host;
   modules."@UnstoppableMango/harmonia" = import ./modules/service/harmonia;
   modules."@UnstoppableMango/hercules-ci-agent" =
     inputs.nixpkgs.lib.modules.importApply ./modules/service/hercules-ci-agent
@@ -132,6 +133,17 @@ in
       roles.server.tags.all = { };
       roles.server.settings.authorizedKeys = sshKeys;
       roles.client.tags.all = { };
+    };
+
+    # The Pis build on gaea. Built on a Pi, a closure can only substitute from
+    # the caches that Pi already trusts, and compiles everything else there.
+    build-host = {
+      module.name = "@UnstoppableMango/build-host";
+      module.input = "self";
+      roles.builder.machines.gaea.settings.address = managed.gaea.ip;
+      roles.client.machines = builtins.mapAttrs (_: host: { settings.address = host.ip; }) (
+        inputs.nixpkgs.lib.filterAttrs (_: host: builtins.elem "pi4b" host.tags) managed
+      );
     };
 
     clan-cache = {
