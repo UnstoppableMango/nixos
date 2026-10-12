@@ -17,7 +17,7 @@ Prioritize these over generic Nix advice.
 ## Gates
 
 Formatting is `nix fmt`, which runs treefmt with nixfmt as the only enabled formatter.
-Evaluation is `nix flake check`; CI runs `nix flake check --all-systems`, builds `nixosConfigurations.hades...toplevel` with `max-jobs = 1`, and builds `.#rpi-kernel` on an arm64 runner.
+Evaluation is `nix flake check`; CI runs `nix flake check --all-systems`, builds `nixosConfigurations.hades...toplevel` with `max-jobs = 1`.
 
 Do not assert that a configuration builds or evaluates unless CI has said so. Say what you inspected instead.
 
@@ -73,7 +73,7 @@ Check the `follows` graph when an input changes:
 
 - zeus and castor use grub with `efiSupport` on purpose: legacy BIOS now, with a hybrid layout that survives a firmware switch. castor's firmware mode is unverified, so it takes pollux's dual-mode grub.
 - gaea uses systemd-boot.
-- pik8s1-9 are aarch64 Raspberry Pi 4Bs. A change that assumes x86_64 breaks the SD image and `rpi-kernel` builds.
+- pik8s1-9 are aarch64 Raspberry Pi 4Bs. A change that assumes x86_64 breaks the SD image. Their kernel comes from nixos-raspberrypi's cache, built against its own nixpkgs, so making that input follow ours again means building the kernel from source.
 - Every etcd member runs with `initialClusterState = "existing"` and `autoJoin`, because the cluster formed long ago and new members join it as learners.
 - Network topology lives in `NETWORK.md`. Do not derive VLAN or subnet facts from IPs in `machines/*/configuration.nix`; check `NETWORK.md` and flag it if the change contradicts it.
 
