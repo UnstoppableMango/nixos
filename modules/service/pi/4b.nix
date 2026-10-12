@@ -30,6 +30,30 @@ in
   # /boot/firmware/nixos.
   boot.loader.raspberry-pi.bootloader = "kernel";
 
+  # nixos-raspberrypi builds this kernel against its own pinned nixpkgs (26.05),
+  # whose binary cache carries it prebuilt. Our 26.11 NixOS reads two attributes
+  # that a 26.05 kernel derivation lacks: `target` (for
+  # `boot.loader.kernelFile`, and nixos-raspberrypi's own bootloader module)
+  # and `buildDTBs` (the `hardware.deviceTree.enable` default). They are added
+  # here, through `override` too, since NixOS re-overrides the kernel to apply
+  # `boot.kernelPatches`. The derivation is untouched, so the output path stays
+  # the one nixos-raspberrypi.cachix.org serves. Drop this once
+  # nixos-raspberrypi's main branch moves to 26.11.
+  boot.kernelPackages =
+    let
+      withAttrs =
+        kernel:
+        kernel
+        // {
+          target = "Image";
+          buildDTBs = true;
+          override = f: withAttrs (kernel.override f);
+        };
+    in
+    inputs.nixos-raspberrypi.packages.aarch64-linux.linuxPackages_rpi4.extend (
+      _: prev: { kernel = withAttrs prev.kernel; }
+    );
+
   boot.zfs.forceImportRoot = false;
 
   # The Raspberry Pi kernel ships with the memory cgroup controller disabled.

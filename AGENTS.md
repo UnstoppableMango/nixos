@@ -113,7 +113,7 @@ Other machines (agreus, pollux, castor, zeus, gaea, iris, pik8s1–9) follow the
 - `hosts` - Machine inventory (name, ip, arch, role) shared with dotfiles, which follows this input
 - `disko` - Declarative disk partitioning (each host has a `disk-config.nix`)
 - `nixos-hardware` - Hardware-specific module presets (hades)
-- `nixos-raspberrypi` - Raspberry Pi kernel, firmware, `config.txt` and the `kernel` bootloader for pik8s1-9, via `modules/service/pi/4b.nix`. It follows nixpkgs, since its 26.05 kernel lacks attributes our 26.11 NixOS reads; the `rpi-kernel` CI job builds and caches that kernel.
+- `nixos-raspberrypi` - Raspberry Pi kernel, firmware, `config.txt` and the `kernel` bootloader for pik8s1-9, via `modules/service/pi/4b.nix`. It keeps its own pinned nixpkgs rather than following ours, so the kernel comes prebuilt from nixos-raspberrypi.cachix.org (a substituter on every machine via `modules/cache`); `4b.nix` adds the two kernel attributes our 26.11 NixOS reads that its 26.05 kernel lacks.
 - `clan-core` (26.05) - Clan cluster management framework; manages all machines via `clan.nix`
 - `sops-nix` - SOPS secrets management; followed by both `clan-core` and `dotfiles`
 - `nixos-facter` - Hardware detection for facter-based configs
@@ -158,6 +158,4 @@ Read additional AGENTS.md files when working in these areas:
 
 ## CI
 
-`.github/workflows/ci.yml` runs two jobs on push/PR to `main`, both with Cachix caching (`unstoppablemango`):
-- `build` (ubuntu-latest): `nix flake check` + `nix build .#nixosConfigurations.hades...toplevel`, with `max-jobs = 1` to avoid OOM on the runner's limited RAM
-- `rpi-kernel` (ubuntu-24.04-arm): `nix build .#rpi-kernel`
+`.github/workflows/ci.yml` runs one job, `build`, on push/PR to `main`, with Cachix caching (`unstoppablemango`): `nix flake check` + `nix build .#nixosConfigurations.hades...toplevel` on the `thecluster` runner.
