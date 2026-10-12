@@ -16,6 +16,10 @@
       "https://ncps.thecluster.lan"
       "https://mangopkgs.cachix.org"
       "https://nix-community.cachix.org"
+      # The Pi kernel and firmware, prebuilt against nixos-raspberrypi's own
+      # nixpkgs. Every machine gets it, since a Pi's closure may be built on
+      # another one.
+      "https://nixos-raspberrypi.cachix.org"
       "https://unmango.cachix.org"
       "https://unstoppablemango.cachix.org"
     ];
@@ -26,6 +30,7 @@
       # well-formed and silently ignores every substitute it is offered.
       "ncps.thecluster.lan:pAJGNVSRmG7gCDSOAaiHDxLFUSdys5Pk0XvcJ5803Dw="
       "mangopkgs.cachix.org-1:uJ5FgSbOg1uiXLcL0gBh1lO+y3KVuthy6UeOFYR1fLk="
+      "nixos-raspberrypi.cachix.org-1:4iMO9LXa8BqhU+Rpg6LQKiGa2lsNh/j2oiYLNOQ5sPI="
       "unmango.cachix.org-1:Psb+0nALJfIcYiZLc9JYri4FJGNnzM6goZX7iLErXCI="
       "unstoppablemango.cachix.org-1:m7uEI6X1Ov8DyFWJQX4WsRFRWFuzRW5c/Xms8ZaP74U="
     ];
