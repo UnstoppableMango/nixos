@@ -38,7 +38,9 @@ in
       };
       files.env.secret = true;
       script = ''
-        printf 'FTLCONF_webserver_api_password=%s\n' "$(cat "$prompts/password")" > "$out/env"
+        # FTL reads any setting from an FTLCONF_<path> variable, and takes
+        # `webserver.api.password` in plain text, hashing it itself.
+        printf '%s=%s\n' FTLCONF_webserver_api_password "$(cat "$prompts/password")" > "$out/env"
       '';
     };
 
