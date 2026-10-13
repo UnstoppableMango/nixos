@@ -41,7 +41,8 @@ Two settings in that spec are load-bearing and must not be dropped or "cleaned u
 
 Also treat as intentional, with the reasoning already in the file's comments:
 
-- The five-member etcd quorum with pik8s3 as a worker. A sixth control-plane machine would make the quorum even and buy no extra failure tolerance, so it is only temporary while an 8 GiB pi replaces a 4 GiB one. The control plane is now pik8s4-5 and pik8s7-9.
+- The five-member etcd quorum with pik8s3 as a worker. A sixth control-plane machine would make the quorum even and buy no extra failure tolerance, so it is only temporary while an 8 GiB pi replaces a 4 GiB one. The quorum is now pik8s4-5 and pik8s7-9.
+- pik8s4-5 keep `role = "control-plane"` only so etcd's default machine list includes them. Every other service is pinned to `controlPlane` (pik8s7-9) or `nodes` in `clan/rosequartz-cluster.nix`, so they run etcd alone: the 4 GiB pis cannot hold the apiserver.
 - `services.loadbalancer.machines` left at its default of every control-plane machine, since each one reaches VLAN 20 untagged on `end0`.
 - `etcd.removedMembers` naming machines that are no longer in the inventory. That is how a departed member leaves etcd; the name is dropped once every member has been deployed with it.
 - The VIP `10.0.69.100` is deliberately not in the hosts flake. It is not a machine.
