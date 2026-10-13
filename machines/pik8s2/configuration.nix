@@ -1,10 +1,8 @@
-{ ... }:
 {
   imports = [
     ./disk-config.nix
-    ../../modules/dns
     ../../modules/memory-pressure
-    ../../modules/nix
+    ../../modules/pihole
   ];
 
   networking = {
@@ -23,4 +21,6 @@
       ];
     };
   };
+
+  pihole.enable = true;
 }
