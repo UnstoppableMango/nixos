@@ -256,6 +256,19 @@ in
             options.SystemdCgroup = true;
           };
       }
+
+      # node-exporter from the-cluster's kube-prometheus-stack, scraped on the
+      # host IP. Flannel runs without IP masquerade, so a scrape arrives from
+      # the Prometheus pod's IP as well as from a node's.
+      (
+        { config, ... }:
+        {
+          networking.firewall.extraCommands = ''
+            iptables -A nixos-fw -p tcp --dport 9100 -s 10.0.69.0/24 -j nixos-fw-accept
+            iptables -A nixos-fw -p tcp --dport 9100 -s ${config.services.kubernetes.clusterCidr} -j nixos-fw-accept
+          '';
+        }
+      )
     ];
 
     loadbalancer = {
