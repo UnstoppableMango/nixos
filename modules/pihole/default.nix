@@ -39,8 +39,11 @@ in
       files.env.secret = true;
       script = ''
         # FTL reads any setting from an FTLCONF_<path> variable, and takes
-        # `webserver.api.password` in plain text, hashing it itself.
-        printf '%s=%s\n' FTLCONF_webserver_api_password "$(cat "$prompts/password")" > "$out/env"
+        # `webserver.api.password` in plain text, hashing it itself. Quoted
+        # and escaped so systemd's EnvironmentFile parsing passes every
+        # character through.
+        value=$(sed -e 's/[\\"$`]/\\&/g' "$prompts/password")
+        printf '%s="%s"\n' FTLCONF_webserver_api_password "$value" > "$out/env"
       '';
     };
 
@@ -67,13 +70,15 @@ in
             "1.1.1.1"
             "1.0.0.1"
           ];
-          domain = "thecluster.lan";
+          domain.name = "thecluster.lan";
           interface = cfg.interface;
           # LOCAL, the default, refuses queries from subnets the host has no
           # interface on, and hades and the rest of VLAN 1 reach this one
           # through pfSense. BIND also keeps FTL off the wildcard address, which
           # systemd-resolved's stub on 127.0.0.53:53 would otherwise collide
           # with.
+          # BIND only binds addresses the interface already has when FTL
+          # starts, so the unit waits for the network below.
           listeningMode = "BIND";
         };
 
@@ -100,10 +105,15 @@ in
 
     services.pihole-web = {
       enable = true;
-      hostName = "${config.networking.hostName}.thecluster.lan";
+      # The default, pi.hole, which FTL answers with its own address. A name
+      # in thecluster.lan would hit the wildcard and land on the gateway.
       ports = [ "80" ];
     };
 
-    systemd.services.pihole-ftl.serviceConfig.EnvironmentFile = pihole-admin.files.env.path;
+    systemd.services.pihole-ftl = {
+      wants = [ "network-online.target" ];
+      after = [ "network-online.target" ];
+      serviceConfig.EnvironmentFile = pihole-admin.files.env.path;
+    };
   };
 }
