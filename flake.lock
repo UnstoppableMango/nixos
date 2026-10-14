@@ -1015,11 +1015,11 @@
         "nixpkgs": "nixpkgs_3"
       },
       "locked": {
-        "lastModified": 1791629474,
-        "narHash": "sha256-6jn8oIBFPBc55fMhbBk+Bq9F8Z2J8ankwq708+3LiDU=",
+        "lastModified": 1791831428,
+        "narHash": "sha256-R6hopQfaxdS8kcxG22WSv6Z6r/hTgITQa8yokNinGcQ=",
         "owner": "hercules-ci",
         "repo": "hercules-ci-agent",
-        "rev": "7f25d7c69dcfdcd20ff9571871877ed96f8e98a3",
+        "rev": "70858699fbe3a2fce768dee7a8ae407a40261708",
         "type": "github"
       },
       "original": {
@@ -1064,11 +1064,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1791697441,
-        "narHash": "sha256-zYkI5my8HZMpdUdKEu7ezPS3SdSXyR37Zg0qOpNdBlk=",
+        "lastModified": 1791868953,
+        "narHash": "sha256-XSHmD1vjkdj0qPsZo6K6trPp2uyG20d2EAj2H2ApYbQ=",
         "owner": "UnstoppableMango",
         "repo": "hosts",
-        "rev": "14003c2ec5703e2f1af6d3e3e125983fd2272af0",
+        "rev": "05d98c7371edf527eec50725c4a44de8d69f3695",
         "type": "github"
       },
       "original": {
@@ -1966,11 +1966,11 @@
     },
     "nixpkgs_6": {
       "locked": {
-        "lastModified": 1791594108,
-        "narHash": "sha256-XK4KceonkwD8LuMAt/vNrz982mXJM5jeHAxMwsUXXAQ=",
+        "lastModified": 1791734076,
+        "narHash": "sha256-i5qk1kLiit98rRbh1AXmWBNT9QXC/y4l5Wk/u5EdpDQ=",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "6510408d147d8c5e6d76043e899e9251756f6a75",
+        "rev": "7fd4004d0511991fff3a0524856a9be09e28c5f0",
         "type": "github"
       },
       "original": {
