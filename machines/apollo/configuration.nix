@@ -8,6 +8,7 @@
   imports = [
     ../../modules/arc-runner-store
     ../../modules/ceph
+    ../../modules/ceph-cluster-network
     ./disk-config.nix
   ];
 
@@ -145,6 +146,18 @@
   systemd.network.networks."10-unused" = {
     matchConfig.MACAddress = "40:b0:76:d7:f6:07";
     linkConfig.ActivationPolicy = "down";
+  };
+
+  # enp12s0f1 is the X520-2 port cabled to the aggregator. ixgbe refuses SFP+
+  # modules and DACs that are not Intel-coded, and the aggregator's are not.
+  boot.extraModprobeConfig = "options ixgbe allow_unsupported_sfp=1";
+
+  cephClusterNetwork = {
+    enable = true;
+    interface = "enp12s0f1";
+    address = "10.0.70.12";
+    rangeStart = "10.0.70.128";
+    rangeEnd = "10.0.70.159";
   };
 
   environment.systemPackages = with pkgs; [
