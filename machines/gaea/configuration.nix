@@ -3,6 +3,7 @@
   imports = [
     ../../modules/arc-runner-store
     ../../modules/ceph
+    ../../modules/ceph-cluster-network
     ../../modules/ci-limits
     ../../modules/dns
     ../../modules/nix
@@ -42,6 +43,18 @@
     AllowHibernation = "no";
     AllowHybridSleep = "no";
     AllowSuspendThenHibernate = "no";
+  };
+
+  # enp99s0f1 is the X520-2 port cabled to the aggregator. ixgbe refuses SFP+
+  # modules and DACs that are not Intel-coded, and the aggregator's are not.
+  boot.extraModprobeConfig = "options ixgbe allow_unsupported_sfp=1";
+
+  cephClusterNetwork = {
+    enable = true;
+    interface = "enp99s0f1";
+    address = "10.0.70.11";
+    rangeStart = "10.0.70.96";
+    rangeEnd = "10.0.70.127";
   };
 
   # eno1 is the port cabled to GS724Tv4 `g1`. eno2 stays unconfigured; it

@@ -121,6 +121,7 @@ gaea, pollux, and castor each have a second NIC on the GS724Tv4 that no config u
 zeus's SFP+ card is `enp3s0f0` and `enp3s0f1`, with `enp3s0f1` on the [Ceph cluster network](#ceph-cluster-network).
 Its other three NICs, `enp7s0`, `enp11s0`, and `enp12s0`, are down and hold no address.
 `g19` is the trunk uplink to the UniFi 24p.
+gaea's and apollo's SFP+ cards are Intel X520-2s, with `enp99s0f1` and `enp12s0f1` respectively on the Ceph cluster network.
 
 apollo's second onboard NIC (`40:b0:76:d7:f6:07`) is cabled to the GS724Tv4 but held down by `linkConfig.ActivationPolicy`, so it emits no frames and no port ever learns its address.
 Its port is therefore not identifiable from the switch and is not recorded here.
@@ -159,8 +160,8 @@ The aggregator must have jumbo frames enabled, since every port and interface on
 | Host | SFP+ port | Host address (`ceph0`) | OSD pod range |
 | --- | --- | --- | --- |
 | zeus | `enp3s0f1` | `10.0.70.10` | `10.0.70.64`-`10.0.70.95` |
-| gaea | Card not installed | `10.0.70.11` | `10.0.70.96`-`10.0.70.127` |
-| apollo | Card not installed | `10.0.70.12` | `10.0.70.128`-`10.0.70.159` |
+| gaea | `enp99s0f1` | `10.0.70.11` | `10.0.70.96`-`10.0.70.127` |
+| apollo | `enp12s0f1` | `10.0.70.12` | `10.0.70.128`-`10.0.70.159` |
 
 `modules/ceph-cluster-network` puts the host address on `ceph0`, a macvlan shim on the SFP+ port, and runs multus as the host CNI plugin so OSD pods get a macvlan interface in the host's range.
 The Rook side, and why the host address sits on a shim rather than the port, is in the-cluster's `docs/storage.md`.
