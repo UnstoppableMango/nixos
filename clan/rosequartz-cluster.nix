@@ -122,11 +122,6 @@ let
       # 128 threads, 503 GiB. It sat at 109 pods against the 110 cap with
       # under half its CPU and a third of its memory requested.
       maxPods = 250;
-      # The first node on nix-snapshotter, so pods here can run
-      # `nix:0/nix/store/...` images off the node's store. Switching
-      # snapshotters discards the images containerd already holds, so drain
-      # the node before deploying this.
-      nixSnapshotter = true;
     };
   };
 in
