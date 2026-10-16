@@ -95,12 +95,12 @@ The rosequartz service CIDR is `10.0.0.0/24` and the pod CIDR is `10.1.0.0/16`, 
 | zeus | `10.0.69.10` | 20 | GS724Tv4 | `g18` | rosequartz worker |
 | gaea | `10.0.69.11` | 20 | GS724Tv4 | `g1` | rosequartz worker |
 | apollo | `10.0.69.12` | 20 | GS724Tv4 | `g10` | rosequartz worker |
-| pik8s1 | `10.0.69.101` | 20 | UniFi 24p | `22` | not in rosequartz; planned pihole host |
-| pik8s2 | `10.0.69.102` | 20 | UniFi 24p | `20` | not in rosequartz; planned pihole host |
+| pik8s1 | `10.0.69.101` | 20 | UniFi 24p | `22` | not in rosequartz; Pi-hole (`modules/pihole`), not yet a LAN resolver |
+| pik8s2 | `10.0.69.102` | 20 | UniFi 24p | `20` | not in rosequartz; Pi-hole (`modules/pihole`), not yet a LAN resolver |
 | pik8s3 | `10.0.69.103` | 20 | UniFi 24p | Unverified | rosequartz worker; web kiosk on its display |
 | pik8s4 | `10.0.69.104` | 20 | UniFi 24p | `2` | rosequartz etcd member only |
 | pik8s5 | `10.0.69.105` | 20 | UniFi 24p | `4` | rosequartz etcd member only |
-| pik8s6 | `10.0.69.106` | 20 | UniFi 24p | `6` | not in rosequartz; planned pihole host |
+| pik8s6 | `10.0.69.106` | 20 | UniFi 24p | `6` | not in rosequartz; Pi-hole (`modules/pihole`), not yet a LAN resolver |
 | pik8s7 | `10.0.69.107` | 20 | UniFi 24p | Unverified | rosequartz control plane |
 | pik8s8 | `10.0.69.108` | 20 | UniFi 24p | Unverified | rosequartz control plane |
 | pik8s9 | `10.0.69.109` | 20 | UniFi 24p | Unverified | rosequartz control plane |
@@ -184,6 +184,10 @@ The piholes are systemd-resolved's global scope, and anything a link supplies is
 `modules/dns` sets the routing-only domain `~thecluster.lan` on the global scope, so internal names go to the piholes alone.
 Every other name goes to the global scope and each default-route link in parallel, and the first answer wins.
 Adding the gateway to the global scope instead would break `thecluster.lan`: resolved stays on whichever server in a scope last answered, so after an outage a machine would keep asking the gateway and get NXDOMAIN.
+
+pik8s1, pik8s2 and pik8s6 run Pi-hole natively (`modules/pihole`), answering on their own addresses from any VLAN.
+They are meant to replace the in-cluster pair as the LAN resolvers, but nothing points at them yet: `modules/dns` still sends every machine to `10.0.69.201` and `10.0.69.202`.
+They answer every `thecluster.lan` name with the rosequartz gateway, `10.0.69.200`, since every name in the zone is an HTTPRoute behind it.
 
 CoreDNS runs inside rosequartz and resolves cluster-internal names.
 It is reached through the cluster, not through the LAN resolver.

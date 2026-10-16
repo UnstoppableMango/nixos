@@ -79,6 +79,9 @@ Other machines (agreus, pollux, castor, zeus, gaea, iris, pik8s1–9) follow the
     Media sources are WebDAV shares from copyparty in the-cluster (`apps/media`), written to a store-linked `sources.xml`, so sources added in Kodi's UI do not persist.
   - `kiosk/` - A web page in Firefox kiosk mode under cage, always on, on pik8s3's display.
     Its user slice is capped at `kiosk.memoryMax`, and pik8s3 reserves that much plus OS headroom from the kubelet.
+  - `pihole/` - Pi-hole on pik8s1, pik8s2 and pik8s6, outside rosequartz, so the LAN keeps a filtering resolver while the cluster is down.
+    Its config is read-only NixOS, so external-dns cannot write `thecluster.lan` records into it the way it does for the in-cluster piholes; the whole zone is a wildcard to the rosequartz gateway (`pihole.gatewayAddress`) instead.
+    The web UI password is the shared `pihole-admin` var. Machines still resolve through the in-cluster piholes until `modules/dns` points at these.
   - `ssh/` - System-level SSH behavior (currently just `ssh.inhibitSleepOnSsh`, a PAM hook that blocks suspend while an SSH session is open).
     SSH *client* config for erik lives in the dotfiles repo's `modules/ssh`.
   - `unifi/` - UniFi network module
@@ -149,7 +152,7 @@ Other machines (agreus, pollux, castor, zeus, gaea, iris, pik8s1–9) follow the
 | gaea          | EPYC 7502 rack box, UEFI | Basement rack server; clan-managed; rosequartz worker; systemd-boot |
 | iris          | Dell R410, UEFI       | Basement rack server; clan-managed; rosequartz worker; systemd-boot; NIC names and install disk unverified |
 | apollo        | ASUS board, firmware mode unverified | Basement server; clan-managed; rosequartz worker; takes castor's dual-mode grub |
-| pik8s1–9      | Raspberry Pi 4B       | k8s cluster nodes; clan-managed; aarch64; pik8s7–9 (8GB) are the rosequartz control plane and pik8s4–5 (4GB) are etcd-only members (five etcd members in all); pik8s3 is a rosequartz worker with a web kiosk on its display; pik8s1, pik8s2 and pik8s6 have left rosequartz and are planned pihole hosts |
+| pik8s1–9      | Raspberry Pi 4B       | k8s cluster nodes; clan-managed; aarch64; pik8s7–9 (8GB) are the rosequartz control plane and pik8s4–5 (4GB) are etcd-only members (five etcd members in all); pik8s3 is a rosequartz worker with a web kiosk on its display; pik8s1, pik8s2 and pik8s6 have left rosequartz and run Pi-hole (`modules/pihole`) |
 
 ## Sub-Agent Guidance
 
