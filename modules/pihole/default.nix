@@ -1,7 +1,12 @@
 # Pi-hole on the host, outside rosequartz, so the LAN keeps a filtering
 # resolver while the cluster is down. Mirrors the-cluster's
 # apps/pihole/base/helm-release-pihole.yml, which this is meant to replace.
-{ config, lib, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 let
   cfg = config.pihole;
   inherit (config.clan.core.vars.generators) pihole-admin;
@@ -37,6 +42,7 @@ in
         type = "hidden";
       };
       files.env.secret = true;
+      runtimeInputs = [ pkgs.gnused ];
       script = ''
         # FTL reads any setting from an FTLCONF_<path> variable, and takes
         # `webserver.api.password` in plain text, hashing it itself. Quoted
