@@ -155,7 +155,7 @@ The UniFi controller itself runs on hades via `modules/unifi`, started on demand
 
 `10.0.70.0/24` is Ceph's cluster network, carrying OSD replication, recovery, and heartbeats among gaea, zeus, and apollo.
 It runs on a UniFi SFP+ aggregator with no uplink to any other switch, so it has no gateway, no VLAN tag, and no route to or from the rest of the network.
-The aggregator must have jumbo frames enabled, since every port and interface on it uses MTU 9000.
+Every port and interface on the aggregator uses MTU 1500 for now, since the aggregator does not have jumbo frames enabled. Raising `cephClusterNetwork.mtu` to 9000 needs jumbo frames turned on first, or the aggregator drops OSD heartbeats and the OSDs crashloop.
 
 | Host | SFP+ port | Host address (`ceph0`) | OSD pod range |
 | --- | --- | --- | --- |

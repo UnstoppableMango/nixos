@@ -42,8 +42,11 @@ in
 
     mtu = lib.mkOption {
       type = lib.types.int;
-      default = 9000;
-      description = "MTU on the port, the shim, and the OSD pod interfaces. The aggregator must have jumbo frames enabled.";
+      # 1500 until jumbo frames are enabled on the aggregator. At 9000 the
+      # aggregator drops OSD heartbeats, so peers mark the OSDs down until
+      # they exceed osd_max_markdown_count and exit.
+      default = 1500;
+      description = "MTU on the port, the shim, and the OSD pod interfaces. Above 1500, the aggregator must have jumbo frames enabled.";
     };
   };
 
