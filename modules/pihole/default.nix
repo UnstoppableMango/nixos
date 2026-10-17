@@ -80,15 +80,20 @@ in
           interface = cfg.interface;
           # LOCAL, the default, refuses queries from subnets the host has no
           # interface on, and hades and the rest of VLAN 1 reach this one
-          # through pfSense. BIND also keeps FTL off the wildcard address, which
-          # systemd-resolved's stub on 127.0.0.53:53 would otherwise collide
-          # with.
-          # BIND only binds addresses the interface already has when FTL
-          # starts, so the unit waits for the network below.
-          listeningMode = "BIND";
+          # through pfSense. Binding per address also keeps FTL off the
+          # wildcard address, which systemd-resolved's stub on 127.0.0.53:53
+          # would otherwise collide with.
+          # NONE writes no listening config, so the two lines below supply it.
+          # FTL's BIND mode is `bind-interfaces`, which binds only the
+          # addresses the interface has when FTL starts and never retries, and
+          # pik8s2 and pik8s6 came up listening on nothing. `bind-dynamic`
+          # binds addresses as they appear.
+          listeningMode = "NONE";
         };
 
         misc.dnsmasq_lines = [
+          "interface=${cfg.interface}"
+          "bind-dynamic"
           # Every name in the zone is an HTTPRoute behind the rosequartz
           # gateway. The in-cluster piholes get these one at a time from
           # external-dns, which needs a writable pihole.toml; NixOS keeps this
