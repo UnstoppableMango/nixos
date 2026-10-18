@@ -324,6 +324,15 @@ in
     )
   ];
 
+  # The Hyprland session from dotfiles' modules/hyprland, picked from GDM's gear
+  # menu. This supplies the compositor, the session entry and
+  # xdg-desktop-portal-hyprland; the home config sets its package to null so
+  # this one is the only Hyprland on the machine. No uwsm: Home Manager's
+  # hyprland-session.target does the systemd integration, and the two conflict.
+  programs.hyprland.enable = true;
+  # hyprlock authenticates through PAM; programs.hyprland does not add its service.
+  security.pam.services.hyprlock = { };
+
   # https://github.com/NixOS/nixpkgs/issues/240444#issuecomment-1977617644
   programs.nix-ld.enable = true;
   programs.nix-ld.libraries = with pkgs; [
