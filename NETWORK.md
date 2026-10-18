@@ -44,7 +44,7 @@ flowchart TB
     HADES2["hades enp7s0<br/>10.0.69.69"]
     CP["pik8s7 · pik8s8 · pik8s9<br/>10.0.69.107-109<br/>control plane"]
     ETCD["pik8s4 · pik8s5<br/>10.0.69.104-105<br/>etcd only"]
-    PIW["pik8s3 10.0.69.103<br/>worker"]
+    PIW["pik8s3 10.0.69.103<br/>uptime checker"]
     AGREUS["agreus 10.0.69.187<br/>worker"]
     POLLUX["pollux 10.0.69.14<br/>worker"]
     CASTOR["castor 10.0.69.13<br/>worker"]
@@ -97,7 +97,7 @@ The rosequartz service CIDR is `10.0.0.0/24` and the pod CIDR is `10.1.0.0/16`, 
 | apollo | `10.0.69.12` | 20 | GS724Tv4 | `g10` | rosequartz worker |
 | pik8s1 | `10.0.69.101` | 20 | UniFi 24p | `22` | not in rosequartz; Pi-hole (`modules/pihole`), not yet a LAN resolver |
 | pik8s2 | `10.0.69.102` | 20 | UniFi 24p | `20` | not in rosequartz; Pi-hole (`modules/pihole`), not yet a LAN resolver |
-| pik8s3 | `10.0.69.103` | 20 | UniFi 24p | Unverified | rosequartz worker; web kiosk on its display |
+| pik8s3 | `10.0.69.103` | 20 | UniFi 24p | Unverified | not in rosequartz; Gatus uptime checker (`modules/uptime`) on port 8080, shown on its display |
 | pik8s4 | `10.0.69.104` | 20 | UniFi 24p | `2` | rosequartz etcd member only |
 | pik8s5 | `10.0.69.105` | 20 | UniFi 24p | `4` | rosequartz etcd member only |
 | pik8s6 | `10.0.69.106` | 20 | UniFi 24p | `6` | not in rosequartz; Pi-hole (`modules/pihole`), not yet a LAN resolver |
