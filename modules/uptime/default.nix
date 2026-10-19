@@ -26,7 +26,11 @@ let
       query-name = "ncps.thecluster.lan";
       query-type = "A";
     };
-    conditions = [ "[DNS_RCODE] == NOERROR" ];
+    # NOERROR alone also passes an empty answer, so require an address.
+    conditions = [
+      "[DNS_RCODE] == NOERROR"
+      "[BODY] == pat(*.*.*.*)"
+    ];
   };
 in
 {
