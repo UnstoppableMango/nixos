@@ -26,8 +26,8 @@
     url = "https://prom.thecluster.io";
   }
   {
-    name = "Dex";
-    url = "https://dex.thecluster.io";
+    name = "Keycloak";
+    url = "https://auth.thecluster.io/realms/thecluster/account";
   }
   {
     name = "apps";

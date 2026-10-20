@@ -221,6 +221,47 @@ in
           unitConfig.StartLimitIntervalSec = 0;
         };
       }
+
+      # kubectl logs in through the thecluster Keycloak realm, configured by
+      # UnstoppableMango/iam. kubelogin uses the public `kubernetes` client,
+      # so the ID token's audience is that client id. Groups keep an `oidc:`
+      # prefix so no realm group can collide with a built-in one such as
+      # system:masters; the-cluster binds `oidc:cluster-admins` to
+      # cluster-admin. An unreachable issuer only disables OIDC logins: the
+      # apiserver retries discovery in the background and client certs keep
+      # working.
+      (
+        { pkgs, ... }:
+        let
+          authentication = pkgs.writeText "authentication-config.json" (
+            builtins.toJSON {
+              apiVersion = "apiserver.config.k8s.io/v1";
+              kind = "AuthenticationConfiguration";
+              jwt = [
+                {
+                  issuer = {
+                    url = "https://auth.thecluster.io/realms/thecluster";
+                    audiences = [ "kubernetes" ];
+                  };
+                  claimMappings = {
+                    username = {
+                      claim = "preferred_username";
+                      prefix = "oidc:";
+                    };
+                    groups = {
+                      claim = "groups";
+                      prefix = "oidc:";
+                    };
+                  };
+                }
+              ];
+            }
+          );
+        in
+        {
+          services.kubernetes.apiserver.extraOpts = "--authentication-config=${authentication}";
+        }
+      )
     ];
 
     # `coredns.nodeNames` stays unset, so the pods run on the machines that
