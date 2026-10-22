@@ -269,5 +269,21 @@ in
     agreus = {
       imports = [ ./machines/agreus/configuration.nix ];
     };
+
+    # Read from the inventory rather than listed in pik8s3's own config, so
+    # the checks follow machines and control-plane changes.
+    pik8s3.uptime =
+      let
+        inherit (inputs.nixpkgs) lib;
+        rosequartz = import ./clan/rosequartz-cluster.nix;
+        ipOf = name: rosequartz.machines.${name}.ip;
+        etcdMembers = lib.attrNames (lib.filterAttrs (_: m: m.role == "control-plane") rosequartz.machines);
+      in
+      {
+        hosts = builtins.mapAttrs (_: host: host.ip) (builtins.removeAttrs managed [ "pik8s3" ]);
+        inherit (rosequartz) vip;
+        apiservers = lib.genAttrs rosequartz.services.apiserver.machines ipOf;
+        etcd = lib.genAttrs etcdMembers ipOf;
+      };
   };
 }

@@ -1,9 +1,9 @@
+{ config, ... }:
 {
   imports = [
     ./disk-config.nix
-    ../../modules/dns
     ../../modules/kiosk
-    ../../modules/nix
+    ../../modules/uptime
   ];
 
   networking = {
@@ -23,12 +23,23 @@
     };
   };
 
-  kiosk = {
+  # Outside rosequartz so it still answers, and the screen still shows it,
+  # while the cluster is down. Hosts, the VIP, apiservers and etcd members
+  # come from the inventory in clan.nix.
+  uptime = {
     enable = true;
-    url = "https://thecluster.lan";
+    gateway = "10.0.69.200";
+    resolvers = {
+      pik8s1 = "10.0.69.101";
+      pik8s2 = "10.0.69.102";
+      pik8s6 = "10.0.69.106";
+      "pihole (in-cluster, .201)" = "10.0.69.201";
+      "pihole (in-cluster, .202)" = "10.0.69.202";
+    };
   };
 
-  # Covers the kiosk slice's MemoryMax plus headroom for the OS.
-  cluster.cairn.kubelet.systemReserved.memory = "1Gi";
-
+  kiosk = {
+    enable = true;
+    url = "http://localhost:${toString config.uptime.port}";
+  };
 }

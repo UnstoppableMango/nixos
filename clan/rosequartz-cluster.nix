@@ -26,15 +26,9 @@ let
 
   machines = {
     # The quorum stays at five: odd, and one more failure tolerated than three.
-    # pik8s3 is a worker rather than a sixth etcd member, which would make the
-    # quorum even and buy no tolerance. Every apiserver machine is also an
+    # Every apiserver machine is also an
     # etcd member: HAProxy fronts only the apiserver port, so flannel reaching
     # etcd through the raw VIP assumes whoever holds it runs etcd locally.
-    pik8s3 = {
-      role = "worker";
-      ip = "10.0.69.103";
-    };
-
     # `etcdOnly`. Their `control-plane` role only places them in etcd's
     # default machine list; every other control-plane service is pinned to
     # `controlPlane` under `services`.
