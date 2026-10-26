@@ -167,3 +167,17 @@ Read additional AGENTS.md files when working in these areas:
 ## CI
 
 `.github/workflows/ci.yml` runs one job, `build`, on push/PR to `main`, with Cachix caching (`unstoppablemango`): `nix flake check` + `nix build .#nixosConfigurations.hades...toplevel` on the `thecluster` runner.
+
+## Agent skills
+
+### Issue tracker
+
+Issues are tracked in this repo's GitHub Issues. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+The five default triage labels, each named after its role (`needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`). See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context: one `CONTEXT.md` and `docs/adr/` at the repo root. See `docs/agents/domain.md`.
