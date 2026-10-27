@@ -59,6 +59,9 @@ Other machines (agreus, pollux, castor, zeus, gaea, iris, pik8s1–9) follow the
   - `pki/` - Trusts the UnMango Root CA G2 from [pki](https://github.com/UnstoppableMango/pki) system-wide; `ca.pem` is a copy of that repo's `certs/ca.pem`.
     Every `*.thecluster.lan` cert chains to it through UnMango Private CA 01.
     `thecluster-lan-nginx-ca.pem` is the pre-ceremony CA, trusted on every machine alongside it until the-cluster's gateway serves the new chain.
+    The `nixery-ca` package in `flake.nix` is both CAs as one file, docker's per-registry trust for the-cluster's Nixery.
+    Clan machines need nothing, since dockerd reads the system bundle; darter installs it with
+    `sudo install -Dm644 "$(nix build --no-link --print-out-paths github:UnstoppableMango/nixos#nixery-ca)" /etc/docker/certs.d/nixery.thecluster.lan/ca.crt`.
   - `ceph-cluster-network/` - Ceph's cluster network on the SFP+ aggregator (`cephClusterNetwork.*`): a macvlan shim holding the host's `10.0.70.0/24` address, and multus as the host CNI plugin wrapping flannel, so Rook's OSD pods get a macvlan interface from the host's `host-local` range.
     multus runs from NixOS rather than its DaemonSet because the kubelet module relinks `/opt/cni/bin` on every start and `/etc/cni/net.d` is a store path.
     Addresses per host are in `NETWORK.md`.

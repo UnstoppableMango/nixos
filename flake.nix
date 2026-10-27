@@ -174,6 +174,14 @@
             brave-certificates-policy = pkgs.writeText "certificates.json" (
               builtins.toJSON (import ./modules/brave/certificates.nix)
             );
+            # docker's per-registry trust for nixery.thecluster.lan on hosts
+            # whose daemon does not read ./modules/pki's system bundle (darter).
+            # Both CAs ./modules/pki trusts, so it survives the gateway moving
+            # to the new chain.
+            nixery-ca = pkgs.concatText "ca.crt" [
+              ./modules/pki/thecluster-lan-nginx-ca.pem
+              ./modules/pki/ca.pem
+            ];
           }
           // lib.optionalAttrs (system == "x86_64-linux") {
             # Hybrid BIOS/UEFI installer for onboarding a machine: boot it, then
