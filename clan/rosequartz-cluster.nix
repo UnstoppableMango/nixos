@@ -185,6 +185,23 @@ in
     inoculant.machines = nodes;
 
     apiserver.extraModules = [
+      # Service-account tokens are issued by a public URL, so Entra can verify
+      # them for workload identity federation: the-cluster's external-secrets
+      # reads the UnstoppableMango/pki Key Vault that way, with no stored
+      # credential. The discovery documents behind the URL are static files in
+      # that repo, so a new rosequartz-sa key means copying
+      # `kubectl get --raw /openid/v1/jwks` over its oidc/rosequartz/openid/v1/jwks.
+      #
+      # The first --service-account-issuer signs; the rest are only accepted.
+      # Keeping the old in-cluster issuer second means tokens minted before the
+      # switch stay valid until they rotate out.
+      {
+        services.kubernetes.apiserver = {
+          serviceAccountIssuer = "https://unmangocrl.blob.core.windows.net/oidc/rosequartz";
+          extraOpts = "--service-account-issuer=https://kubernetes.default.svc";
+        };
+      }
+
       # On the 4 GiB pis that used to run it, an apiserver reached 2.7 GiB and
       # was still climbing when the machine stopped responding, which took the
       # local etcd member with it; the quorum that would let the apiserver

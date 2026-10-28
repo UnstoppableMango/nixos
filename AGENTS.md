@@ -29,6 +29,8 @@ The `rosequartz` Kubernetes cluster (control plane and workers listed in `clan/r
 
 Cluster PKI predates cairn, so the `pki` instance sets `roles.node.settings.generatorPrefix = "rosequartz"`, which keeps every existing `vars/{shared,per-machine}/*/rosequartz-*` generator (and the CA behind them) resolving unchanged. Leaving it at cairn's `"cairn"` default would mint a parallel CA and cert set and take the cluster down.
 
+The apiserver signs service-account tokens with the public issuer `https://unmangocrl.blob.core.windows.net/oidc/rosequartz`, whose discovery documents are static files in [pki](https://github.com/UnstoppableMango/pki) (`oidc/rosequartz/`), so Entra can verify them for workload identity federation. It still accepts the old `https://kubernetes.default.svc` issuer. Rotating the `rosequartz-sa` key means copying `kubectl get --raw /openid/v1/jwks` into that repo's `oidc/rosequartz/openid/v1/jwks`.
+
 **How hades is assembled** (see `clan.nix` → `machines.hades`):
 ```nix
 hades = {
