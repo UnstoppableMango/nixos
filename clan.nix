@@ -285,13 +285,15 @@ in
         apiservers = lib.genAttrs rosequartz.services.apiserver.machines ipOf;
         etcd = lib.genAttrs etcdMembers ipOf;
         # status.php answers without a login, and reports maintenance mode,
-        # which a stuck `occ upgrade` leaves on.
+        # which a stuck `occ upgrade` leaves on, and a pending upgrade, which
+        # a new image that never ran it leaves behind.
         services.nextcloud = {
           url = "https://cloud.thecluster.io/status.php";
           conditions = [
             "[STATUS] == 200"
             "[BODY].installed == true"
             "[BODY].maintenance == false"
+            "[BODY].needsDbUpgrade == false"
           ];
         };
       };
