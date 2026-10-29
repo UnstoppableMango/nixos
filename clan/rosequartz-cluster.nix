@@ -185,7 +185,7 @@ in
     inoculant.machines = nodes;
 
     apiserver.extraModules = [
-      # Service-account tokens move to a public issuer URL, so Entra can verify
+      # Service-account tokens are issued by a public URL, so Entra can verify
       # them for workload identity federation: the-cluster's external-secrets
       # reads the UnstoppableMango/pki Key Vault that way, with no stored
       # credential. The discovery documents behind the URL are static files in
@@ -193,13 +193,15 @@ in
       # `kubectl get --raw /openid/v1/jwks` over its oidc/rosequartz/openid/v1/jwks.
       #
       # The first --service-account-issuer signs; the rest are only accepted.
-      # Every apiserver has to accept the public issuer before any of them signs
-      # with it, or tokens minted by an upgraded server fail on one that is not
-      # yet. So this first step only adds it as accepted, and a second change,
-      # once all three servers run this one, makes it serviceAccountIssuer and
-      # keeps the old in-cluster issuer in extraOpts.
+      # Every apiserver accepted the public issuer before this made it the
+      # signer, so no server rejects another's tokens mid-rollout. The old
+      # in-cluster issuer stays accepted so tokens minted before the switch
+      # stay valid until they rotate out.
       {
-        services.kubernetes.apiserver.extraOpts = "--service-account-issuer=https://unmangocrl.blob.core.windows.net/oidc/rosequartz";
+        services.kubernetes.apiserver = {
+          serviceAccountIssuer = "https://unmangocrl.blob.core.windows.net/oidc/rosequartz";
+          extraOpts = "--service-account-issuer=https://kubernetes.default.svc";
+        };
       }
 
       # On the 4 GiB pis that used to run it, an apiserver reached 2.7 GiB and
