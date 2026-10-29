@@ -80,7 +80,7 @@ Other machines (agreus, pollux, castor, zeus, gaea, iris, pik8s1–9) follow the
   - `kiosk/` - A web page in Firefox kiosk mode under cage, always on, on pik8s3's display, where it shows the `uptime/` status page.
     Its user slice is capped at `kiosk.memoryMax`; on a Kubernetes node, reserve that much from the kubelet.
   - `uptime/` - Gatus on pik8s3, outside rosequartz, so something still reports the cluster down while it is down.
-    It checks the apiserver VIP, each apiserver and etcd member, the gateway, every resolver, and pings every clan machine; `clan.nix` fills the machine, apiserver and etcd lists from the inventory and `clan/rosequartz-cluster.nix`.
+    It checks the apiserver VIP, each apiserver and etcd member, the gateway, every resolver, and the services listed in `uptime.services` (Nextcloud's `status.php`), and pings every clan machine; `clan.nix` fills the machine, apiserver and etcd lists from the inventory and `clan/rosequartz-cluster.nix`.
     The status page is on port 8080, open on the LAN. No alerting is configured.
   - `pihole/` - Pi-hole on pik8s1, pik8s2 and pik8s6, outside rosequartz, so the LAN keeps a filtering resolver while the cluster is down.
     Its config is read-only NixOS, so external-dns cannot write `thecluster.lan` records into it the way it does for the in-cluster piholes; the whole zone is a wildcard to the rosequartz gateway (`pihole.gatewayAddress`) instead.

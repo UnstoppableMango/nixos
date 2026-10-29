@@ -84,6 +84,29 @@ in
       default = null;
       description = "The cluster's ingress gateway, checked on 443.";
     };
+
+    services = lib.mkOption {
+      type = lib.types.attrsOf (
+        lib.types.submodule {
+          options = {
+            url = lib.mkOption {
+              type = lib.types.str;
+              description = "URL to request.";
+            };
+            conditions = lib.mkOption {
+              type = lib.types.listOf lib.types.str;
+              default = [ "[STATUS] == 200" ];
+              description = "Gatus conditions the response must meet.";
+            };
+          };
+        }
+      );
+      default = { };
+      example = {
+        nextcloud.url = "https://cloud.thecluster.io/status.php";
+      };
+      description = "Services the cluster hosts, by name, each checked over HTTP.";
+    };
   };
 
   config = lib.mkIf cfg.enable {
@@ -99,6 +122,12 @@ in
           ++ lib.mapAttrsToList (n: a: tcp "apiserver" n "${a}:6443") cfg.apiservers
           ++ lib.mapAttrsToList (n: a: tcp "etcd" n "${a}:2379") cfg.etcd
           ++ lib.mapAttrsToList dns cfg.resolvers
+          ++ lib.mapAttrsToList (n: svc: {
+            name = n;
+            group = "services";
+            inherit (svc) url conditions;
+            interval = "1m";
+          }) cfg.services
           ++ lib.mapAttrsToList (n: a: {
             name = n;
             group = "hosts";
