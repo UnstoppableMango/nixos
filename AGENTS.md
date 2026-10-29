@@ -18,7 +18,7 @@ This file provides guidance to AI agents when working with code in this reposito
 
 ## Architecture
 
-This is a NixOS configuration flake using **flake-parts** and **clan-core** for modular organization. All machines (hades, agreus, pollux, castor, zeus, gaea, iris, pik8s1–9) are clan-managed and configured via `clan.nix`, which holds the inventory (machine tags, service instances) and per-machine `imports`/overrides. Each machine's NixOS config lives under `machines/<name>/configuration.nix`.
+This is a NixOS configuration flake using **flake-parts** and **clan-core** for modular organization. All machines (hades, agreus, pollux, castor, zeus, gaea, apollo, pik8s1–9) are clan-managed and configured via `clan.nix`, which holds the inventory (machine tags, service instances) and per-machine `imports`/overrides. Each machine's NixOS config lives under `machines/<name>/configuration.nix`.
 
 ### Module System
 
@@ -47,12 +47,12 @@ hades = {
 ```
 `machines/hades/configuration.nix` itself imports `../../modules/desktops`, `../../modules/ssh`, and `../../modules/unifi`.
 
-Other machines (agreus, pollux, castor, zeus, gaea, iris, pik8s1–9) follow the same pattern with a thinner `imports` list, since they don't need desktop/hardware-preset modules.
+Other machines (agreus, pollux, castor, zeus, gaea, apollo, pik8s1–9) follow the same pattern with a thinner `imports` list, since they don't need desktop/hardware-preset modules.
 
 ### Directory Layout
 
 - `flake.nix` - Entry point; imports flake-parts modules; clan config via `./clan.nix`
-- `machines/` - Per-machine `configuration.nix` for every host (hades, agreus, pollux, castor, zeus, gaea, iris, pik8s1–9)
+- `machines/` - Per-machine `configuration.nix` for every host (hades, agreus, pollux, castor, zeus, gaea, apollo, pik8s1–9)
 - `modules/` - Shared NixOS modules imported by machine configs:
   - `brave/` - Brave enterprise policy at `/etc/brave/policies/managed/`, currently just the `thecluster` managed-bookmarks folder.
     Brave itself is installed by the dotfiles repo's home-manager configuration; policy lives in `/etc`, which home-manager cannot write, so it is supplied here.
@@ -156,7 +156,6 @@ Other machines (agreus, pollux, castor, zeus, gaea, iris, pik8s1–9) follow the
 | castor        | Sandy Bridge i5-2500  | Basement rack server; pollux's twin; rosequartz worker; firmware mode unverified, so it takes pollux's dual-mode grub |
 | zeus          | Dual Xeon E5-2670 tower, legacy BIOS | Basement tower; clan-managed; rosequartz worker; grub with `efiSupport` so the hybrid layout survives a firmware switch |
 | gaea          | EPYC 7502 rack box, UEFI | Basement rack server; clan-managed; rosequartz worker; systemd-boot |
-| iris          | Dell R410, UEFI       | Basement rack server; clan-managed; rosequartz worker; systemd-boot; NIC names and install disk unverified |
 | apollo        | ASUS board, firmware mode unverified | Basement server; clan-managed; rosequartz worker; takes castor's dual-mode grub |
 | pik8s1–9      | Raspberry Pi 4B       | k8s cluster nodes; clan-managed; aarch64; pik8s7–9 (8GB) are the rosequartz control plane and pik8s4–5 (4GB) are etcd-only members (five etcd members in all); pik8s3 has left rosequartz and runs the Gatus uptime checker (`modules/uptime`), shown on its display; pik8s1, pik8s2 and pik8s6 have left rosequartz and run Pi-hole (`modules/pihole`) |
 

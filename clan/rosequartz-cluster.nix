@@ -1,6 +1,6 @@
 # THECLUSTER's vanilla-Kubernetes cluster, "rosequartz": pik8s7-9 as an HA
 # control plane behind a keepalived VIP, pik8s4-5 as etcd-only members, and
-# pik8s3, agreus, pollux, castor, iris, apollo, zeus, and gaea as workers.
+# agreus, pollux, castor, apollo, zeus, and gaea as workers.
 # Lowered by cairn's `cairn.clusters` option tree
 # (flakeModules/cluster/lower.nix) into the same per-service inventory
 # instances this used to be hand-wired as in clan.nix.
@@ -71,11 +71,6 @@ let
     castor = {
       role = "worker";
       ip = "10.0.69.13";
-    };
-
-    iris = {
-      role = "worker";
-      ip = "10.0.69.15";
     };
 
     # The three x86 workers raise cairn's 110-pod default, which the pi
