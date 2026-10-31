@@ -316,9 +316,16 @@ in
 
   # Joins hades to the work tailnet. tz runs `tailscale up`/`down` without
   # sudo, and with no auth key nothing connects until tz does.
+  # Shields up refuses every inbound tailnet connection: the firewall is off
+  # and harmonia, sshd and the rest listen on all interfaces, and tz only
+  # needs to reach out. `tailscale logout` clears both prefs; tailscaled-set
+  # reapplies them on the next `systemctl restart tailscaled`.
   services.tailscale = {
     enable = true;
-    extraSetFlags = [ "--operator=tz" ];
+    extraSetFlags = [
+      "--operator=tz"
+      "--shields-up"
+    ];
   };
 
   # Enable automatic login for the user.
