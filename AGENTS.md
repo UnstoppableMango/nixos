@@ -105,7 +105,7 @@ Other machines (agreus, pollux, castor, zeus, gaea, apollo, pik8s1–9) follow t
 - `NETWORK.md` - VLANs, subnets, switch chain, and per-host IP/VLAN assignments, plus the known gaps between configured and reachable addresses.
   Read it before deriving network facts from `machines/*/configuration.nix`, since the physical topology those IPs sit on is recorded nowhere else.
 - Home directories on hades are standalone Home Manager installs from the dotfiles repo (`erik@hades`, `tz@hades`), not NixOS modules here.
-  This repo owns the machine and the system accounts (the `erik` and `tz` users instances in `clan.nix`), and installs the `home-manager` CLI for tz so that account can bootstrap its home.
+  This repo owns the machine and the system accounts (the `erik` and `tz` users instances in `clan.nix`), and installs the `home-manager` CLI for tz so that account can bootstrap its home. tz is the work account: hades also gives it zsh as its shell, the 1Password app (tz is its polkit owner), and Tailscale with tz as operator, which joins the work tailnet only once tz runs `tailscale up`.
   - The rosequartz kubeconfig and its admin identity live in dotfiles' `hosts/hades.nix` and `modules/kubernetes/rosequartz`.
   - The apiserver VIP `10.0.69.100` is deliberately *not* in the `hosts` flake: it is not a machine, and it is already the default of `dotfiles.kubernetes.rosequartz.server`.
 - `clan.nix` - Clan meta-config: cluster name/domain, machine inventory + tags, service instances, per-machine `imports`/overrides
