@@ -299,7 +299,34 @@ in
   # tz's account comes from the `tz` users instance in clan.nix. Like erik's,
   # tz's home is a standalone Home Manager install from the dotfiles repo; this
   # only supplies the CLI to bootstrap it.
-  users.users.tz.packages = [ pkgs.home-manager ];
+  users.users.tz = {
+    packages = [ pkgs.home-manager ];
+    # dotfiles' tz@hades configures zsh, not bash.
+    shell = pkgs.zsh;
+  };
+
+  # tz is the work account. The 1Password app's browser integration, system
+  # unlock and setgid `op` need the NixOS modules; Home Manager cannot set
+  # them up. tz@hades in dotfiles points SSH and git signing at its agent.
+  programs._1password.enable = true;
+  programs._1password-gui = {
+    enable = true;
+    polkitPolicyOwners = [ "tz" ];
+  };
+
+  # Joins hades to the work tailnet. tz runs `tailscale up`/`down` without
+  # sudo, and with no auth key nothing connects until tz does.
+  # Shields up refuses every inbound tailnet connection: the firewall is off
+  # and harmonia, sshd and the rest listen on all interfaces, and tz only
+  # needs to reach out. `tailscale logout` clears both prefs; tailscaled-set
+  # reapplies them on the next `systemctl restart tailscaled`.
+  services.tailscale = {
+    enable = true;
+    extraSetFlags = [
+      "--operator=tz"
+      "--shields-up"
+    ];
+  };
 
   # Enable automatic login for the user.
   services.displayManager.autoLogin.enable = true;
