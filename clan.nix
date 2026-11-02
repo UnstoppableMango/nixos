@@ -65,8 +65,8 @@ in
   inventory.machines = machines;
 
   inventory.instances = {
-    # Plain NixOS modules every machine carries (./modules/dns, ./modules/gc,
-    # ./modules/nix).
+    # Plain NixOS modules every machine carries (listed in
+    # ./modules/service/base).
     # Attaching them here, rather than in each machines/*/configuration.nix,
     # means a new machine inherits them by joining the inventory.
     base = {

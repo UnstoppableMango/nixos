@@ -10,6 +10,7 @@
       ../../gc
       ../../nix
       ../../pki
+      ../../smartmontools
     ];
   };
 }
