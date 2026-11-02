@@ -6,6 +6,7 @@ Plain NixOS modules that every clan machine carries, attached through the `base`
 - [gc](../../gc/default.nix): weekly `nh clean`, run with the agents stopped on Hercules CI agent machines
 - [nix](../../nix/default.nix): daemon settings that are not about where it fetches from
 - [pki](../../pki/default.nix): trust in the UnMango Root CA G2, which `*.thecluster.lan` (the `ncps` substituter included) chains to
-- [smartmontools](../../smartmontools/default.nix): `smartctl`, for reading drive health
+
+The service also installs `smartmontools`, for reading drive health with `smartctl`.
 
 Substituters and trusted keys are attached separately, by the `clan-cache` instance.

@@ -23,7 +23,7 @@ This is a NixOS configuration flake using **flake-parts** and **clan-core** for 
 ### Module System
 
 Plain NixOS modules live under `modules/` and are composed into machine configs via direct `imports`. Clan service modules (role-based, multi-machine) live under `modules/service/` and are registered as clan inventory modules in `clan.nix`.
-Modules every machine needs (`modules/dns`, `modules/gc`, `modules/nix`, `modules/pki`, `modules/smartmontools`) are not imported per machine: the `base` instance in `clan.nix` attaches them to every inventory member through its `tags.all` role, the same way the `clan-cache` instance attaches `modules/cache`.
+Modules every machine needs (`modules/dns`, `modules/gc`, `modules/nix`, `modules/pki`) are not imported per machine: the `base` instance in `clan.nix` attaches them to every inventory member through its `tags.all` role, the same way the `clan-cache` instance attaches `modules/cache`.
 
 The `rosequartz` Kubernetes cluster (control plane and workers listed in `clan/rosequartz-cluster.nix`) is **not** defined in this repo. It runs on [cairn](https://github.com/UnstoppableMango/cairn), a library flake that registers one clan service per cluster component (`@UnstoppableMango/{pki,etcd,apiserver,kubelet,loadbalancer,network,kubeconfig,inoculant,coredns,flux}`). `clan.nix` declares a `rosequartz-<component>` instance per service with `module.input = "cairn"`; the services coordinate via clan exports. Cairn's `docs/USAGE.md` and per-service `modules/service/<name>/README.md` are the reference for their options.
 
