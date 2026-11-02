@@ -10,6 +10,12 @@
       ../../gc
       ../../nix
       ../../pki
+      (
+        { pkgs, ... }:
+        {
+          environment.systemPackages = [ pkgs.smartmontools ];
+        }
+      )
     ];
   };
 }

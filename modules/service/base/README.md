@@ -7,4 +7,6 @@ Plain NixOS modules that every clan machine carries, attached through the `base`
 - [nix](../../nix/default.nix): daemon settings that are not about where it fetches from
 - [pki](../../pki/default.nix): trust in the UnMango Root CA G2, which `*.thecluster.lan` (the `ncps` substituter included) chains to
 
+The service also installs `smartmontools`, for reading drive health with `smartctl`.
+
 Substituters and trusted keys are attached separately, by the `clan-cache` instance.
