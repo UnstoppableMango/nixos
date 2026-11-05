@@ -23,7 +23,9 @@
     memoryMax = 128;
     agentMemoryMax = 16;
     maxJobs = 16;
-    cores = 8;
+    # Matches the rosequartz Hercules pods, so a build gets the same share
+    # wherever it lands (UnstoppableMango/tdl#1351).
+    cores = 4;
     reservedCpu = 16;
   };
 
