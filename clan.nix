@@ -188,9 +188,8 @@ in
       };
     };
 
-    # Host agents for both Hercules CI accounts. Each account also runs an agent
-    # in rosequartz (apps/hercules-ci/helm-release-*.yml in the-cluster), and
-    # they share its binary-caches.json.
+    # Host agents for both Hercules CI accounts. These are the only agents:
+    # Hercules CI runs on physical machines, not in rosequartz.
     #
     # hades is a workstation, so its agents stay at two tasks each: the desktop
     # comes first, and a machine that sleeps is opportunistic capacity either
