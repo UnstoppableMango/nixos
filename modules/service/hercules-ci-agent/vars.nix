@@ -21,8 +21,8 @@ in
       type = "hidden";
     };
 
-    # Cache names must match the account's other agents, so paste the same
-    # binary-caches.json the rosequartz agent's sealed secret carries.
+    # Shared like the token, so every agent of an account sees the same
+    # cache names.
     prompts.binary-caches = {
       description = "binary-caches.json for the ${account} Hercules CI account";
       type = "multiline-hidden";

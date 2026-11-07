@@ -10,7 +10,7 @@ The shared `hercules-ci-agent-<account>` vars generator prompts for two secrets,
 
 - `cluster-join-token`: the token from the account's Hercules CI dashboard.
 - `binary-caches`: the account's `binary-caches.json`.
-  Cache names must match the account's other agents, so use the same file the rosequartz agents mount.
+  Every machine of an account deploys the same file, so cache names always match across its agents.
 
 The agent holds no GC root for a task's paths once the worker that created them exits, so a collection while tasks are in flight can delete paths a later step needs (hercules-ci/hercules-ci-agent#105).
 Agent machines therefore collect only while their agents are stopped.
