@@ -23,8 +23,9 @@
     memoryMax = 128;
     agentMemoryMax = 16;
     maxJobs = 16;
-    # Matches the rosequartz Hercules pods, so a build gets the same share
-    # wherever it lands (UnstoppableMango/tdl#1351).
+    # 16 jobs x 4 cores = 64. Overlapping Hercules builds at cores = 8
+    # oversubscribed gaea and roughly tripled a job's build phase
+    # (UnstoppableMango/tdl#1346).
     cores = 4;
     reservedCpu = 16;
   };

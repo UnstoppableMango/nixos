@@ -213,12 +213,7 @@ in
       module.input = "self";
       roles.agent.settings.account = "unstoppablemango";
       roles.agent.machines = {
-        # Six tasks at gaea's `cores = 4`, matching this account's rosequartz
-        # pod on the same host, so the two together stay well under gaea's
-        # threads; overlapping builds on an oversubscribed gaea roughly tripled
-        # a job's build phase (UnstoppableMango/tdl#1346,
-        # UnstoppableMango/tdl#1351).
-        gaea.settings.concurrentTasks = 6;
+        gaea.settings.concurrentTasks = 8;
         hades.settings.concurrentTasks = 2;
         zeus.settings.concurrentTasks = 4;
       };
