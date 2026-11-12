@@ -12,7 +12,13 @@
   ...
 }:
 let
-  kodi = pkgs.kodi-wayland.withPackages (p: [ p.joystick ]);
+  # nixpkgs' plex-for-kodi is pannal's maintained fork; the copy in Kodi's own
+  # repository fails to import against urllib3 2.x.
+  kodi = pkgs.kodi-wayland.withPackages (p: [
+    p.jellyfin
+    p.joystick
+    p.plex-for-kodi
+  ]);
 
   # copyparty in the-cluster (apps/media) serves each media claim read-only over WebDAV.
   # The content type Kodi scrapes each source as lives in its database, so it
@@ -43,22 +49,43 @@ let
     </sources>
   '';
 
-  # Kodi rewrites guisettings.xml on exit, so the idle timer is set before
-  # each start rather than linked from the store the way sources.xml is.
-  # A shutdown state of 0 is Quit.
-  idleQuit = pkgs.writeShellApplication {
-    name = "htpc-kodi-idle-quit";
+  # Kodi rewrites guisettings.xml on exit, so these are set before each start
+  # rather than linked from the store the way sources.xml is. Kodi quits after
+  # 30 idle minutes (a shutdown state of 0 is Quit), and its web server, which
+  # the Kore remote uses, always asks for a login.
+  settings = {
+    "powermanagement.shutdowntime" = "30";
+    "powermanagement.shutdownstate" = "0";
+    "services.webserver" = "true";
+    "services.webserverauthentication" = "true";
+    "services.webserverusername" = "kodi";
+  };
+  webserverPassword = config.clan.core.vars.generators.kodi-webserver.files.password.path;
+
+  applySettings = pkgs.writeShellApplication {
+    name = "htpc-kodi-settings";
     runtimeInputs = [ pkgs.xmlstarlet ];
     text = ''
       f=/home/kodi/.kodi/userdata/guisettings.xml
       [ -s "$f" ] || printf '<settings version="2">\n</settings>\n' >"$f"
-      xmlstarlet ed -L \
-        -d '/settings/setting[@id="powermanagement.shutdowntime" or @id="powermanagement.shutdownstate"]' \
-        -s /settings -t elem -n setting -v 30 \
-        -i '/settings/setting[last()]' -t attr -n id -v powermanagement.shutdowntime \
-        -s /settings -t elem -n setting -v 0 \
-        -i '/settings/setting[last()]' -t attr -n id -v powermanagement.shutdownstate \
-        "$f"
+      set_setting() {
+        xmlstarlet ed -L \
+          -d "/settings/setting[@id='$1']" \
+          -s /settings -t elem -n setting -v "$2" \
+          -i '/settings/setting[last()]' -t attr -n id -v "$1" \
+          "$f"
+      }
+      ${lib.concatMapAttrsStringSep "\n" (
+        id: value: "set_setting ${lib.escapeShellArg id} ${lib.escapeShellArg value}"
+      ) settings}
+
+      # Kodi keeps the password in plain text in guisettings.xml itself.
+      # xmlstarlet reads & in a value as the start of an entity, so it is
+      # escaped; it escapes everything else itself.
+      if [ -r ${webserverPassword} ]; then
+        password=$(cat ${webserverPassword})
+        set_setting services.webserverpassword "''${password//&/&amp;}"
+      fi
     '';
   };
 in
@@ -77,6 +104,23 @@ in
       "render"
       "video"
     ];
+  };
+
+  # Read by applySettings, which runs as kodi. Generated on the first
+  # `clan machines update`; read it for Kore with
+  # `clan vars get agreus kodi-webserver/password`.
+  clan.core.vars.generators.kodi-webserver = {
+    files.password = {
+      secret = true;
+      owner = "kodi";
+    };
+    runtimeInputs = [
+      pkgs.coreutils
+      pkgs.pwgen
+    ];
+    script = ''
+      pwgen -s 32 1 | tr -d '\n' > "$out/password"
+    '';
   };
 
   # A symlink into the store, so sources added from Kodi's UI do not persist.
@@ -103,7 +147,7 @@ in
     wantedBy = lib.mkForce [ "multi-user.target" ];
     serviceConfig = {
       # Not fatal, so a malformed guisettings.xml cannot keep Kodi down.
-      ExecStartPre = "-${lib.getExe idleQuit}";
+      ExecStartPre = "-${lib.getExe applySettings}";
       # Covers Kodi quitting on its idle timer as well as crashing or being
       # killed at the memory cap.
       Restart = "always";
@@ -127,6 +171,30 @@ in
       Type = "oneshot";
       ExecStart = "${pkgs.systemd}/bin/systemctl try-restart cage-tty1.service";
     };
+  };
+
+  # Kodi cannot see new files on copyparty, so the library is rescanned once
+  # Kodi is back from its nightly restart. Not videolibrary.updateonstartup:
+  # Kodi also restarts after every idle quit, which would scan every half hour.
+  systemd.services.htpc-kodi-scan = {
+    description = "Scan Kodi's libraries for new media";
+    startAt = "04:10";
+    path = with pkgs; [
+      coreutils
+      curl
+    ];
+    serviceConfig.Type = "oneshot";
+    # The login goes in on stdin rather than the command line, where other
+    # users could read it.
+    script = ''
+      for method in VideoLibrary.Scan AudioLibrary.Scan; do
+        printf 'user = "kodi:%s"\n' "$(cat ${webserverPassword})" |
+          curl -sSf -K - -H 'Content-Type: application/json' \
+            -d "{\"jsonrpc\":\"2.0\",\"method\":\"$method\",\"id\":1}" \
+            http://127.0.0.1:8080/jsonrpc
+        echo
+      done
+    '';
   };
 
   # pam_systemd moves the session into kodi's user slice, so the cap goes there.
