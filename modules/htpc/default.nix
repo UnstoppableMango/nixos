@@ -1,16 +1,13 @@
-# Kodi on the TV, running under the cage kiosk compositor only while it is in use.
+# Kodi on the TV, running under the cage kiosk compositor and always up.
 #
-# The TV keeps HDMI hotplug asserted through standby, so the connector cannot
-# tell when it is on. Its network API can: it stops answering in standby.
-# htpc-tv-power starts Kodi when the TV turns on and stops it once the TV has
-# been off for about 30 seconds. A game controller connecting also starts it,
-# for after Kodi was quit with the TV still on.
+# The TV is usually off, so Kodi mostly sits idle on a dark screen. It quits
+# itself after 30 idle minutes in its menus and systemd starts it again fresh,
+# and a nightly restart covers what that timer skips: Kodi resets it while
+# anything is playing or paused, so a video left paused with the TV off would
+# otherwise hold its place indefinitely.
 { pkgs, lib, ... }:
 let
   kodi = pkgs.kodi-wayland.withPackages (p: [ p.joystick ]);
-
-  # Samsung UN50KU630D on VLAN 1. pfSense must pass agreus to it on 8001.
-  tv = "192.168.1.75";
 
   # copyparty in the-cluster (apps/media) serves each media claim read-only over WebDAV.
   # The content type Kodi scrapes each source as lives in its database, so it
@@ -41,28 +38,22 @@ let
     </sources>
   '';
 
-  tvPower = pkgs.writeShellApplication {
-    name = "htpc-tv-power";
-    runtimeInputs = with pkgs; [
-      curl
-      systemd
-    ];
+  # Kodi rewrites guisettings.xml on exit, so the idle timer is set before
+  # each start rather than linked from the store the way sources.xml is.
+  # A shutdown state of 0 is Quit.
+  idleQuit = pkgs.writeShellApplication {
+    name = "htpc-kodi-idle-quit";
+    runtimeInputs = [ pkgs.xmlstarlet ];
     text = ''
-      on=false
-      misses=0
-      while true; do
-        if curl -sf -m 2 -o /dev/null http://${tv}:8001/api/v2/; then
-          misses=0
-          if ! $on; then
-            on=true
-            systemctl start cage-tty1.service
-          fi
-        elif $on && ((++misses >= 3)); then
-          on=false
-          systemctl stop cage-tty1.service
-        fi
-        sleep 10
-      done
+      f=/home/kodi/.kodi/userdata/guisettings.xml
+      [ -s "$f" ] || printf '<settings version="2">\n</settings>\n' >"$f"
+      xmlstarlet ed -L \
+        -d '/settings/setting[@id="powermanagement.shutdowntime" or @id="powermanagement.shutdownstate"]' \
+        -s /settings -t elem -n setting -v 30 \
+        -i '/settings/setting[last()]' -t attr -n id -v powermanagement.shutdowntime \
+        -s /settings -t elem -n setting -v 0 \
+        -i '/settings/setting[last()]' -t attr -n id -v powermanagement.shutdownstate \
+        "$f"
     '';
   };
 in
@@ -96,11 +87,18 @@ in
     ];
   };
 
-  # The cage module starts with graphical.target; here only the triggers above start it.
+  # The cage module starts with graphical.target, which would also start GDM
+  # from modules/desktops onto the same tty, so the default stays multi-user.
   systemd.defaultUnit = lib.mkForce "multi-user.target";
   systemd.services.cage-tty1 = {
-    wantedBy = lib.mkForce [ ];
+    wantedBy = lib.mkForce [ "multi-user.target" ];
     serviceConfig = {
+      # Not fatal, so a malformed guisettings.xml cannot keep Kodi down.
+      ExecStartPre = "-${lib.getExe idleQuit}";
+      # Covers Kodi quitting on its idle timer as well as crashing or being
+      # killed at the memory cap.
+      Restart = "always";
+      RestartSec = 5;
       # cage waits for Kodi on SIGTERM without signalling it, so quit Kodi
       # first. uid 1001 is shared with container users; match the name too.
       ExecStop = "-${pkgs.procps}/bin/pkill -TERM -u kodi -x kodi.bin";
@@ -110,28 +108,24 @@ in
     };
   };
 
+  # Kodi never returns memory it has grown into, and services.cage leaves
+  # restartIfChanged off, so a deploy reaches a running Kodi only here.
+  systemd.services.htpc-kodi-restart = {
+    description = "Restart Kodi nightly";
+    startAt = "04:00";
+    serviceConfig = {
+      Type = "oneshot";
+      ExecStart = "${pkgs.systemd}/bin/systemctl try-restart cage-tty1.service";
+    };
+  };
+
   # pam_systemd moves the session into kodi's user slice, so the cap goes there.
-  # Capped rather than reserved from the kubelet, so pods keep the memory
-  # while Kodi is not running.
+  # Capped rather than reserved from the kubelet, so the scheduler still
+  # counts the memory Kodi has not grown into as free for pods.
   systemd.slices."user-1001".sliceConfig = {
     MemoryMax = "2G";
     CPUWeight = 50;
   };
-
-  systemd.services.htpc-tv-power = {
-    description = "Start and stop Kodi with the TV's power";
-    wantedBy = [ "multi-user.target" ];
-    after = [ "network-online.target" ];
-    wants = [ "network-online.target" ];
-    serviceConfig = {
-      ExecStart = lib.getExe tvPower;
-      Restart = "always";
-    };
-  };
-
-  services.udev.extraRules = ''
-    ACTION=="add", SUBSYSTEM=="input", KERNEL=="event*", ENV{ID_INPUT_JOYSTICK}=="1", RUN+="${pkgs.systemd}/bin/systemctl --no-block start cage-tty1.service"
-  '';
 
   hardware.graphics = {
     enable = true;

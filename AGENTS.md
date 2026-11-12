@@ -75,10 +75,9 @@ Other machines (agreus, pollux, castor, zeus, gaea, apollo, pik8s1–9) follow t
     On agent machines (gaea, hades, zeus) the `hercules-ci-agent` service stops the agents while it runs, since a collection mid-task can delete paths the task still needs.
   - `desktops/` - Desktop environment modules (currently GNOME only)
   - `hardware/` - Hardware-specific modules (currently NVIDIA config)
-  - `htpc/` - Kodi under the cage kiosk compositor on agreus, started and stopped with the TV's power.
-    The TV keeps HDMI hotplug asserted in standby, so `htpc-tv-power` polls the TV's network API instead, which stops answering in standby; a game controller connecting also starts Kodi.
-    The poll crosses from VLAN 20 to VLAN 1, so it depends on the pfSense rule listed in `NETWORK.md`.
-    Capped in kodi's `user-1001.slice` and not reserved from the kubelet, so pods keep the memory while Kodi is not running.
+  - `htpc/` - Kodi under the cage kiosk compositor on agreus, always running, usually with the TV off.
+    Kodi quits itself after 30 idle minutes in its menus (set in `guisettings.xml` before each start) and systemd restarts it fresh; a 04:00 restart covers playback left paused, which that timer ignores, and is also when a deploy reaches a running Kodi, since `services.cage.restartIfChanged` is off.
+    Capped in kodi's `user-1001.slice` and not reserved from the kubelet, so the scheduler counts the memory Kodi has not grown into as free.
     Media sources are WebDAV shares from copyparty in the-cluster (`apps/media`), written to a store-linked `sources.xml`, so sources added in Kodi's UI do not persist.
   - `kiosk/` - A web page in Firefox kiosk mode under cage, always on, on pik8s3's display, where it shows the `uptime/` status page.
     Its user slice is capped at `kiosk.memoryMax`; on a Kubernetes node, reserve that much from the kubelet.
@@ -151,7 +150,7 @@ Other machines (agreus, pollux, castor, zeus, gaea, apollo, pik8s1–9) follow t
 | Host          | Hardware              | Notes                                                     |
 | ------------- | --------------------- | ---------------------------------------------------------- |
 | hades         | ASUS ROG Strix X570-E | Primary desktop; AMD GPU; BTRFS; clan-managed; Hercules CI agent for both accounts at two tasks each |
-| agreus        | Generic x86_64        | Office mini PC; clan-managed; facter hardware config; rosequartz worker; HTPC (Kodi, follows the TV's power) |
+| agreus        | Generic x86_64        | Office mini PC; clan-managed; facter hardware config; rosequartz worker; HTPC (Kodi, always on) |
 | pollux        | Sandy Bridge i5, legacy BIOS | Basement rack server; clan-managed; facter hardware config; rosequartz worker |
 | castor        | Sandy Bridge i5-2500  | Basement rack server; pollux's twin; rosequartz worker; firmware mode unverified, so it takes pollux's dual-mode grub |
 | zeus          | Dual Xeon E5-2670 tower, legacy BIOS | Basement tower; clan-managed; rosequartz worker; grub with `efiSupport` so the hybrid layout survives a firmware switch |
