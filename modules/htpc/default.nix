@@ -12,7 +12,13 @@
   ...
 }:
 let
-  kodi = pkgs.kodi-wayland.withPackages (p: [ p.joystick ]);
+  # nixpkgs' plex-for-kodi is pannal's maintained fork; the copy in Kodi's own
+  # repository fails to import against urllib3 2.x.
+  kodi = pkgs.kodi-wayland.withPackages (p: [
+    p.jellyfin
+    p.joystick
+    p.plex-for-kodi
+  ]);
 
   # copyparty in the-cluster (apps/media) serves each media claim read-only over WebDAV.
   # The content type Kodi scrapes each source as lives in its database, so it
