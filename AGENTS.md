@@ -77,7 +77,7 @@ Other machines (agreus, pollux, castor, zeus, gaea, apollo, pik8s1–9) follow t
   - `hardware/` - Hardware-specific modules (currently NVIDIA config)
   - `htpc/` - Kodi under the cage kiosk compositor on agreus, always running, usually with the TV off.
     Kodi quits itself after 30 idle minutes in its menus (set in `guisettings.xml` before each start) and systemd restarts it fresh; a 04:00 restart covers playback left paused, which that timer ignores, and is also when a deploy reaches a running Kodi, since `services.cage.restartIfChanged` is off.
-    Capped in kodi's `user-1001.slice` and not reserved from the kubelet, so the scheduler counts the memory Kodi has not grown into as free.
+    Capped in kodi's user slice (`user-2000.slice`, named after its pinned uid) and not reserved from the kubelet, so the scheduler counts the memory Kodi has not grown into as free.
     Media sources are WebDAV shares from copyparty in the-cluster (`apps/media`), written to a store-linked `sources.xml`, so sources added in Kodi's UI do not persist.
   - `kiosk/` - A web page in Firefox kiosk mode under cage, always on, on pik8s3's display, where it shows the `uptime/` status page.
     Its user slice is capped at `kiosk.memoryMax`; on a Kubernetes node, reserve that much from the kubelet.

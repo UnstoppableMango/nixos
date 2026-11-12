@@ -5,7 +5,12 @@
 # and a nightly restart covers what that timer skips: Kodi resets it while
 # anything is playing or paused, so a video left paused with the TV off would
 # otherwise hold its place indefinitely.
-{ pkgs, lib, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 let
   kodi = pkgs.kodi-wayland.withPackages (p: [ p.joystick ]);
 
@@ -60,8 +65,12 @@ in
 {
   users.users.kodi = {
     isNormalUser = true;
-    # Pinned so the user-1001.slice cap below keeps applying.
-    uid = 1001;
+    # Pinned, since the slice cap below is named after it. Kept clear of 1001,
+    # the default user of many container images (the ARC runners among them),
+    # whose processes would otherwise show up as kodi on this host.
+    # NixOS never changes an existing user's uid, so changing this means
+    # `usermod -u` on the host with Kodi stopped, or the cap stops applying.
+    uid = 2000;
     extraGroups = [
       "audio"
       "input"
@@ -100,7 +109,8 @@ in
       Restart = "always";
       RestartSec = 5;
       # cage waits for Kodi on SIGTERM without signalling it, so quit Kodi
-      # first. uid 1001 is shared with container users; match the name too.
+      # first. Matching the name as well keeps a container process that
+      # happens to share the uid out of it.
       ExecStop = "-${pkgs.procps}/bin/pkill -TERM -u kodi -x kodi.bin";
       TimeoutStopSec = 20;
       # Under memory pressure the kernel kills Kodi before any pod.
@@ -122,7 +132,7 @@ in
   # pam_systemd moves the session into kodi's user slice, so the cap goes there.
   # Capped rather than reserved from the kubelet, so the scheduler still
   # counts the memory Kodi has not grown into as free for pods.
-  systemd.slices."user-1001".sliceConfig = {
+  systemd.slices."user-${toString config.users.users.kodi.uid}".sliceConfig = {
     MemoryMax = "2G";
     CPUWeight = 50;
   };
