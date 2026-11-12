@@ -167,6 +167,30 @@ in
     };
   };
 
+  # Kodi cannot see new files on copyparty, so the library is rescanned once
+  # Kodi is back from its nightly restart. Not videolibrary.updateonstartup:
+  # Kodi also restarts after every idle quit, which would scan every half hour.
+  systemd.services.htpc-kodi-scan = {
+    description = "Scan Kodi's libraries for new media";
+    startAt = "04:10";
+    path = with pkgs; [
+      coreutils
+      curl
+    ];
+    serviceConfig.Type = "oneshot";
+    # The login goes in on stdin rather than the command line, where other
+    # users could read it.
+    script = ''
+      for method in VideoLibrary.Scan AudioLibrary.Scan; do
+        printf 'user = "kodi:%s"\n' "$(cat ${webserverPassword})" |
+          curl -sSf -K - -H 'Content-Type: application/json' \
+            -d "{\"jsonrpc\":\"2.0\",\"method\":\"$method\",\"id\":1}" \
+            http://127.0.0.1:8080/jsonrpc
+        echo
+      done
+    '';
+  };
+
   # pam_systemd moves the session into kodi's user slice, so the cap goes there.
   # Capped rather than reserved from the kubelet, so the scheduler still
   # counts the memory Kodi has not grown into as free for pods.
