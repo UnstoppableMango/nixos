@@ -100,19 +100,20 @@ in
     ];
   };
 
-  # Read by applySettings, which runs as kodi. `clan machines update` prompts
-  # for it the first time.
+  # Read by applySettings, which runs as kodi. Generated on the first
+  # `clan machines update`; read it for Kore with
+  # `clan vars get agreus kodi-webserver/password`.
   clan.core.vars.generators.kodi-webserver = {
-    prompts.password = {
-      description = "Password for Kodi's web server on agreus (user kodi), used by the Kore remote";
-      type = "hidden";
-    };
     files.password = {
       secret = true;
       owner = "kodi";
     };
+    runtimeInputs = [
+      pkgs.coreutils
+      pkgs.pwgen
+    ];
     script = ''
-      cp "$prompts/password" "$out/password"
+      pwgen -s 32 1 | tr -d '\n' > "$out/password"
     '';
   };
 
