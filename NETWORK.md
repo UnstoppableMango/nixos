@@ -104,7 +104,7 @@ The rosequartz service CIDR is `10.0.0.0/24` and the pod CIDR is `10.1.0.0/16`, 
 | pollux | `10.0.69.14` | 20 | GS724Tv4 | `g7` | rosequartz worker |
 | castor (`eno1`) | `10.0.69.13` | 20 | GS724Tv4 | `g5` | rosequartz worker |
 | castor (`enp2s0`) | DHCP | 1 | GS724Tv4 | `g11` | Second NIC, unused by any config |
-| Samsung TV (UN50KU630D) | `192.168.1.75` | 1 | Wireless | n/a | agreus's HDMI display; agreus polls `:8001/api/v2/` to detect power, which needs a pfSense pass rule from `10.0.69.187` to `192.168.1.75:8001` |
+| Samsung TV (UN50KU630D) | `192.168.1.75` | 1 | Wireless | n/a | agreus's HDMI display. Nothing in this repo reaches it over the network, so the pfSense pass rule from `10.0.69.187` to `192.168.1.75:8001` that agreus's TV power poll used can be removed |
 | rosequartz VIP | `10.0.69.100` | 20 | keepalived on pik8s7-9 | n/a | apiserver endpoint |
 | Unidentified (`d0:50:99:e1:dc:92`) | `192.168.1.9` | 1 | GS724Tv4 | `g22` | Answers SSH with `ssh-rsa`/`ssh-dss` host keys only |
 | Unidentified (`d0:50:99:e1:dd:1e`) | `192.168.1.7` | 1 | GS724Tv4 | `g24` | Answers SSH with `ssh-rsa`/`ssh-dss` host keys only |
