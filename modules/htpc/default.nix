@@ -43,22 +43,43 @@ let
     </sources>
   '';
 
-  # Kodi rewrites guisettings.xml on exit, so the idle timer is set before
-  # each start rather than linked from the store the way sources.xml is.
-  # A shutdown state of 0 is Quit.
-  idleQuit = pkgs.writeShellApplication {
-    name = "htpc-kodi-idle-quit";
+  # Kodi rewrites guisettings.xml on exit, so these are set before each start
+  # rather than linked from the store the way sources.xml is. Kodi quits after
+  # 30 idle minutes (a shutdown state of 0 is Quit), and its web server, which
+  # the Kore remote uses, always asks for a login.
+  settings = {
+    "powermanagement.shutdowntime" = "30";
+    "powermanagement.shutdownstate" = "0";
+    "services.webserver" = "true";
+    "services.webserverauthentication" = "true";
+    "services.webserverusername" = "kodi";
+  };
+  webserverPassword = config.clan.core.vars.generators.kodi-webserver.files.password.path;
+
+  applySettings = pkgs.writeShellApplication {
+    name = "htpc-kodi-settings";
     runtimeInputs = [ pkgs.xmlstarlet ];
     text = ''
       f=/home/kodi/.kodi/userdata/guisettings.xml
       [ -s "$f" ] || printf '<settings version="2">\n</settings>\n' >"$f"
-      xmlstarlet ed -L \
-        -d '/settings/setting[@id="powermanagement.shutdowntime" or @id="powermanagement.shutdownstate"]' \
-        -s /settings -t elem -n setting -v 30 \
-        -i '/settings/setting[last()]' -t attr -n id -v powermanagement.shutdowntime \
-        -s /settings -t elem -n setting -v 0 \
-        -i '/settings/setting[last()]' -t attr -n id -v powermanagement.shutdownstate \
-        "$f"
+      set_setting() {
+        xmlstarlet ed -L \
+          -d "/settings/setting[@id='$1']" \
+          -s /settings -t elem -n setting -v "$2" \
+          -i '/settings/setting[last()]' -t attr -n id -v "$1" \
+          "$f"
+      }
+      ${lib.concatMapAttrsStringSep "\n" (
+        id: value: "set_setting ${lib.escapeShellArg id} ${lib.escapeShellArg value}"
+      ) settings}
+
+      # Kodi keeps the password in plain text in guisettings.xml itself.
+      # xmlstarlet reads & in a value as the start of an entity, so it is
+      # escaped; it escapes everything else itself.
+      if [ -r ${webserverPassword} ]; then
+        password=$(cat ${webserverPassword})
+        set_setting services.webserverpassword "''${password//&/&amp;}"
+      fi
     '';
   };
 in
@@ -77,6 +98,22 @@ in
       "render"
       "video"
     ];
+  };
+
+  # Read by applySettings, which runs as kodi. `clan machines update` prompts
+  # for it the first time.
+  clan.core.vars.generators.kodi-webserver = {
+    prompts.password = {
+      description = "Password for Kodi's web server on agreus (user kodi), used by the Kore remote";
+      type = "hidden";
+    };
+    files.password = {
+      secret = true;
+      owner = "kodi";
+    };
+    script = ''
+      cp "$prompts/password" "$out/password"
+    '';
   };
 
   # A symlink into the store, so sources added from Kodi's UI do not persist.
@@ -103,7 +140,7 @@ in
     wantedBy = lib.mkForce [ "multi-user.target" ];
     serviceConfig = {
       # Not fatal, so a malformed guisettings.xml cannot keep Kodi down.
-      ExecStartPre = "-${lib.getExe idleQuit}";
+      ExecStartPre = "-${lib.getExe applySettings}";
       # Covers Kodi quitting on its idle timer as well as crashing or being
       # killed at the memory cap.
       Restart = "always";
