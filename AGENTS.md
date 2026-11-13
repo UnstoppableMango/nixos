@@ -79,6 +79,7 @@ Other machines (agreus, pollux, castor, zeus, gaea, apollo, pik8s1–9) follow t
     Kodi quits itself after 30 idle minutes in its menus (set in `guisettings.xml` before each start, along with the web server login: user `kodi` and the `kodi-webserver` var's password) and systemd restarts it fresh; a 04:00 restart covers playback left paused, which that timer ignores, and is also when a deploy reaches a running Kodi, since `services.cage.restartIfChanged` is off.
     A 04:10 JSON-RPC call rescans the video and music libraries, since Kodi cannot watch copyparty for new files; which content type each source holds is set once in Kodi's UI and lives in its database.
     Capped in kodi's user slice (`user-2000.slice`, named after its pinned uid) and not reserved from the kubelet, so the scheduler counts the memory Kodi has not grown into as free.
+    Audio goes to the TV over HDMI, which shares a card with the analog jack; a WirePlumber rule prefers the `output:hdmi-stereo` profile so the card moves to it whenever the TV comes on, since it boots onto analog while the TV is off.
     Media sources are WebDAV shares from copyparty in the-cluster (`apps/media`), written to a store-linked `sources.xml`, so sources added in Kodi's UI do not persist.
   - `kiosk/` - A web page in Firefox kiosk mode under cage, always on, on pik8s3's display, where it shows the `uptime/` status page.
     Its user slice is capped at `kiosk.memoryMax`; on a Kubernetes node, reserve that much from the kubelet.
