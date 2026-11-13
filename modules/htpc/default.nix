@@ -214,7 +214,27 @@ in
     enable = true;
     alsa.enable = true;
     pulse.enable = true;
+
+    # The TV is on the board's HDMI, which shares a card with the analog
+    # jack. WirePlumber ranks the analog profile higher, and HDMI is
+    # unavailable while the TV is off, so it boots onto analog and stays there.
+    # Preferring HDMI moves the card to it whenever the TV reports in, since a
+    # change in profile availability makes WirePlumber choose again; analog
+    # remains the fallback while the TV is off. A remembered profile would be
+    # chosen ahead of this preference, so none is kept.
+    wireplumber.extraConfig."50-htpc-hdmi" = {
+      "wireplumber.settings"."device.restore-profile" = false;
+      "device.profile.priority.rules" = [
+        {
+          matches = [ { "device.name" = "~alsa_card.*"; } ];
+          actions.update-props.priorities = [ "output:hdmi-stereo" ];
+        }
+      ];
+    };
   };
+
+  # aplay -l and friends, for finding which output the TV is on.
+  environment.systemPackages = [ pkgs.alsa-utils ];
 
   hardware.bluetooth.enable = true;
 
