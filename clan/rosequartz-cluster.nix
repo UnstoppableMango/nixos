@@ -97,8 +97,7 @@ let
     zeus = {
       role = "worker";
       ip = "10.0.69.10";
-      # 32 threads, 125 GiB, minus the ci.slice ceiling modules/ci-limits
-      # reserves from the kubelet.
+      # 32 threads, 125 GiB.
       maxPods = 200;
     };
 

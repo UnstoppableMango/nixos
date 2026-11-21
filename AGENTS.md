@@ -65,14 +65,11 @@ Other machines (agreus, pollux, castor, zeus, gaea, apollo, pik8s1–9) follow t
   - `ceph-cluster-network/` - Ceph's cluster network on the SFP+ aggregator (`cephClusterNetwork.*`): a macvlan shim holding the host's `10.0.70.0/24` address, and multus as the host CNI plugin wrapping flannel, so Rook's OSD pods get a macvlan interface from the host's `host-local` range.
     multus runs from NixOS rather than its DaemonSet because the kubelet module relinks `/opt/cni/bin` on every start and `/etc/cni/net.d` is a store path.
     Addresses per host are in `NETWORK.md`.
-  - `ci-limits/` - Memory and CPU limits for hosts running Hercules CI builds alongside rook-ceph pods (zeus, gaea).
+  - `ci-limits/` - Memory and CPU limits for hosts running Hercules CI builds alongside rook-ceph pods (gaea).
     Puts nix-daemon, the Hercules agents and harmonia in a capped `ci.slice`, sets nix `max-jobs`/`cores`, and reserves the slice ceiling from the kubelet.
     Each host sizes it through `ciLimits.*` in its `configuration.nix`; per-agent `concurrentTasks` is set on the hercules-ci instances in `clan.nix`.
-  - `ci-idle/` - Hercules CI agents on hades, in a low-weight `ci.slice` whose `MemoryHigh` drops to `ciIdle.activeMemoryHigh` while a graphical session is active and unlocked.
-    The agents' evaluator heap is never returned to the kernel, so zram is enabled for the kernel to reclaim it into.
-    nix-daemon stays outside the slice, since it also runs the desktop user's builds.
   - `gc/` - Weekly `nh clean` (keeps the last 5 generations and anything under 14 days), attached to every machine by the `base` instance.
-    On agent machines (gaea, hades, zeus) the `hercules-ci-agent` service stops the agents while it runs, since a collection mid-task can delete paths the task still needs.
+    On agent machines (gaea) the `hercules-ci-agent` service stops the agents while it runs, since a collection mid-task can delete paths the task still needs.
   - `desktops/` - Desktop environment modules (currently GNOME only)
   - `hardware/` - Hardware-specific modules (currently NVIDIA config)
   - `htpc/` - Kodi under the cage kiosk compositor on agreus, always running, usually with the TV off.
@@ -120,7 +117,7 @@ Other machines (agreus, pollux, castor, zeus, gaea, apollo, pik8s1–9) follow t
 - `flake-parts` - Modular flake framework
 - `home-manager` - Not imported by any machine; it exists so `dotfiles` can follow it.
 - `dotfiles` - Personal dotfiles flake; hades takes its `overlays.default`.
-- `hercules-ci-agent` - Provides `nixosModules.multi-agent-service`, which the `hercules-ci-agent` clan service imports to run one agent per Hercules CI account on zeus and gaea.
+- `hercules-ci-agent` - Provides `nixosModules.multi-agent-service`, which the `hercules-ci-agent` clan service imports to run one agent per Hercules CI account on gaea.
   Its nixpkgs is not followed, so the agent package matches what upstream caches.
 - `hosts` - Machine inventory (name, ip, arch, role) shared with dotfiles, which follows this input
 - `disko` - Declarative disk partitioning (each host has a `disk-config.nix`)
@@ -151,7 +148,7 @@ Other machines (agreus, pollux, castor, zeus, gaea, apollo, pik8s1–9) follow t
 
 | Host          | Hardware              | Notes                                                     |
 | ------------- | --------------------- | ---------------------------------------------------------- |
-| hades         | ASUS ROG Strix X570-E | Primary desktop; AMD GPU; BTRFS; clan-managed; Hercules CI agent for both accounts at two tasks each |
+| hades         | ASUS ROG Strix X570-E | Primary desktop; AMD GPU; BTRFS; clan-managed |
 | agreus        | Generic x86_64        | Office mini PC; clan-managed; facter hardware config; rosequartz worker; HTPC (Kodi, always on) |
 | pollux        | Sandy Bridge i5, legacy BIOS | Basement rack server; clan-managed; facter hardware config; rosequartz worker |
 | castor        | Sandy Bridge i5-2500  | Basement rack server; pollux's twin; rosequartz worker; firmware mode unverified, so it takes pollux's dual-mode grub |

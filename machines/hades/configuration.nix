@@ -36,7 +36,6 @@ in
   imports = [
     ./disk-config.nix
     ../../modules/brave
-    ../../modules/ci-idle
     ../../modules/desktops
     ../../modules/dns
     ../../modules/nix
@@ -267,8 +266,6 @@ in
   programs.zsh.enable = true;
   users.defaultUserShell = pkgs.bash;
 
-  ciIdle.activeMemoryHigh = 4;
-
   host.brave.enable = true;
   host.gnome.enable = true;
   ssh.inhibitSleepOnSsh.enable = true;
@@ -317,7 +314,7 @@ in
   # Joins hades to the work tailnet. tz runs `tailscale up`/`down` without
   # sudo, and with no auth key nothing connects until tz does.
   # Shields up refuses every inbound tailnet connection: the firewall is off
-  # and harmonia, sshd and the rest listen on all interfaces, and tz only
+  # and sshd and the rest listen on all interfaces, and tz only
   # needs to reach out. `tailscale logout` clears both prefs; tailscaled-set
   # reapplies them on the next `systemctl restart tailscaled`.
   services.tailscale = {
