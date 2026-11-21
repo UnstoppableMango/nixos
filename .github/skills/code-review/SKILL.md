@@ -72,7 +72,8 @@ Check the `follows` graph when an input changes:
 
 ## Per-host details that look like mistakes but are not
 
-- zeus and castor use grub with `efiSupport` on purpose: legacy BIOS now, with a hybrid layout that survives a firmware switch. castor's firmware mode is unverified, so it takes pollux's dual-mode grub.
+- zeus uses BIOS-only grub on purpose: its firmware tries a fallback `BOOTX64.EFI` before legacy boot and its UEFI path crashes, so it must not regain `efiSupport`.
+- castor uses grub with `efiSupport` on purpose: its firmware mode is unverified, so it takes pollux's dual-mode grub.
 - gaea uses systemd-boot.
 - pik8s1-9 are aarch64 Raspberry Pi 4Bs. A change that assumes x86_64 breaks the SD image. Their kernel comes from nixos-raspberrypi's cache, built against its own nixpkgs, so making that input follow ours again means building the kernel from source.
 - Every etcd member runs with `initialClusterState = "existing"` and `autoJoin`, because the cluster formed long ago and new members join it as learners.

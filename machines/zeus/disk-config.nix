@@ -11,9 +11,7 @@
       content = {
         type = "gpt";
         partitions = {
-          # The box boots in legacy BIOS mode; grub lives here. The ESP is
-          # partitioned anyway so flipping the firmware to UEFI later needs
-          # no repartitioning.
+          # The box boots in legacy BIOS mode; grub lives here.
           boot = {
             name = "boot";
             size = "1M";

@@ -26,14 +26,9 @@
 
   systemd.services.harmonia.serviceConfig.MemoryMax = "2G";
 
-  # Dual Xeon E5-2670 tower whose firmware is in legacy BIOS mode, so it takes
-  # grub rather than gaea's systemd-boot. efiSupport keeps the hybrid layout
-  # bootable if the firmware ever switches to UEFI.
-  boot.loader.grub = {
-    enable = true;
-    efiSupport = true;
-    efiInstallAsRemovable = true;
-  };
+  # Legacy BIOS only. The firmware tries a fallback BOOTX64.EFI on the ESP
+  # before legacy boot, and its UEFI path crashes, so grub writes none.
+  boot.loader.grub.enable = true;
 
   # https://nixos.wiki/wiki/Power_Management#systemd_sleep
   systemd.sleep.settings.Sleep = {
