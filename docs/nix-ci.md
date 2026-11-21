@@ -69,7 +69,7 @@ Decided in [#503](https://github.com/UnstoppableMango/nixos/issues/503) and [Cho
 Decided in [#511](https://github.com/UnstoppableMango/nixos/issues/511).
 
 - An hourly check on the store volume.
-  Below 15% free, it stops the agents, runs `nix store gc --max` until 35% is free, and starts the agents again, interrupting any running task.
+  Below 15% free, it stops the agents, runs `nix store gc --max <bytes>`, with `<bytes>` the amount that brings the volume to 35% free, and starts the agents again, interrupting any running task.
 - Nothing is rooted.
   A "root keeper" for each repo's latest green `main` is held in reserve, built only if random eviction shows up as slow runs.
 - Each run pushes its result to Gatus; a collection that can't reach 35% pages.
@@ -181,7 +181,8 @@ Fixes that need a build run in `renovate-fixup.yml` on `renovate/**` pushes, on 
 2. A second job mints a token for the contents-only `renovate-fixup` App, applies the patch, and pushes to that branch only.
 
 The builder VM never holds a push token.
-If the fixup fails, nothing is pushed and the workflow labels the PR `renovate:needs-human`, unless `main`'s latest gate is red, in which case it leaves the label off so next week's run rebases the PR.
+If the fixup fails, nothing is pushed and the workflow labels the PR `renovate:needs-human`, unless `main`'s latest gate is red, in which case it leaves the label off.
+How such a PR resumes once `main` is green is still open: with `rebaseWhen: conflicted` a clean branch is never pushed again, so the fixup doesn't rerun on its own ([Decide how a fixup blocked by a red main resumes](https://github.com/UnstoppableMango/nixos/issues/538)).
 Nothing retries; Erik fixes the branch or closes the PR.
 
 ## Package collections
