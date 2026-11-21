@@ -152,7 +152,7 @@ Other machines (agreus, pollux, castor, zeus, gaea, apollo, pik8s1–9) follow t
 | agreus        | Generic x86_64        | Office mini PC; clan-managed; facter hardware config; rosequartz worker; HTPC (Kodi, always on) |
 | pollux        | Sandy Bridge i5, legacy BIOS | Basement rack server; clan-managed; facter hardware config; rosequartz worker |
 | castor        | Sandy Bridge i5-2500  | Basement rack server; pollux's twin; rosequartz worker; firmware mode unverified, so it takes pollux's dual-mode grub |
-| zeus          | Dual Xeon E5-2670 tower, legacy BIOS | Basement tower; clan-managed; rosequartz worker; grub with `efiSupport` so the hybrid layout survives a firmware switch |
+| zeus          | Dual Xeon E5-2670 tower, legacy BIOS | Basement tower; clan-managed; rosequartz worker; BIOS-only grub, since its firmware's UEFI boot path crashes |
 | gaea          | EPYC 7502 rack box, UEFI | Basement rack server; clan-managed; rosequartz worker; systemd-boot |
 | apollo        | ASUS board, firmware mode unverified | Basement server; clan-managed; rosequartz worker; takes castor's dual-mode grub |
 | pik8s1–9      | Raspberry Pi 4B       | k8s cluster nodes; clan-managed; aarch64; pik8s7–9 (8GB) are the rosequartz control plane and pik8s4–5 (4GB) are etcd-only members (five etcd members in all); pik8s3 has left rosequartz and runs the Gatus uptime checker (`modules/uptime`), shown on its display; pik8s1, pik8s2 and pik8s6 have left rosequartz and run Pi-hole (`modules/pihole`) |
