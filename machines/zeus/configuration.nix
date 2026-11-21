@@ -43,21 +43,21 @@
     AllowSuspendThenHibernate = "no";
   };
 
-  # enp3s0f0 and enp3s0f1 are the two ports of the SFP+ card, a Broadcom
+  # enp4s0f0 and enp4s0f1 are the two ports of the SFP+ card, a Broadcom
   # BCM57810. bnx2x loads the card's firmware from linux-firmware when a port
   # comes up, and fails with "Error loading firmware" without it.
   hardware.enableRedistributableFirmware = true;
 
-  # enp3s0f1 is the port cabled to the aggregator.
+  # enp4s0f1 is the port cabled to the aggregator.
   cephClusterNetwork = {
     enable = true;
-    interface = "enp3s0f1";
+    interface = "enp4s0f1";
     address = "10.0.70.10";
     rangeStart = "10.0.70.64";
     rangeEnd = "10.0.70.95";
   };
 
-  # enp6s0 is the port cabled to GS724Tv4 `g18`. enp7s0, enp11s0, and enp12s0
+  # enp7s0 is the port cabled to GS724Tv4 `g18`. enp8s0, enp12s0, and enp13s0
   # stay unconfigured; two of the board's NICs carried the previous cluster's
   # 10.69.0.0/16 network.
   networking = {
@@ -66,10 +66,10 @@
 
     defaultGateway = {
       address = "10.0.69.1";
-      interface = "enp6s0";
+      interface = "enp7s0";
     };
 
-    interfaces.enp6s0 = {
+    interfaces.enp7s0 = {
       useDHCP = false;
       ipv4.addresses = [
         {
