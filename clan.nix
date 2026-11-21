@@ -191,8 +191,9 @@ in
     #
     # gaea carries all sixteen task slots alone until the builder VM is up
     # (#518). Both accounts share `herculesAgents`, so adding zeus back is one
-    # line there, `zeus.settings.concurrentTasks = 4;`, plus modules/ci-limits
-    # back on zeus so its builds cannot crowd out its OSDs.
+    # line there, `zeus.settings.concurrentTasks = 4;`. Its builds would then
+    # want modules/ci-limits back too, which replaces the kubelet reservations
+    # and harmonia cap in machines/zeus/configuration.nix.
     hercules-ci-unmango = {
       module.name = "@UnstoppableMango/hercules-ci-agent";
       module.input = "self";

@@ -14,8 +14,8 @@
   # Hercules agents in clan.nix since #518.
   #
   # These replace the reservations ci-limits supplied, without the 48 GiB CI
-  # slice ceiling: the rest of the host keeps its 4 GiB, and the kubelet and
-  # eviction threshold keep theirs. Dropping them entirely would hand the
+  # slice ceiling or the CPUs the builds needed: the rest of the host keeps
+  # its 4 GiB, and the kubelet and eviction threshold keep theirs. Dropping them entirely would hand the
   # scheduler every byte and leave the OSDs to contend with the kernel.
   services.kubernetes.kubelet.extraConfig = {
     systemReserved = {

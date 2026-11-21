@@ -24,8 +24,8 @@
   # memoryMax + 4 as systemReserved plus 2 kubeReserved, which left 11.2 GiB of
   # the 31.2 GiB allocatable and no room for a third OSD.
   #
-  # gaea and zeus absorb both roles at 504 GiB and 126 GiB. apollo does not, so
-  # it is a storage host only.
+  # gaea absorbs both roles at 504 GiB. apollo does not, so it is a storage
+  # host only, as zeus is since #518.
   #
   # The reservations below replace the ones ci-limits supplied. Dropping them
   # entirely would hand the scheduler every byte and leave the OSDs to contend

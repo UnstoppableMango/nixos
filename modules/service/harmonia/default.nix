@@ -45,7 +45,7 @@
     interface.options.exclude = lib.mkOption {
       type = lib.types.listOf lib.types.str;
       default = [ ];
-      example = [ "hades" ];
+      example = [ "zeus" ];
       description = ''
         Servers this client does not substitute from. For machines that
         cannot tolerate an unreachable substituter, such as a Hercules CI

@@ -67,9 +67,9 @@ Other machines (agreus, pollux, castor, zeus, gaea, apollo, pik8s1–9) follow t
     Addresses per host are in `NETWORK.md`.
   - `ci-limits/` - Memory and CPU limits for hosts running Hercules CI builds alongside rook-ceph pods (gaea).
     Puts nix-daemon, the Hercules agents and harmonia in a capped `ci.slice`, sets nix `max-jobs`/`cores`, and reserves the slice ceiling from the kubelet.
-    Each host sizes it through `ciLimits.*` in its `configuration.nix`; per-agent `concurrentTasks` is set on the hercules-ci instances in `clan.nix`.
+    Each host sizes it through `ciLimits.*` in its `configuration.nix`; per-agent `concurrentTasks` is set in `herculesAgents` in `clan.nix`, which both hercules-ci instances share.
   - `gc/` - Weekly `nh clean` (keeps the last 5 generations and anything under 14 days), attached to every machine by the `base` instance.
-    On agent machines (gaea) the `hercules-ci-agent` service stops the agents while it runs, since a collection mid-task can delete paths the task still needs.
+    On gaea, the agent machine, the `hercules-ci-agent` service stops the agents while it runs, since a collection mid-task can delete paths the task still needs.
   - `desktops/` - Desktop environment modules (currently GNOME only)
   - `hardware/` - Hardware-specific modules (currently NVIDIA config)
   - `htpc/` - Kodi under the cage kiosk compositor on agreus, always running, usually with the TV off.
