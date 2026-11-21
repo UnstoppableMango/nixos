@@ -44,6 +44,11 @@ let
 
   machines = builtins.mapAttrs (_: host: { inherit (host) tags; }) managed;
 
+  # An agent on a kubelet node also needs modules/ci-limits.
+  herculesAgents = {
+    gaea.settings.concurrentTasks = 8;
+  };
+
 in
 {
   meta = {
@@ -168,54 +173,32 @@ in
 
       # Addresses come from the hosts flake rather than <machine>.thecluster.io,
       # so reaching a server does not depend on LAN DNS.
+      #
+      # A server must stay up: the Hercules agents fail their startup check
+      # when a substituter is unreachable.
       roles.server.machines = {
         apollo.settings.address = managed.apollo.ip;
         gaea.settings.address = managed.gaea.ip;
-        # managed.hades.ip is hades's VLAN 1 address, which the VLAN 20
-        # machines cannot reach. See NETWORK.md.
-        hades.settings.address = "10.0.69.69";
         zeus.settings.address = managed.zeus.ip;
       };
 
       roles.client.tags.all = { };
-
-      # hades is a workstation that sleeps, and the Hercules CI agents on these
-      # machines fail their startup check when any substituter is unreachable.
-      roles.client.machines = {
-        apollo.settings.exclude = [ "hades" ];
-        gaea.settings.exclude = [ "hades" ];
-        zeus.settings.exclude = [ "hades" ];
-      };
     };
 
     # Host agents for both Hercules CI accounts. These are the only agents:
     # Hercules CI runs on physical machines, not in rosequartz.
-    #
-    # hades is a workstation, so its agents stay at two tasks each: the desktop
-    # comes first, and a machine that sleeps is opportunistic capacity either
-    # way. It has no ciLimits, since modules/ci-limits sizes the slice against
-    # the kubelet and the OSDs, neither of which hades runs. modules/ci-idle
-    # limits its agents' memory while the desktop is in use instead.
     hercules-ci-unmango = {
       module.name = "@UnstoppableMango/hercules-ci-agent";
       module.input = "self";
       roles.agent.settings.account = "unmango";
-      roles.agent.machines = {
-        gaea.settings.concurrentTasks = 8;
-        hades.settings.concurrentTasks = 2;
-        zeus.settings.concurrentTasks = 4;
-      };
+      roles.agent.machines = herculesAgents;
     };
 
     hercules-ci-unstoppablemango = {
       module.name = "@UnstoppableMango/hercules-ci-agent";
       module.input = "self";
       roles.agent.settings.account = "unstoppablemango";
-      roles.agent.machines = {
-        gaea.settings.concurrentTasks = 8;
-        hades.settings.concurrentTasks = 2;
-        zeus.settings.concurrentTasks = 4;
-      };
+      roles.agent.machines = herculesAgents;
     };
 
     internet = {

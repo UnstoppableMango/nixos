@@ -3,7 +3,6 @@
   imports = [
     ../../modules/ceph
     ../../modules/ceph-cluster-network
-    ../../modules/ci-limits
     ../../modules/dns
     ../../modules/nix
     ./disk-config.nix
@@ -11,14 +10,21 @@
 
   nixpkgs.hostPlatform = "x86_64-linux";
 
-  # 32 threads, 125 GB, fifteen OSDs at 4 GiB each.
-  ciLimits = {
-    memoryMax = 48;
-    agentMemoryMax = 8;
-    maxJobs = 8;
-    cores = 4;
-    reservedCpu = 4;
+  # 32 threads, 125 GB, fifteen OSDs at 4 GiB each. Without reservations the
+  # scheduler hands out every byte and the OSDs contend with the kernel.
+  services.kubernetes.kubelet.extraConfig = {
+    systemReserved = {
+      cpu = "2";
+      memory = "4Gi";
+    };
+    kubeReserved = {
+      cpu = "1";
+      memory = "2Gi";
+    };
+    evictionHard."memory.available" = "2Gi";
   };
+
+  systemd.services.harmonia.serviceConfig.MemoryMax = "2G";
 
   # Dual Xeon E5-2670 tower whose firmware is in legacy BIOS mode, so it takes
   # grub rather than gaea's systemd-boot. efiSupport keeps the hybrid layout

@@ -40,8 +40,7 @@
           config.clan.core.vars.generators."harmonia-${instanceName}".files.pub-key.value
         ];
 
-        # Servers include a workstation that is regularly asleep or off.
-        # Without a short timeout every substituter miss stalls on it.
+        # Keeps a down server from stalling every substituter miss.
         connect-timeout = lib.mkDefault 5;
       };
     };
