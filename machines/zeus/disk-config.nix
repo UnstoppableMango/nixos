@@ -1,5 +1,5 @@
 {
-  # Only the 250G boot SSD appears here. zeus also carries eight 500G SATA
+  # Only the 480G boot SSD appears here. zeus also carries eight 500G SATA
   # SSDs and six 10T HDDs, every one of them holding a `ceph_bluestore`
   # partition from the previous cluster. disko formats exactly the devices
   # named below, so those disks survive the install untouched and their OSDs
@@ -7,7 +7,7 @@
   disko.devices = {
     disk.sda = {
       type = "disk";
-      device = "/dev/disk/by-id/ata-Samsung_SSD_850_EVO_250GB_S2R5NX0J566681R";
+      device = "/dev/disk/by-id/ata-SSDSC2KB480G8L_01MP366S7A06680LEN_PHYF83300743480BGN";
       content = {
         type = "gpt";
         partitions = {
