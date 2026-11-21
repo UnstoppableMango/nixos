@@ -25,7 +25,7 @@
   # the 31.2 GiB allocatable and no room for a third OSD.
   #
   # gaea absorbs both roles at 504 GiB. apollo does not, so it is a storage
-  # host only, as zeus is since #518.
+  # host only.
   #
   # The reservations below replace the ones ci-limits supplied. Dropping them
   # entirely would hand the scheduler every byte and leave the OSDs to contend

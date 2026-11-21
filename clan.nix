@@ -44,7 +44,7 @@ let
 
   machines = builtins.mapAttrs (_: host: { inherit (host) tags; }) managed;
 
-  # The machines running an agent for each Hercules CI account.
+  # An agent on a kubelet node also needs modules/ci-limits.
   herculesAgents = {
     gaea.settings.concurrentTasks = 8;
   };
@@ -174,9 +174,8 @@ in
       # Addresses come from the hosts flake rather than <machine>.thecluster.io,
       # so reaching a server does not depend on LAN DNS.
       #
-      # Every server is an always-on rack machine, so no client needs to
-      # exclude one. hades, which sleeps, left in #518: a server exposes its
-      # whole store, and hades's store holds a desktop's worth of paths.
+      # A server must stay up: the Hercules agents fail their startup check
+      # when a substituter is unreachable.
       roles.server.machines = {
         apollo.settings.address = managed.apollo.ip;
         gaea.settings.address = managed.gaea.ip;
@@ -188,12 +187,6 @@ in
 
     # Host agents for both Hercules CI accounts. These are the only agents:
     # Hercules CI runs on physical machines, not in rosequartz.
-    #
-    # gaea carries all sixteen task slots alone until the builder VM is up
-    # (#518). Both accounts share `herculesAgents`, so adding zeus back is one
-    # line there, `zeus.settings.concurrentTasks = 4;`. Its builds would then
-    # want modules/ci-limits back too, which replaces the kubelet reservations
-    # and harmonia cap in machines/zeus/configuration.nix.
     hercules-ci-unmango = {
       module.name = "@UnstoppableMango/hercules-ci-agent";
       module.input = "self";

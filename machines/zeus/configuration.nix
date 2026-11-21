@@ -10,13 +10,8 @@
 
   nixpkgs.hostPlatform = "x86_64-linux";
 
-  # 32 threads, 125 GB, fifteen OSDs at 4 GiB each. No ciLimits, and no
-  # Hercules agents in clan.nix since #518.
-  #
-  # These replace the reservations ci-limits supplied, without the 48 GiB CI
-  # slice ceiling or the CPUs the builds needed: the rest of the host keeps
-  # its 4 GiB, and the kubelet and eviction threshold keep theirs. Dropping them entirely would hand the
-  # scheduler every byte and leave the OSDs to contend with the kernel.
+  # 32 threads, 125 GB, fifteen OSDs at 4 GiB each. Without reservations the
+  # scheduler hands out every byte and the OSDs contend with the kernel.
   services.kubernetes.kubelet.extraConfig = {
     systemReserved = {
       cpu = "2";
@@ -29,8 +24,6 @@
     evictionHard."memory.available" = "2Gi";
   };
 
-  # harmonia took its ceiling from ci.slice, which no longer exists here. It
-  # serves this machine's store to the clan and is not a build.
   systemd.services.harmonia.serviceConfig.MemoryMax = "2G";
 
   # Dual Xeon E5-2670 tower whose firmware is in legacy BIOS mode, so it takes

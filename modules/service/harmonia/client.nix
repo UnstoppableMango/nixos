@@ -40,8 +40,7 @@
           config.clan.core.vars.generators."harmonia-${instanceName}".files.pub-key.value
         ];
 
-        # A server that is down for maintenance would otherwise stall every
-        # substituter miss on it.
+        # Keeps a down server from stalling every substituter miss.
         connect-timeout = lib.mkDefault 5;
       };
     };
