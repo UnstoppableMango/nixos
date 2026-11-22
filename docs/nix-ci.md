@@ -246,7 +246,7 @@ Decided in [Decide how we know CI meets the Destination](https://github.com/Unst
 - **The aggregator** in `UnstoppableMango/nix` runs hourly, finds the `ci-health` issues with one search across both accounts, and keeps a pinned "Nix CI health" issue in that repo listing every repo.
   Its own issue carries no `ci-health` label, so neither workflow touches the other's issue in `UnstoppableMango/nix`.
   It pages in the hour a `main` passes 24 hours red and every 24 hours after that, read from the streak's age alone.
-  A streak that clears within the hour it passes 24 hours never pages, since by then there is nothing left to fix.
+  A streak that passes 24 hours and clears before the next aggregator run may not page, since by then there is nothing left to fix.
   The weekly digest holds whatever the current issues show that isn't a page.
   The ntfy topic is a secret in that repo alone.
 - Both keep custom code small: `run:` steps with `gh` and `jq`, and `actions/github-script` only where JS is really needed.
