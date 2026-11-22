@@ -197,7 +197,8 @@ A Renovate PR whose fixup or gate failed while `main` was red would stall.
   Renovate rebases them onto the fixed `main`, and that push reruns the fixup and the gate.
 - It uses the workflow's `GITHUB_TOKEN` with `pull-requests: write`.
 
-A PR still red afterwards gets `renovate:needs-human` from the fixup, since `main` is now green.
+A PR whose fixup fails again gets `renovate:needs-human`, since `main` is now green.
+A PR whose fixup passes but whose gate stays red gets no label.
 Waiting PRs carry no label: a red `main` already pages after 24 hours.
 
 ## Package collections
