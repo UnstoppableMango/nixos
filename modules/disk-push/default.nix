@@ -1,6 +1,5 @@
-# Pushes the root filesystem's free space to the Gatus endpoint `disk_<hostname>`.
-# A push under `minFreePercent` fails the endpoint, and Gatus pages on that and
-# on a missed push.
+# Pushes free space on / to the Gatus endpoint `disk_<hostname>`, which
+# `uptime.pushes.disk` on pik8s3 must declare.
 {
   config,
   lib,

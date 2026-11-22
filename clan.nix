@@ -287,9 +287,9 @@ in
           page = true;
         };
         pushes = {
-          # hades suspends, so only a low-disk push from it pages.
+          # Workstations suspend, so only a low-disk push from one pages.
           disk = builtins.mapAttrs (
-            name: _: lib.optionalAttrs (name == "hades") { heartbeat = null; }
+            _: host: lib.optionalAttrs (builtins.elem "workstation" host.tags) { heartbeat = null; }
           ) managed;
           # No heartbeat until the VMs push, or they would page from the start.
           builder =

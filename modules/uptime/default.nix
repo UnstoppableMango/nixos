@@ -19,7 +19,7 @@ let
   cfg = config.uptime;
   inherit (config.clan.core.vars.generators) uptime-ntfy uptime-push;
 
-  page = extra: [ ({ type = "ntfy"; } // extra) ];
+  ntfyAlerts = extra: [ ({ type = "ntfy"; } // extra) ];
 
   tcp = group: name: address: {
     inherit name group;
@@ -176,8 +176,7 @@ in
       settings = {
         web.port = cfg.port;
         ui.title = "THECLUSTER";
-        # Uptime and response times keep 30 days in sqlite; events are capped
-        # by count, so raise the cap to cover a month of outages.
+        # Events are capped by count; 500 covers a month of outages.
         storage = {
           type = "sqlite";
           path = "/var/lib/gatus/data.db";
@@ -197,7 +196,7 @@ in
                 inherit name group;
                 token = "\${GATUS_PUSH_TOKEN}";
                 # Each push is one result, so one failure is enough.
-                alerts = page {
+                alerts = ntfyAlerts {
                   failure-threshold = 1;
                   success-threshold = 1;
                 };
@@ -217,7 +216,7 @@ in
             group = "services";
             inherit (svc) url conditions;
             interval = "1m";
-            alerts = lib.optionals svc.page (page { });
+            alerts = lib.optionals svc.page (ntfyAlerts { });
           }) cfg.services
           ++ lib.mapAttrsToList (n: a: {
             name = n;
