@@ -2,6 +2,7 @@
 
 Plain NixOS modules that every clan machine carries, attached through the `base` instance's `tags.all` role in `clan.nix` so a new machine inherits them without editing its `configuration.nix`.
 
+- [disk-push](../../disk-push/default.nix): pushes free space on `/` to Gatus at `uptimeUrl` over pinned TLS every five minutes, failing under 10% free
 - [dns](../../dns/default.nix): the clan-wide resolvers and the `~thecluster.lan` routing domain
 - [gc](../../gc/default.nix): weekly `nh clean`, run with the agents stopped on Hercules CI agent machines
 - [nix](../../nix/default.nix): daemon settings that are not about where it fetches from

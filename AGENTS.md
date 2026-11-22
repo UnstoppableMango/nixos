@@ -23,7 +23,7 @@ This is a NixOS configuration flake using **flake-parts** and **clan-core** for 
 ### Module System
 
 Plain NixOS modules live under `modules/` and are composed into machine configs via direct `imports`. Clan service modules (role-based, multi-machine) live under `modules/service/` and are registered as clan inventory modules in `clan.nix`.
-Modules every machine needs (`modules/dns`, `modules/gc`, `modules/nix`, `modules/pki`) are not imported per machine: the `base` instance in `clan.nix` attaches them to every inventory member through its `tags.all` role, the same way the `clan-cache` instance attaches `modules/cache`.
+Modules every machine needs (`modules/disk-push`, `modules/dns`, `modules/gc`, `modules/nix`, `modules/pki`) are not imported per machine: the `base` instance in `clan.nix` attaches them to every inventory member through its `tags.all` role, the same way the `clan-cache` instance attaches `modules/cache`.
 
 The `rosequartz` Kubernetes cluster (control plane and workers listed in `clan/rosequartz-cluster.nix`) is **not** defined in this repo. It runs on [cairn](https://github.com/UnstoppableMango/cairn), a library flake that registers one clan service per cluster component (`@UnstoppableMango/{pki,etcd,apiserver,kubelet,loadbalancer,network,kubeconfig,inoculant,coredns,flux}`). `clan.nix` declares a `rosequartz-<component>` instance per service with `module.input = "cairn"`; the services coordinate via clan exports. Cairn's `docs/USAGE.md` and per-service `modules/service/<name>/README.md` are the reference for their options.
 
@@ -82,7 +82,11 @@ Other machines (agreus, pollux, castor, zeus, gaea, apollo, pik8s1–9) follow t
     Its user slice is capped at `kiosk.memoryMax`; on a Kubernetes node, reserve that much from the kubelet.
   - `uptime/` - Gatus on pik8s3, outside rosequartz, so something still reports the cluster down while it is down.
     It checks the apiserver VIP, each apiserver and etcd member, the gateway, every resolver, and the services listed in `uptime.services` (Nextcloud's `status.php`), and pings every clan machine; `clan.nix` fills the machine, apiserver and etcd lists from the inventory and `clan/rosequartz-cluster.nix`.
-    The status page is on port 8080, open on the LAN. No alerting is configured.
+    The status page is on port 8080, open on the LAN, and keeps 30 days of history in sqlite.
+    nginx fronts it and accepts pushes only over TLS on 8443, with a self-signed cert from the shared `uptime-tls` var that pushers pin.
+    Hercules' API and failing or missed pushes to its external endpoints (`uptime.pushes`) page through ntfy.sh, on the topic in pik8s3's `uptime-ntfy` var.
+    Every clan machine pushes free space on `/` to `disk_<machine>` through `disk-push/`, which the `base` instance attaches.
+  - `disk-push/` - A five-minute timer pushing free space on `/` to Gatus, failing under 10% free; the push token is the shared `uptime-push` var.
   - `pihole/` - Pi-hole on pik8s1, pik8s2 and pik8s6, outside rosequartz, so the LAN keeps a filtering resolver while the cluster is down.
     Its config is read-only NixOS, so external-dns cannot write `thecluster.lan` records into it the way it does for the in-cluster piholes; the whole zone is a wildcard to the rosequartz gateway (`pihole.gatewayAddress`) instead.
     The web UI password is the shared `pihole-admin` var. Machines still resolve through the in-cluster piholes until `modules/dns` points at these.
