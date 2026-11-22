@@ -149,7 +149,7 @@ Every template in `UnstoppableMango/nix` imports the module and ships a `ci.yml`
 
 ### Joining CI
 
-A new repo starts from a template, or adds the input and module, adds `ci.yml`, extends `renovate-config:nix-ci` (and `deploys` if its `main` deploys), adds its ruleset entry in scm or vcs, and sets `CACHIX_AUTH_TOKEN`.
+A new repo starts from a template, or adds the input and module, adds `ci.yml` with its `ci-health` job, extends `renovate-config:nix-ci` (and `deploys` if its `main` deploys), adds its ruleset entry in scm or vcs, and sets `CACHIX_AUTH_TOKEN`.
 The checklist lives in the `UnstoppableMango/nix` README.
 Private repos, repos in other accounts and repos without a flake join hosted-only with `linux: true`.
 
@@ -239,8 +239,14 @@ Decided in [Decide how we know CI meets the Destination](https://github.com/Unst
   A missed push is a failure.
 - **Pages** go to ntfy.sh on a long random topic kept as a clan var, to Erik only, with no secrets in the text:
   any OS disk under 10% free, a builder GC that misses its target, the builder VM or its agents down, attic down or under 15% free, a Hercules outage, and a `main` red for more than 24 hours.
-- **`ci-health.yml`** in `unmango/ci` runs daily and keeps a pinned "CI health" issue in nixos: each Nix repo's `main`, open `renovate:needs-human` PRs, and p50 and p90 of the `required` job's duration on `main`, flagging any repo whose p50 is over 5 minutes.
-  Everything that isn't a page goes in its weekly digest.
+- **`ci-health.yml`** in `unmango/ci` is a reusable workflow each Nix repo calls from its own `ci-health` job, daily and on push to `main`.
+  It keeps a pinned "CI health" issue in the calling repo, written with that repo's `GITHUB_TOKEN`: its `main`, open `renovate:needs-human` PRs, and p50 and p90 of the `required` run's duration on `main`, flagging a p50 over 5 minutes.
+  A red `main` carries the `ci-health:red` label, and the body records when the streak started.
+  Decided in [Decide the shape and language of the CI health workflow](https://github.com/UnstoppableMango/nixos/issues/548).
+- **The aggregator** in `UnstoppableMango/nix` runs daily, finds those issues with one search across both accounts, and keeps a pinned "CI health" issue in nixos listing every repo.
+  It pages for a `main` red for more than 24 hours, and everything that isn't a page goes in its weekly digest.
+  The ntfy topic is a secret in that repo alone.
+- Both keep custom code small: `run:` steps with `gh` and `jq`, and `actions/github-script` only where JS is really needed.
 - The in-cluster Alertmanager is outside this design.
 
 ## Removed
@@ -294,7 +300,8 @@ Tickets for `unmango/ci` are filed in nixos until that repo exists, and the kube
 | 2 | [Give PublicRepo the gate-only ruleset shape (vcs)](https://github.com/UnstoppableMango/vcs/issues/159) |
 | 2 | [Give PublicRepo the gate-only ruleset shape (scm)](https://github.com/unmango/scm/issues/374) |
 | 2 | [Page through Gatus and ntfy, with disk pushes from every clan machine](https://github.com/UnstoppableMango/nixos/issues/521) |
-| 2 | [unmango/ci: add the daily CI health workflow](https://github.com/UnstoppableMango/nixos/issues/525) |
+| 2 | [Add the reusable CI health workflow](https://github.com/unmango/ci/issues/2) |
+| 2 | [Add the CI health aggregator workflow](https://github.com/UnstoppableMango/nix/issues/158) |
 | 2 | [unmango/ci: add collection-ci.yml with drv-diff builds](https://github.com/UnstoppableMango/nixos/issues/526) |
 | 2 | [unmango/ci: add package-updates.yml](https://github.com/UnstoppableMango/nixos/issues/527) |
 | 3 | [Run attic in a cache microVM on gaea](https://github.com/UnstoppableMango/nixos/issues/524) |
