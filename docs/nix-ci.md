@@ -243,9 +243,9 @@ Decided in [Decide how we know CI meets the Destination](https://github.com/Unst
   It keeps a pinned "CI health" issue labelled `ci-health` in the calling repo, written with that repo's `GITHUB_TOKEN`: its `main`, open `renovate:needs-human` PRs, and p50 and p90 of the `required` run's duration on `main`, flagging a p50 over 5 minutes.
   A red `main` carries the `ci-health:red` label, and the body records when the streak started.
   Decided in [Decide the shape and language of the CI health workflow](https://github.com/UnstoppableMango/nixos/issues/548).
-- **The aggregator** in `UnstoppableMango/nix` runs daily, finds the `ci-health` issues with one search across both accounts, and keeps a pinned "Nix CI health" issue in that repo listing every repo.
+- **The aggregator** in `UnstoppableMango/nix` runs hourly, finds the `ci-health` issues with one search across both accounts, and keeps a pinned "Nix CI health" issue in that repo listing every repo.
   Its own issue carries no `ci-health` label, so neither workflow touches the other's issue in `UnstoppableMango/nix`.
-  It pages for a `main` red for more than 24 hours, and everything that isn't a page goes in its weekly digest.
+  It pages in the hour a `main` passes 24 hours red and every 24 hours after that, read from the streak's age alone, so a streak that clears between daily checks still pages; everything that isn't a page goes in its weekly digest.
   The ntfy topic is a secret in that repo alone.
 - Both keep custom code small: `run:` steps with `gh` and `jq`, and `actions/github-script` only where JS is really needed.
 - The in-cluster Alertmanager is outside this design.
