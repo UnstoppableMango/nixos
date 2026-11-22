@@ -79,7 +79,7 @@ in
       module.input = "self";
       roles.default.tags.all = { };
       # By address, so pushes still land while DNS is down.
-      roles.default.settings.uptimeUrl = "http://${managed.pik8s3.ip}:8080";
+      roles.default.settings.uptimeUrl = "https://${managed.pik8s3.ip}:8443";
     };
 
     erik = {

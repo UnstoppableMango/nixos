@@ -10,7 +10,7 @@
     interface.options.uptimeUrl = lib.mkOption {
       type = lib.types.nullOr lib.types.str;
       default = null;
-      example = "http://10.0.69.103:8080";
+      example = "https://10.0.69.103:8443";
       description = "Gatus every machine pushes its disk status to. Null disables the push.";
     };
 

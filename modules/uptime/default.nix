@@ -4,7 +4,8 @@
 #
 # Checks are declared here rather than in a UI, so the config stays
 # read-only NixOS like everything else on the machine. The page is served on
-# `uptime.port`, open on the LAN.
+# `uptime.port`, open on the LAN. nginx fronts Gatus so pushes, which carry the
+# shared token, are accepted only over TLS on `uptime.pushPort`.
 #
 # Pages go to ntfy.sh on the topic in the `uptime-ntfy` var; subscribe with
 # `clan vars get pik8s3 uptime-ntfy/topic`. Anyone who knows a topic can read
@@ -17,7 +18,15 @@
 }:
 let
   cfg = config.uptime;
-  inherit (config.clan.core.vars.generators) uptime-ntfy uptime-push;
+  inherit (config.clan.core.vars.generators)
+    uptime-ntfy
+    uptime-push
+    uptime-tls
+    uptime-tls-key
+    ;
+
+  gatusPort = 8079;
+  gatus = "http://127.0.0.1:${toString gatusPort}";
 
   ntfyAlerts = extra: [ ({ type = "ntfy"; } // extra) ];
 
@@ -46,7 +55,7 @@ let
   };
 in
 {
-  imports = [ ./push-token.nix ];
+  imports = [ ./push-vars.nix ];
 
   options.uptime = {
     enable = lib.mkEnableOption "the Gatus uptime checker";
@@ -55,6 +64,12 @@ in
       type = lib.types.port;
       default = 8080;
       description = "Port the status page is served on.";
+    };
+
+    pushPort = lib.mkOption {
+      type = lib.types.port;
+      default = 8443;
+      description = "Port pushes to external endpoints are accepted on, over TLS.";
     };
 
     hosts = lib.mkOption {
@@ -165,6 +180,51 @@ in
       '';
     };
 
+    # The shared generator keeps the key off pushers, so copy it into one
+    # that deploys here.
+    clan.core.vars.generators.uptime-tls-key = {
+      dependencies = [ "uptime-tls" ];
+      files.key.owner = "nginx";
+      script = ''
+        cp "$in/uptime-tls/key" "$out/key"
+      '';
+    };
+
+    services.nginx = {
+      enable = true;
+      recommendedProxySettings = true;
+      virtualHosts.uptime = {
+        default = true;
+        listen = [
+          {
+            addr = "0.0.0.0";
+            inherit (cfg) port;
+          }
+        ];
+        locations."/".proxyPass = gatus;
+        locations."~ ^/api/v1/endpoints/[^/]+/external$".return = "403";
+      };
+      virtualHosts.uptime-push = {
+        onlySSL = true;
+        listen = [
+          {
+            addr = "0.0.0.0";
+            port = cfg.pushPort;
+            ssl = true;
+          }
+        ];
+        sslCertificate = uptime-tls.files.cert.path;
+        sslCertificateKey = uptime-tls-key.files.key.path;
+        locations."~ ^/api/v1/endpoints/[^/]+/external$".proxyPass = gatus;
+        locations."/".return = "404";
+      };
+    };
+
+    networking.firewall.allowedTCPPorts = [
+      cfg.port
+      cfg.pushPort
+    ];
+
     systemd.services.gatus.serviceConfig.EnvironmentFile = [
       uptime-ntfy.files.env.path
       uptime-push.files.env.path
@@ -172,9 +232,11 @@ in
 
     services.gatus = {
       enable = true;
-      openFirewall = true;
       settings = {
-        web.port = cfg.port;
+        web = {
+          address = "127.0.0.1";
+          port = gatusPort;
+        };
         ui.title = "THECLUSTER";
         # Events are capped by count; 500 covers a month of outages.
         storage = {

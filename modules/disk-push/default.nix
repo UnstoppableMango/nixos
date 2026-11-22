@@ -8,16 +8,16 @@
 }:
 let
   cfg = config.diskPush;
-  inherit (config.clan.core.vars.generators) uptime-push;
+  inherit (config.clan.core.vars.generators) uptime-push uptime-tls;
 in
 {
-  imports = [ ../uptime/push-token.nix ];
+  imports = [ ../uptime/push-vars.nix ];
 
   options.diskPush = {
     url = lib.mkOption {
       type = lib.types.nullOr lib.types.str;
       default = null;
-      example = "http://10.0.69.103:8080";
+      example = "https://10.0.69.103:8443";
       description = "Gatus to push to. Null disables the push.";
     };
 
@@ -56,8 +56,11 @@ in
 
         # -G puts the fields in the query string, where Gatus reads them.
         # The header comes in on stdin, so the token stays out of argv.
+        # --insecure skips CA and name checks; the pinned key still
+        # authenticates Gatus.
         printf 'header = "Authorization: Bearer %s"\n' "$(<"$CREDENTIALS_DIRECTORY/token")" |
           curl --config - --fail --silent --show-error --max-time 30 --retry 3 \
+          --insecure --pinnedpubkey ${uptime-tls.files.pubkey.path} \
           -G -X POST \
           --data-urlencode "success=$success" \
           --data-urlencode "error=$free% free on /" \
