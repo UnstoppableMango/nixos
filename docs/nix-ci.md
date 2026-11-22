@@ -286,17 +286,17 @@ Tickets for `unmango/ci` are filed in nixos until that repo exists, and the kube
 | 2 | [Add the unmango/ci repository](https://github.com/unmango/scm/issues/373) |
 | 2 | [Create the renovate-fixup and package-updates GitHub Apps](https://github.com/UnstoppableMango/nixos/issues/520) |
 | 2 | [Add flakeModules.ci](https://github.com/UnstoppableMango/nix/issues/151) |
-| 2 | [unmango/ci: add nix-ci.yml with the required gate](https://github.com/UnstoppableMango/nixos/issues/523) |
-| 2 | [unmango/ci: add renovate-fixup.yml](https://github.com/UnstoppableMango/nixos/issues/528) |
+| 2 | [unmango/ci: add nix-ci.yml with the required gate](https://github.com/unmango/ci/issues/1) |
+| 2 | [unmango/ci: add renovate-fixup.yml](https://github.com/unmango/ci/issues/5) |
 | 2 | [Add the nix-ci and deploys presets](https://github.com/UnstoppableMango/renovate-config/issues/67) |
 | 2 | [Match allowedCommands in both Renovate HelmReleases for no-build fixes](https://github.com/UnstoppableMango/the-cluster/issues/4952) |
 | 2 | [Ship flakeModules.ci in every template and document how to join CI](https://github.com/UnstoppableMango/nix/issues/152) |
 | 2 | [Give PublicRepo the gate-only ruleset shape (vcs)](https://github.com/UnstoppableMango/vcs/issues/159) |
 | 2 | [Give PublicRepo the gate-only ruleset shape (scm)](https://github.com/unmango/scm/issues/374) |
 | 2 | [Page through Gatus and ntfy, with disk pushes from every clan machine](https://github.com/UnstoppableMango/nixos/issues/521) |
-| 2 | [unmango/ci: add the daily CI health workflow](https://github.com/UnstoppableMango/nixos/issues/525) |
-| 2 | [unmango/ci: add collection-ci.yml with drv-diff builds](https://github.com/UnstoppableMango/nixos/issues/526) |
-| 2 | [unmango/ci: add package-updates.yml](https://github.com/UnstoppableMango/nixos/issues/527) |
+| 2 | [unmango/ci: add the daily CI health workflow](https://github.com/unmango/ci/issues/2) |
+| 2 | [unmango/ci: add collection-ci.yml with drv-diff builds](https://github.com/unmango/ci/issues/3) |
+| 2 | [unmango/ci: add package-updates.yml](https://github.com/unmango/ci/issues/4) |
 | 3 | [Run attic in a cache microVM on gaea](https://github.com/UnstoppableMango/nixos/issues/524) |
 | 4 | [Run the builder microVM on gaea with a Hercules agent per account](https://github.com/UnstoppableMango/nixos/issues/529) |
 | 4 | [Add builder store GC and move gaea's CI into the VM](https://github.com/UnstoppableMango/nixos/issues/530) |
