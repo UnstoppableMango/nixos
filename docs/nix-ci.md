@@ -142,7 +142,7 @@ Every template in `UnstoppableMango/nix` imports the module and ships a `ci.yml`
 `unmango/ci` holds every reusable CI workflow; repos pin them by SHA.
 `unmango/actions` keeps composite actions such as `setup-nix`.
 
-- `nix-ci.yml`: the hosted jobs and the `required` gate, with switches for `darwin`, `aarch64-linux`, `linux` (private repos) and `cachix-push` (on `main` only, with a per-repo `CACHIX_AUTH_TOKEN`).
+- `nix-ci.yml`: the hosted jobs and the `required` gate, with switches for `darwin`, `aarch64-linux`, `linux` (private repos) and `cachix-push` (on `main` only, with a per-repo `CACHIX_AUTH_TOKEN`), plus the [`renovate-resume`](#resuming-after-a-red-main) job.
 - `renovate-fixup.yml`: see [Renovate fixup](#renovate-fixup).
 - `collection-ci.yml` and `package-updates.yml`: see [Package collections](#package-collections).
 - `ci-health.yml`: see [Observability](#observability).
@@ -182,8 +182,23 @@ Fixes that need a build run in `renovate-fixup.yml` on `renovate/**` pushes, on 
 
 The builder VM never holds a push token.
 If the fixup fails, nothing is pushed and the workflow labels the PR `renovate:needs-human`, unless `main`'s latest gate is red, in which case it leaves the label off.
-How such a PR resumes once `main` is green is still open: with `rebaseWhen: conflicted` a clean branch is never pushed again, so the fixup doesn't rerun on its own ([Decide how a fixup blocked by a red main resumes](https://github.com/UnstoppableMango/nixos/issues/538)).
-Nothing retries; Erik fixes the branch or closes the PR.
+A labelled PR never retries; Erik fixes the branch or closes the PR.
+
+### Resuming after a red `main`
+
+Decided in [#538](https://github.com/UnstoppableMango/nixos/issues/538).
+
+With `rebaseWhen: conflicted` a clean branch is never pushed again, and GitHub never reruns a PR's checks when `main` changes.
+A Renovate PR whose fixup or gate failed while `main` was red would stall.
+`nix-ci.yml` and `collection-ci.yml` carry a `renovate-resume` job for it:
+
+- It runs on a push to `main` after the gate passes, and only when the previous completed `required` run on `main` failed.
+- It ticks Renovate's rebase checkbox on every open Renovate PR whose head's latest `required` result is a failure and that isn't labelled `renovate:needs-human`.
+  Renovate rebases them onto the fixed `main`, and that push reruns the fixup and the gate.
+- It uses the workflow's `GITHUB_TOKEN` with `pull-requests: write`.
+
+A PR still red afterwards gets `renovate:needs-human` from the fixup, since `main` is now green.
+Waiting PRs carry no label: a red `main` already pages after 24 hours.
 
 ## Package collections
 
