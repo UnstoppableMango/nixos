@@ -55,9 +55,10 @@ in
         if ((free < ${toString cfg.minFreePercent})); then success=false; fi
 
         # -G puts the fields in the query string, where Gatus reads them.
-        curl --fail --silent --show-error --max-time 30 --retry 3 \
+        # The header comes in on stdin, so the token stays out of argv.
+        printf 'header = "Authorization: Bearer %s"\n' "$(<"$CREDENTIALS_DIRECTORY/token")" |
+          curl --config - --fail --silent --show-error --max-time 30 --retry 3 \
           -G -X POST \
-          -H "Authorization: Bearer $(cat "$CREDENTIALS_DIRECTORY/token")" \
           --data-urlencode "success=$success" \
           --data-urlencode "error=$free% free on /" \
           ${lib.escapeShellArg "${cfg.url}/api/v1/endpoints/disk_${config.networking.hostName}/external"}
