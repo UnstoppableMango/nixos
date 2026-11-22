@@ -82,7 +82,10 @@ Other machines (agreus, pollux, castor, zeus, gaea, apollo, pik8s1–9) follow t
     Its user slice is capped at `kiosk.memoryMax`; on a Kubernetes node, reserve that much from the kubelet.
   - `uptime/` - Gatus on pik8s3, outside rosequartz, so something still reports the cluster down while it is down.
     It checks the apiserver VIP, each apiserver and etcd member, the gateway, every resolver, and the services listed in `uptime.services` (Nextcloud's `status.php`), and pings every clan machine; `clan.nix` fills the machine, apiserver and etcd lists from the inventory and `clan/rosequartz-cluster.nix`.
-    The status page is on port 8080, open on the LAN. No alerting is configured.
+    The status page is on port 8080, open on the LAN, and keeps 30 days of history in sqlite.
+    Hercules' API and failing or missed pushes to its external endpoints (`uptime.pushes`) page through ntfy.sh, on the topic in pik8s3's `uptime-ntfy` var.
+    Every clan machine pushes free space on `/` to `disk_<machine>` through `disk-push/`, which the `base` instance attaches.
+  - `disk-push/` - A five-minute timer pushing free space on `/` to Gatus, failing under 10% free; the push token is the shared `uptime-push` var.
   - `pihole/` - Pi-hole on pik8s1, pik8s2 and pik8s6, outside rosequartz, so the LAN keeps a filtering resolver while the cluster is down.
     Its config is read-only NixOS, so external-dns cannot write `thecluster.lan` records into it the way it does for the in-cluster piholes; the whole zone is a wildcard to the rosequartz gateway (`pihole.gatewayAddress`) instead.
     The web UI password is the shared `pihole-admin` var. Machines still resolve through the in-cluster piholes until `modules/dns` points at these.

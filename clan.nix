@@ -78,6 +78,8 @@ in
       module.name = "@UnstoppableMango/base";
       module.input = "self";
       roles.default.tags.all = { };
+      # By address, so pushes still land while DNS is down.
+      roles.default.settings.uptimeUrl = "http://${managed.pik8s3.ip}:8080";
     };
 
     erik = {
@@ -276,6 +278,31 @@ in
             "[BODY].maintenance == false"
             "[BODY].needsDbUpgrade == false"
           ];
+        };
+        # The API answers 401 without a token, which a Cloudflare error page
+        # does not.
+        services.hercules-ci = {
+          url = "https://hercules-ci.com/api/v1/accounts/me";
+          conditions = [ "[STATUS] == 401" ];
+          page = true;
+        };
+        pushes = {
+          # hades suspends, so only a low-disk push from it pages.
+          disk = builtins.mapAttrs (
+            name: _: lib.optionalAttrs (name == "hades") { heartbeat = null; }
+          ) managed;
+          # No heartbeat until the VMs push, or they would page from the start.
+          builder =
+            lib.genAttrs
+              [
+                "disk"
+                "gc"
+                "agents"
+              ]
+              (_: {
+                heartbeat = null;
+              });
+          attic.disk.heartbeat = null;
         };
       };
   };

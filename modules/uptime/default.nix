@@ -5,9 +5,21 @@
 # Checks are declared here rather than in a UI, so the config stays
 # read-only NixOS like everything else on the machine. The page is served on
 # `uptime.port`, open on the LAN.
-{ config, lib, ... }:
+#
+# Pages go to ntfy.sh on the topic in the `uptime-ntfy` var; subscribe with
+# `clan vars get pik8s3 uptime-ntfy/topic`. Anyone who knows a topic can read
+# it, so alert text must never carry a secret.
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 let
   cfg = config.uptime;
+  inherit (config.clan.core.vars.generators) uptime-ntfy uptime-push;
+
+  page = extra: [ ({ type = "ntfy"; } // extra) ];
 
   tcp = group: name: address: {
     inherit name group;
@@ -34,6 +46,8 @@ let
   };
 in
 {
+  imports = [ ./push-token.nix ];
+
   options.uptime = {
     enable = lib.mkEnableOption "the Gatus uptime checker";
 
@@ -98,6 +112,11 @@ in
               default = [ "[STATUS] == 200" ];
               description = "Gatus conditions the response must meet.";
             };
+            page = lib.mkOption {
+              type = lib.types.bool;
+              default = false;
+              description = "Whether a failing check pages through ntfy.";
+            };
           };
         }
       );
@@ -105,17 +124,88 @@ in
       example = {
         nextcloud.url = "https://cloud.thecluster.io/status.php";
       };
-      description = "Services the cluster hosts, by name, each checked over HTTP.";
+      description = "Services to check over HTTP, by name.";
+    };
+
+    pushes = lib.mkOption {
+      type = lib.types.attrsOf (
+        lib.types.attrsOf (
+          lib.types.submodule {
+            options.heartbeat = lib.mkOption {
+              type = lib.types.nullOr lib.types.str;
+              default = "10m";
+              description = ''
+                Longest gap between pushes before Gatus records a failure.
+                Null accepts pushes without expecting them.
+              '';
+            };
+          }
+        )
+      );
+      default = { };
+      example = {
+        disk.zeus = { };
+      };
+      description = ''
+        External endpoints that accept pushes, by group and then name. One is
+        pushed to at `/api/v1/endpoints/<group>_<name>/external`. A push
+        reporting failure pages, as does a missed heartbeat.
+      '';
     };
   };
 
   config = lib.mkIf cfg.enable {
+    clan.core.vars.generators.uptime-ntfy = {
+      files.topic.deploy = false;
+      files.env.secret = true;
+      runtimeInputs = [ pkgs.openssl ];
+      script = ''
+        openssl rand -hex 24 | tr -d '\n' > "$out/topic"
+        printf 'GATUS_NTFY_TOPIC=%s\n' "$(cat "$out/topic")" > "$out/env"
+      '';
+    };
+
+    systemd.services.gatus.serviceConfig.EnvironmentFile = [
+      uptime-ntfy.files.env.path
+      uptime-push.files.env.path
+    ];
+
     services.gatus = {
       enable = true;
       openFirewall = true;
       settings = {
         web.port = cfg.port;
         ui.title = "THECLUSTER";
+        # Uptime and response times keep 30 days in sqlite; events are capped
+        # by count, so raise the cap to cover a month of outages.
+        storage = {
+          type = "sqlite";
+          path = "/var/lib/gatus/data.db";
+          maximum-number-of-events = 500;
+        };
+        alerting.ntfy = {
+          topic = "\${GATUS_NTFY_TOPIC}";
+          priority = 4;
+          default-alert.send-on-resolved = true;
+        };
+        external-endpoints = lib.concatLists (
+          lib.mapAttrsToList (
+            group:
+            lib.mapAttrsToList (
+              name: push:
+              {
+                inherit name group;
+                token = "\${GATUS_PUSH_TOKEN}";
+                # Each push is one result, so one failure is enough.
+                alerts = page {
+                  failure-threshold = 1;
+                  success-threshold = 1;
+                };
+              }
+              // lib.optionalAttrs (push.heartbeat != null) { heartbeat.interval = push.heartbeat; }
+            )
+          ) cfg.pushes
+        );
         endpoints =
           lib.optional (cfg.vip != null) (tcp "rosequartz" "apiserver VIP" "${cfg.vip}:6443")
           ++ lib.optional (cfg.gateway != null) (tcp "rosequartz" "gateway" "${cfg.gateway}:443")
@@ -127,6 +217,7 @@ in
             group = "services";
             inherit (svc) url conditions;
             interval = "1m";
+            alerts = lib.optionals svc.page (page { });
           }) cfg.services
           ++ lib.mapAttrsToList (n: a: {
             name = n;
