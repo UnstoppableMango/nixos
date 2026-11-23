@@ -1,4 +1,4 @@
-# The VM disk, a WD SN7100 2 TB on a PCIe M.2 adapter (#519).
+# The VM disk, a WD SN7100 2 TB in a PCIe NVMe enclosure (#519).
 #
 # Each logical volume is one microVM's virtio disk, which the guest formats, so
 # nothing here mounts on the host. Sizes are GiB, leaving about 263 GiB free.
