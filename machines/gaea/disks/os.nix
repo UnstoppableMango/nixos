@@ -9,7 +9,7 @@
 {
   disko.devices.disk.os = {
     type = "disk";
-    device = "/dev/disk/by-id/nvme-WDS100T1X0E-00AFY0_SERIAL_TODO";
+    device = "/dev/disk/by-id/nvme-WDS100T1X0E-00AFY0_20496U801727";
     content = {
       type = "gpt";
       partitions = {

@@ -9,7 +9,7 @@
   disko.devices = {
     disk.vms = {
       type = "disk";
-      device = "/dev/disk/by-id/nvme-WD_BLACK_SN7100_2TB_SERIAL_TODO";
+      device = "/dev/disk/by-id/nvme-WD_BLACK_SN7100_2TB_252750801658";
       content = {
         type = "gpt";
         partitions.pv = {
