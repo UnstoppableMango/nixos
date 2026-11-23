@@ -1,13 +1,11 @@
-# The OS disk: a WD SN850 1 TB in the board's M.2 slot, replacing the worn
-# SN750 (#519).
+# The OS disk, a WD SN850 1 TB in the board's M.2 slot.
 #
-# Its own file so `disko` can format this disk alone, with the SN7100 absent or
-# untouched. The CLI reads `disko.devices` from the file it is given and
-# ignores `imports`, so it is pointed at this file, not disk-config.nix.
+# Its own file so `disko` can format this disk alone. The CLI reads
+# `disko.devices` from the file it is given and ignores `imports`.
 #
-# The disk is named `os` rather than after its kernel name so its partitions
-# get labels (`disk-os-ESP`, `disk-os-root`) that the SN750's
-# (`disk-nvme0n1-*`) cannot collide with while both are fitted for the copy.
+# Named `os` rather than after its kernel name, so its partition labels
+# (`disk-os-ESP`, `disk-os-root`) cannot collide with another NVMe disk's
+# `disk-nvme0n1-*`.
 {
   disko.devices.disk.os = {
     type = "disk";

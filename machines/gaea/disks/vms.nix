@@ -1,10 +1,7 @@
-# The VM disk: a WD SN7100 2 TB on a PCIe M.2 adapter, holding the `vms`
-# volume group (#519, docs/nix-ci.md "Hardware").
+# The VM disk, a WD SN7100 2 TB on a PCIe M.2 adapter (#519).
 #
-# Each logical volume becomes one microVM's virtio disk, so neither carries a
-# filesystem and nothing mounts it on the host. The guest formats its own.
-# Sizes are GiB: of the drive's 1863 GiB, about 263 stay unallocated as growth
-# and wear headroom.
+# Each logical volume is one microVM's virtio disk, which the guest formats, so
+# nothing here mounts on the host. Sizes are GiB, leaving about 263 GiB free.
 #
 # Its own file so `disko` can format this disk alone without touching the
 # booted OS disk.
