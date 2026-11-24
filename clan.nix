@@ -281,6 +281,11 @@ in
         };
         # The API answers 401 without a token, which a Cloudflare error page
         # does not.
+        services.attic = {
+          url = "http://${managed.gaea.ip}:8080/thecluster/nix-cache-info";
+          conditions = [ "[STATUS] == 200" ];
+          page = true;
+        };
         services.hercules-ci = {
           url = "https://hercules-ci.com/api/v1/accounts/me";
           conditions = [ "[STATUS] == 401" ];
@@ -291,7 +296,7 @@ in
           disk = builtins.mapAttrs (
             _: host: lib.optionalAttrs (builtins.elem "workstation" host.tags) { heartbeat = null; }
           ) managed;
-          # No heartbeat until the VMs push, or they would page from the start.
+          # No heartbeat until the builder VM pushes, or it would page from the start.
           builder =
             lib.genAttrs
               [
@@ -302,7 +307,7 @@ in
               (_: {
                 heartbeat = null;
               });
-          attic.disk.heartbeat = null;
+          attic.disk = { };
         };
       };
   };

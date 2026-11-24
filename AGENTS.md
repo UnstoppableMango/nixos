@@ -87,6 +87,12 @@ Other machines (agreus, pollux, castor, zeus, gaea, apollo, pik8s1–9) follow t
     Hercules' API and failing or missed pushes to its external endpoints (`uptime.pushes`) page through ntfy.sh, on the topic in pik8s3's `uptime-ntfy` var.
     Every clan machine pushes free space on `/` to `disk_<machine>` through `disk-push/`, which the `base` instance attaches.
   - `disk-push/` - A five-minute timer pushing free space on `/` to Gatus, failing under 10% free; the push token is the shared `uptime-push` var.
+    `clan.nix` adds the clan vars; the VMs on gaea import the push alone.
+  - `attic/` - The attic binary cache in a microVM on gaea (cloud-hypervisor, no virtiofs), on the `vms/attic` logical volume, which the guest formats on first boot and mounts at `/var/lib`.
+    The cache is `thecluster`, public for pulls, at `http://10.0.69.11:8080/thecluster`; paths go 90 days after last access.
+    Its secrets are gaea's clan vars: `attic-signing` (the cache key, set into atticd's database at every boot, its public half committed), `attic-jwt` (signs every token, so replacing it revokes them all) and `attic-push-token` (pull and push only, for the builder VM).
+    cloud-hypervisor takes no credentials, so gaea packs them into a tar it attaches as a read-only disk.
+    The VM pushes free space on `/var/lib` to `attic_disk`, failing under 15%; addresses and the firewall rules are in `NETWORK.md`.
   - `pihole/` - Pi-hole on pik8s1, pik8s2 and pik8s6, outside rosequartz, so the LAN keeps a filtering resolver while the cluster is down.
     Its config is read-only NixOS, so external-dns cannot write `thecluster.lan` records into it the way it does for the in-cluster piholes; the whole zone is a wildcard to the rosequartz gateway (`pihole.gatewayAddress`) instead.
     The web UI password is the shared `pihole-admin` var. Machines still resolve through the in-cluster piholes until `modules/dns` points at these.
@@ -123,6 +129,7 @@ Other machines (agreus, pollux, castor, zeus, gaea, apollo, pik8s1–9) follow t
 - `dotfiles` - Personal dotfiles flake; hades takes its `overlays.default`.
 - `hercules-ci-agent` - Provides `nixosModules.multi-agent-service`, which the `hercules-ci-agent` clan service imports to run one agent per Hercules CI account on gaea.
   Its nixpkgs is not followed, so the agent package matches what upstream caches.
+- `microvm` - microvm.nix, for the VMs on gaea (`modules/attic`). Its `spectrum` input is only for the graphics hypervisor, so nothing fetches it.
 - `hosts` - Machine inventory (name, ip, arch, role) shared with dotfiles, which follows this input
 - `disko` - Declarative disk partitioning (each host has a `disk-config.nix`)
 - `nixos-hardware` - Hardware-specific module presets (hades)

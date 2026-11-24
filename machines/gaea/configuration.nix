@@ -2,6 +2,7 @@
 {
   imports = [
     ../../modules/arc-runner-store
+    ../../modules/attic
     ../../modules/ceph
     ../../modules/ceph-cluster-network
     ../../modules/ci-limits

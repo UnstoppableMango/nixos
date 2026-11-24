@@ -18,7 +18,7 @@
       { settings, ... }:
       {
         nixosModule.imports = [
-          ../../disk-push
+          ../../disk-push/clan.nix
           ../../dns
           ../../gc
           ../../nix
