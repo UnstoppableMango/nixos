@@ -145,24 +145,18 @@ in
 
     # The VM may only answer and push to Gatus: no host, pods or services.
     # mangle runs before kube-proxy's DNAT and flannel's FORWARD accepts.
-    networking.firewall =
-      let
-        stopVmFilter = ''
-          iptables -w -t mangle -D PREROUTING -i ${net.tap} -j attic-vm 2>/dev/null || true
-          iptables -w -t mangle -F attic-vm 2>/dev/null || true
-          iptables -w -t mangle -X attic-vm 2>/dev/null || true
-        '';
-      in
-      {
-        extraCommands = ''
-          ${stopVmFilter}
-          iptables -w -t mangle -N attic-vm
-          iptables -w -t mangle -A attic-vm -m conntrack --ctstate ESTABLISHED,RELATED -j RETURN
-          iptables -w -t mangle -A attic-vm -d ${gatusIp} -p tcp --dport ${gatusPort} -j RETURN
-          iptables -w -t mangle -A attic-vm -j DROP
-          iptables -w -t mangle -A PREROUTING -i ${net.tap} -j attic-vm
-        '';
-        extraStopCommands = stopVmFilter;
-      };
+    # A reload runs the stop commands first, so nothing removes the filter, and
+    # the new chain takes traffic before the old one goes.
+    networking.firewall.extraCommands = ''
+      iptables -w -t mangle -F attic-vm-new 2>/dev/null || iptables -w -t mangle -N attic-vm-new
+      iptables -w -t mangle -A attic-vm-new -m conntrack --ctstate ESTABLISHED,RELATED -j RETURN
+      iptables -w -t mangle -A attic-vm-new -d ${gatusIp} -p tcp --dport ${gatusPort} -j RETURN
+      iptables -w -t mangle -A attic-vm-new -j DROP
+      iptables -w -t mangle -I PREROUTING -i ${net.tap} -j attic-vm-new
+      while iptables -w -t mangle -D PREROUTING -i ${net.tap} -j attic-vm 2>/dev/null; do :; done
+      iptables -w -t mangle -F attic-vm 2>/dev/null || true
+      iptables -w -t mangle -X attic-vm 2>/dev/null || true
+      iptables -w -t mangle -E attic-vm-new attic-vm
+    '';
   };
 }
