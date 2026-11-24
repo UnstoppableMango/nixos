@@ -148,6 +148,9 @@ in
     # A reload runs the stop commands first, so nothing removes the filter, and
     # the new chain takes traffic before the old one goes.
     networking.firewall.extraCommands = ''
+      # Finishes a swap an earlier run left halfway, so the flush below never
+      # empties the live chain.
+      iptables -w -t mangle -S attic-vm >/dev/null 2>&1 || iptables -w -t mangle -E attic-vm-new attic-vm 2>/dev/null || true
       iptables -w -t mangle -F attic-vm-new 2>/dev/null || iptables -w -t mangle -N attic-vm-new
       iptables -w -t mangle -A attic-vm-new -m conntrack --ctstate ESTABLISHED,RELATED -j RETURN
       iptables -w -t mangle -A attic-vm-new -d ${gatusIp} -p tcp --dport ${gatusPort} -j RETURN
