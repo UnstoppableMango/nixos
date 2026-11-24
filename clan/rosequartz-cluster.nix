@@ -91,7 +91,6 @@ in
 {
   vip = "10.0.69.100";
 
-
   # Keeps instance ids at `rosequartz-pki`, `rosequartz-etcd`, etc.
   instancePrefix = "rosequartz-";
 

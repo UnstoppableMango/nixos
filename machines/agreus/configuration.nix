@@ -71,7 +71,6 @@
   #   };
   # };
 
-
   # The release of the first install. Do not change it.
   system.stateVersion = "25.05";
 }

@@ -221,7 +221,6 @@ in
     alsa.enable = true;
     alsa.support32Bit = true;
     pulse.enable = true;
-
   };
 
   services.btrfs.autoScrub = {
@@ -413,7 +412,6 @@ in
     liberation_ttf # Another standard set of fallbacks
     ubuntu-classic
   ];
-
 
   # The system half of dotfiles' modules/yubikey.
   services.pcscd.enable = true;
