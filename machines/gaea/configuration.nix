@@ -2,6 +2,7 @@
 {
   imports = [
     ../../modules/arc-runner-store
+    ../../modules/attic
     ../../modules/ceph
     ../../modules/ceph-cluster-network
     ../../modules/ci-limits
@@ -78,6 +79,8 @@
       ];
     };
   };
+
+  atticVm.interface = "eno1";
 
   hardware.facter.detected.dhcp.enable = false;
 
