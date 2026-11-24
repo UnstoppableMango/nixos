@@ -145,21 +145,26 @@ in
 
     # The VM may only answer and push to Gatus: no host, pods or services.
     # mangle runs before kube-proxy's DNAT and flannel's FORWARD accepts.
-    # A reload runs the stop commands first, so nothing removes the filter, and
-    # the new chain takes traffic before the old one goes.
+    # A reload runs the stop commands first, so nothing removes the filter.
+    # Rules alternate between two chains, and the live one is only removed
+    # once the other takes traffic, wherever an earlier run stopped.
     networking.firewall.extraCommands = ''
-      # Finishes a swap an earlier run left halfway, so the flush below never
-      # empties the live chain.
-      iptables -w -t mangle -S attic-vm >/dev/null 2>&1 || iptables -w -t mangle -E attic-vm-new attic-vm 2>/dev/null || true
-      iptables -w -t mangle -F attic-vm-new 2>/dev/null || iptables -w -t mangle -N attic-vm-new
-      iptables -w -t mangle -A attic-vm-new -m conntrack --ctstate ESTABLISHED,RELATED -j RETURN
-      iptables -w -t mangle -A attic-vm-new -d ${gatusIp} -p tcp --dport ${gatusPort} -j RETURN
-      iptables -w -t mangle -A attic-vm-new -j DROP
-      iptables -w -t mangle -I PREROUTING -i ${net.tap} -j attic-vm-new
-      while iptables -w -t mangle -D PREROUTING -i ${net.tap} -j attic-vm 2>/dev/null; do :; done
-      iptables -w -t mangle -F attic-vm 2>/dev/null || true
-      iptables -w -t mangle -X attic-vm 2>/dev/null || true
-      iptables -w -t mangle -E attic-vm-new attic-vm
+      mangle="iptables -w -t mangle"
+      jump="PREROUTING -i ${net.tap} -j"
+      if $mangle -C $jump attic-vm-a 2>/dev/null; then
+        live=attic-vm-a next=attic-vm-b
+      else
+        live=attic-vm-b next=attic-vm-a
+      fi
+      while $mangle -D $jump $next 2>/dev/null; do :; done
+      $mangle -F $next 2>/dev/null || $mangle -N $next
+      $mangle -A $next -m conntrack --ctstate ESTABLISHED,RELATED -j RETURN
+      $mangle -A $next -d ${gatusIp} -p tcp --dport ${gatusPort} -j RETURN
+      $mangle -A $next -j DROP
+      $mangle -I $jump $next
+      while $mangle -D $jump $live 2>/dev/null; do :; done
+      $mangle -F $live 2>/dev/null || true
+      $mangle -X $live 2>/dev/null || true
     '';
   };
 }
