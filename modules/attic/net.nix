@@ -1,4 +1,4 @@
-# gaea and the attic VM share a /30 on the VM's tap, outside every LAN and
+# The host and the VM share a /30 on the VM's tap, outside every LAN and
 # cluster range in NETWORK.md.
 {
   tap = "vm-attic";

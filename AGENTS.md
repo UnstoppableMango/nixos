@@ -90,8 +90,8 @@ Other machines (agreus, pollux, castor, zeus, gaea, apollo, pik8s1–9) follow t
     `clan.nix` adds the clan vars; the VMs on gaea import the push alone.
   - `attic/` - The attic binary cache in a microVM on gaea (cloud-hypervisor, no virtiofs), on the `vms/attic` logical volume, which the guest formats on first boot and mounts at `/var/lib`.
     The cache is `thecluster`, public for pulls, at `http://10.0.69.11:8080/thecluster`; paths go 90 days after last access.
-    Its secrets are gaea's clan vars: `attic-signing` (the cache key, set into atticd's database at every boot, its public half committed), `attic-jwt` (signs every token, so replacing it revokes them all) and `attic-push-token` (pull and push only, for the builder VM).
-    cloud-hypervisor takes no credentials, so gaea packs them into a tar it attaches as a read-only disk.
+    Its secrets are gaea's clan vars: `attic-signing` (the cache key, set into atticd's database at every boot, its public half committed), `attic-token-key` (signs every token, so replacing it revokes them all) and `attic-push-token` (pull and push only, for the builder VM).
+    cloud-hypervisor takes no credentials, so gaea builds them into an erofs image it attaches as a read-only disk.
     The VM pushes free space on `/var/lib` to `attic_disk`, failing under 15%; addresses and the firewall rules are in `NETWORK.md`.
   - `pihole/` - Pi-hole on pik8s1, pik8s2 and pik8s6, outside rosequartz, so the LAN keeps a filtering resolver while the cluster is down.
     Its config is read-only NixOS, so external-dns cannot write `thecluster.lan` records into it the way it does for the in-cluster piholes; the whole zone is a wildcard to the rosequartz gateway (`pihole.gatewayAddress`) instead.

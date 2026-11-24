@@ -80,6 +80,8 @@
     };
   };
 
+  atticVm.interface = "eno1";
+
   hardware.facter.detected.dhcp.enable = false;
 
   environment.systemPackages = with pkgs; [
