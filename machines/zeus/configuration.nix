@@ -10,8 +10,7 @@
 
   nixpkgs.hostPlatform = "x86_64-linux";
 
-  # 32 threads, 125 GB, fifteen OSDs at 4 GiB each. Without reservations the
-  # scheduler hands out every byte and the OSDs contend with the kernel.
+  # Without reservations the OSDs contend with the kernel.
   services.kubernetes.kubelet.extraConfig = {
     systemReserved = {
       cpu = "2";
@@ -26,8 +25,7 @@
 
   systemd.services.harmonia.serviceConfig.MemoryMax = "2G";
 
-  # Legacy BIOS only. The firmware tries a fallback BOOTX64.EFI on the ESP
-  # before legacy boot, and its UEFI path crashes, so grub writes none.
+  # Legacy BIOS only: the firmware's UEFI path crashes on a fallback BOOTX64.EFI.
   boot.loader.grub.enable = true;
 
   # https://nixos.wiki/wiki/Power_Management#systemd_sleep
@@ -38,12 +36,9 @@
     AllowSuspendThenHibernate = "no";
   };
 
-  # enp4s0f0 and enp4s0f1 are the two ports of the SFP+ card, a Broadcom
-  # BCM57810. bnx2x loads the card's firmware from linux-firmware when a port
-  # comes up, and fails with "Error loading firmware" without it.
+  # bnx2x loads the SFP+ card's firmware from linux-firmware.
   hardware.enableRedistributableFirmware = true;
 
-  # enp4s0f1 is the port cabled to the aggregator.
   cephClusterNetwork = {
     enable = true;
     interface = "enp4s0f1";
@@ -52,9 +47,7 @@
     rangeEnd = "10.0.70.95";
   };
 
-  # enp7s0 is the port cabled to GS724Tv4 `g18`. enp8s0, enp12s0, and enp13s0
-  # stay unconfigured; two of the board's NICs carried the previous cluster's
-  # 10.69.0.0/16 network.
+  # enp7s0 is cabled to GS724Tv4 `g18`.
   networking = {
     hostName = "zeus";
     useDHCP = false;

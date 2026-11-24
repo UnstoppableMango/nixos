@@ -13,23 +13,32 @@ This file provides guidance to AI agents when working with code in this reposito
 - `make update` - Update all flake inputs
 - `make system` - Update the local flake and rebuild/switch (`sudo nixos-rebuild switch --flake /etc/nixos --cores 12`)
 - `make sd-images` / `make pik8sN-sd` - Build Pi images (nixos-raspberrypi's sd-image, 1024 MiB firmware partition)
-- `make pik8sN-flash` - Write a Pi image to `$DISK` (default `/dev/sdi`). The Pis boot from a USB SSD with no SD card, so `$DISK` is the SSD attached to the workstation.
+- `make pik8sN-flash` - Write a Pi image to `$DISK` (default `/dev/sdi`).
+  The Pis boot from a USB SSD with no SD card, so `$DISK` is the SSD attached to the workstation.
 - `nix flake check --all-systems` - What CI runs (checks all systems)
 
 ## Architecture
 
-This is a NixOS configuration flake using **flake-parts** and **clan-core** for modular organization. All machines (hades, agreus, pollux, castor, zeus, gaea, apollo, pik8s1–9) are clan-managed and configured via `clan.nix`, which holds the inventory (machine tags, service instances) and per-machine `imports`/overrides. Each machine's NixOS config lives under `machines/<name>/configuration.nix`.
+This is a NixOS configuration flake using **flake-parts** and **clan-core** for modular organization.
+All machines (hades, agreus, pollux, castor, zeus, gaea, apollo, pik8s1–9) are clan-managed and configured via `clan.nix`, which holds the inventory (machine tags, service instances) and per-machine `imports`/overrides.
+Each machine's NixOS config lives under `machines/<name>/configuration.nix`.
 
 ### Module System
 
-Plain NixOS modules live under `modules/` and are composed into machine configs via direct `imports`. Clan service modules (role-based, multi-machine) live under `modules/service/` and are registered as clan inventory modules in `clan.nix`.
+Plain NixOS modules live under `modules/` and are composed into machine configs via direct `imports`.
+Clan service modules (role-based, multi-machine) live under `modules/service/` and are registered as clan inventory modules in `clan.nix`.
 Modules every machine needs (`modules/disk-push`, `modules/dns`, `modules/gc`, `modules/nix`, `modules/pki`) are not imported per machine: the `base` instance in `clan.nix` attaches them to every inventory member through its `tags.all` role, the same way the `clan-cache` instance attaches `modules/cache`.
 
-The `rosequartz` Kubernetes cluster (control plane and workers listed in `clan/rosequartz-cluster.nix`) is **not** defined in this repo. It runs on [cairn](https://github.com/UnstoppableMango/cairn), a library flake that registers one clan service per cluster component (`@UnstoppableMango/{pki,etcd,apiserver,kubelet,loadbalancer,network,kubeconfig,inoculant,coredns,flux}`). `clan.nix` declares a `rosequartz-<component>` instance per service with `module.input = "cairn"`; the services coordinate via clan exports. Cairn's `docs/USAGE.md` and per-service `modules/service/<name>/README.md` are the reference for their options.
+The `rosequartz` Kubernetes cluster (control plane and workers listed in `clan/rosequartz-cluster.nix`) is **not** defined in this repo.
+It runs on [cairn](https://github.com/UnstoppableMango/cairn), a library flake that registers one clan service per cluster component (`@UnstoppableMango/{pki,etcd,apiserver,kubelet,loadbalancer,network,kubeconfig,inoculant,coredns,flux}`).
+`clan.nix` declares a `rosequartz-<component>` instance per service with `module.input = "cairn"`; the services coordinate via clan exports.
+Cairn's `docs/USAGE.md` and per-service `modules/service/<name>/README.md` are the reference for their options.
 
-Cluster PKI predates cairn, so the `pki` instance sets `roles.node.settings.generatorPrefix = "rosequartz"`, which keeps every existing `vars/{shared,per-machine}/*/rosequartz-*` generator (and the CA behind them) resolving unchanged. Leaving it at cairn's `"cairn"` default would mint a parallel CA and cert set and take the cluster down.
+Cluster PKI predates cairn, so the `pki` instance sets `roles.node.settings.generatorPrefix = "rosequartz"`, which keeps every existing `vars/{shared,per-machine}/*/rosequartz-*` generator (and the CA behind them) resolving unchanged.
+Leaving it at cairn's `"cairn"` default would mint a parallel CA and cert set and take the cluster down.
 
-The apiserver accepts service-account tokens from the public issuer `https://unmangocrl.blob.core.windows.net/oidc/rosequartz`, whose discovery documents are static files in [pki](https://github.com/UnstoppableMango/pki) (`oidc/rosequartz/`), so Entra can verify them for workload identity federation. It still signs with `https://kubernetes.default.svc` until every apiserver accepts the public issuer; the switch is a second change, and the old issuer then stays accepted.
+The apiserver accepts service-account tokens from the public issuer `https://unmangocrl.blob.core.windows.net/oidc/rosequartz`, whose discovery documents are static files in [pki](https://github.com/UnstoppableMango/pki) (`oidc/rosequartz/`), so Entra can verify them for workload identity federation.
+It still signs with `https://kubernetes.default.svc` until every apiserver accepts the public issuer; the switch is a second change, and the old issuer then stays accepted.
 Entra verifies against that published JWKS, so rotating the `rosequartz-sa` key needs an overlap: publish a JWKS holding both public keys (copied from `kubectl get --raw /openid/v1/jwks` into that repo's `oidc/rosequartz/openid/v1/jwks`) before the apiserver signs with the new key, and drop the old key only after the tokens it signed have expired.
 
 **How hades is assembled** (see `clan.nix` → `machines.hades`):
@@ -56,8 +65,7 @@ Other machines (agreus, pollux, castor, zeus, gaea, apollo, pik8s1–9) follow t
 - `modules/` - Shared NixOS modules imported by machine configs:
   - `brave/` - Brave enterprise policy at `/etc/brave/policies/managed/`, currently just the `thecluster` managed-bookmarks folder.
     Brave itself is installed by the dotfiles repo's home-manager configuration; policy lives in `/etc`, which home-manager cannot write, so it is supplied here.
-    The bookmark list is a plain data file (`modules/brave/bookmarks.nix`) shared with the `brave-bookmarks-policy` package in `flake.nix`, so darter, which is not a clan machine and has no Nix-managed `/etc`, installs the same file with
-    `sudo install -Dm644 "$(nix build --no-link --print-out-paths github:UnstoppableMango/nixos#brave-bookmarks-policy)" /etc/brave/policies/managed/bookmarks.json`.
+    The bookmark list is a plain data file (`modules/brave/bookmarks.nix`) shared with the `brave-bookmarks-policy` package in `flake.nix`, so darter, which is not a clan machine and has no Nix-managed `/etc`, installs the same file with `sudo install -Dm644 "$(nix build --no-link --print-out-paths github:UnstoppableMango/nixos#brave-bookmarks-policy)" /etc/brave/policies/managed/bookmarks.json`.
     `certificates.nix` is the `CACertificates` policy carrying the same root as `pki/`, since Chromium on Linux ignores the system bundle; darter installs it the same way from `#brave-certificates-policy` as `certificates.json`.
   - `pki/` - Trusts the UnMango Root CA G2 from [pki](https://github.com/UnstoppableMango/pki) system-wide; `ca.pem` is a copy of that repo's `certs/ca.pem`.
     Every `*.thecluster.lan` cert chains to it through UnMango Private CA 01.
@@ -89,7 +97,8 @@ Other machines (agreus, pollux, castor, zeus, gaea, apollo, pik8s1–9) follow t
   - `disk-push/` - A five-minute timer pushing free space on `/` to Gatus, failing under 10% free; the push token is the shared `uptime-push` var.
   - `pihole/` - Pi-hole on pik8s1, pik8s2 and pik8s6, outside rosequartz, so the LAN keeps a filtering resolver while the cluster is down.
     Its config is read-only NixOS, so external-dns cannot write `thecluster.lan` records into it the way it does for the in-cluster piholes; the whole zone is a wildcard to the rosequartz gateway (`pihole.gatewayAddress`) instead.
-    The web UI password is the shared `pihole-admin` var. Machines still resolve through the in-cluster piholes until `modules/dns` points at these.
+    The web UI password is the shared `pihole-admin` var.
+    Machines still resolve through the in-cluster piholes until `modules/dns` points at these.
   - `ssh/` - System-level SSH behavior (currently just `ssh.inhibitSleepOnSsh`, a PAM hook that blocks suspend while an SSH session is open).
     SSH *client* config for erik lives in the dotfiles repo's `modules/ssh`.
   - `unifi/` - UniFi network module
@@ -103,7 +112,8 @@ Other machines (agreus, pollux, castor, zeus, gaea, apollo, pik8s1–9) follow t
   Every host carries exactly one role tag (`control-plane`, `worker`, `workstation`), and the flake validates that.
 - `clan.nix` owns only clan *membership*, as the `clanMachines` attrset of names.
   The hosts flake covers machines this clan does not manage, so `clanMachines` narrows it via `builtins.intersectAttrs`; the resulting `managed` set feeds both `inventory.machines` (tags) and the `internet` instance (addresses).
-  Comment an entry out to drop a machine. A name that is not in the hosts flake throws rather than being silently dropped.
+  Comment an entry out to drop a machine.
+  A name that is not in the hosts flake throws rather than being silently dropped.
 - `NETWORK.md` - VLANs, subnets, switch chain, and per-host IP/VLAN assignments, plus the known gaps between configured and reachable addresses.
   Read it before deriving network facts from `machines/*/configuration.nix`, since the physical topology those IPs sit on is recorded nowhere else.
 - Home directories on hades are standalone Home Manager installs from the dotfiles repo (`erik@hades`, `tz@hades`), not NixOS modules here.
@@ -126,7 +136,8 @@ Other machines (agreus, pollux, castor, zeus, gaea, apollo, pik8s1–9) follow t
 - `hosts` - Machine inventory (name, ip, arch, role) shared with dotfiles, which follows this input
 - `disko` - Declarative disk partitioning (each host has a `disk-config.nix`)
 - `nixos-hardware` - Hardware-specific module presets (hades)
-- `nixos-raspberrypi` - Raspberry Pi kernel, firmware, `config.txt` and the `kernel` bootloader for pik8s1-9, via `modules/service/pi/4b.nix`. It keeps its own pinned nixpkgs rather than following ours, so the kernel comes prebuilt from nixos-raspberrypi.cachix.org (a substituter on every machine via `modules/cache`); `4b.nix` adds the two kernel attributes our 26.11 NixOS reads that its 26.05 kernel lacks.
+- `nixos-raspberrypi` - Raspberry Pi kernel, firmware, `config.txt` and the `kernel` bootloader for pik8s1-9, via `modules/service/pi/4b.nix`.
+  It keeps its own pinned nixpkgs rather than following ours, so the kernel comes prebuilt from nixos-raspberrypi.cachix.org (a substituter on every machine via `modules/cache`); `4b.nix` adds the two kernel attributes our 26.11 NixOS reads that its 26.05 kernel lacks.
 - `clan-core` (26.05) - Clan cluster management framework; manages all machines via `clan.nix`
 - `sops-nix` - SOPS secrets management; followed by both `clan-core` and `dotfiles`
 - `nixos-facter` - Hardware detection for facter-based configs
@@ -134,7 +145,8 @@ Other machines (agreus, pollux, castor, zeus, gaea, apollo, pik8s1–9) follow t
 - `nixvim` - Neovim configuration (also pulled through `dotfiles`)
 - `mynix` - Personal Nix utilities flake
 - `gomod2nix` - Go module packaging (used by `mynix`)
-- `cairn` (26.05 clan-core, followed) - Kubernetes distribution on Nix and clan; provides every clan service the `rosequartz` cluster runs on. Pulls `a2b` (renders Flux manifests via the real `flux` CLI) and `inoculant` (addon-manifest bootstrap) in as its own inputs.
+- `cairn` (26.05 clan-core, followed) - Kubernetes distribution on Nix and clan; provides every clan service the `rosequartz` cluster runs on.
+  Pulls `a2b` (renders Flux manifests via the real `flux` CLI) and `inoculant` (addon-manifest bootstrap) in as its own inputs.
 - `treefmt-nix` - Formatter config (nixfmt enabled)
 
 ### Formatter
@@ -166,7 +178,8 @@ Other machines (agreus, pollux, castor, zeus, gaea, apollo, pik8s1–9) follow t
 Read additional AGENTS.md files when working in these areas:
 
 - **Clan services** (`modules/service/`): read `./modules/service/AGENTS.md`
-- **Rosequartz / Kubernetes**: the services live in the `cairn` input, not this repo. Read cairn's `AGENTS.md`, `docs/ARCHITECTURE.md`, and `modules/service/AGENTS.md`, plus the `rosequartz-*` instances in `clan.nix`.
+- **Rosequartz / Kubernetes**: the services live in the `cairn` input, not this repo.
+  Read cairn's `AGENTS.md`, `docs/ARCHITECTURE.md`, and `modules/service/AGENTS.md`, plus the `rosequartz-*` instances in `clan.nix`.
 
 ## CI
 
@@ -176,12 +189,15 @@ Read additional AGENTS.md files when working in these areas:
 
 ### Issue tracker
 
-Issues are tracked in this repo's GitHub Issues. See `docs/agents/issue-tracker.md`.
+Issues are tracked in this repo's GitHub Issues.
+See `docs/agents/issue-tracker.md`.
 
 ### Triage labels
 
-The five default triage labels, each named after its role (`needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`). See `docs/agents/triage-labels.md`.
+The five default triage labels, each named after its role (`needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`).
+See `docs/agents/triage-labels.md`.
 
 ### Domain docs
 
-Single-context: one `CONTEXT.md` and `docs/adr/` at the repo root. See `docs/agents/domain.md`.
+Single-context: one `CONTEXT.md` and `docs/adr/` at the repo root.
+See `docs/agents/domain.md`.

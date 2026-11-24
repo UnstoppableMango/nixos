@@ -1,9 +1,7 @@
 {
   description = "UnstoppableMango's NixOS configuration";
 
-  # ./modules/nix turns this on for the clan's own machines. Declaring it here
-  # too means evaluating this flake from anywhere else, a fresh checkout or CI,
-  # does not need the feature already set in the ambient nix.conf.
+  # Also set here so evaluating from a fresh checkout or CI needs no nix.conf.
   nixConfig.extra-experimental-features = [ "pipe-operators" ];
 
   inputs = {
@@ -11,8 +9,7 @@
     nixpkgs-stable.url = "github:nixos/nixpkgs?ref=nixos-25.11";
     systems.url = "github:UnstoppableMango/nix-systems";
     nixos-hardware.url = "github:nixos/nixos-hardware?ref=master";
-    # Not following nixpkgs: the Pi kernel is built against nixos-raspberrypi's
-    # own pinned nixpkgs, which its binary cache carries prebuilt.
+    # Not following nixpkgs, so the Pi kernel comes prebuilt from its cache.
     nixos-raspberrypi.url = "github:nvmd/nixos-raspberrypi/main";
     flake-parts.url = "github:hercules-ci/flake-parts";
 
@@ -165,8 +162,7 @@
           };
 
           packages = {
-            # ./modules/brave installs this on hades. Hosts outside this clan
-            # (darter) have no Nix-managed /etc, so they copy this file into
+            # For hosts without a Nix-managed /etc (darter), copied into
             # /etc/brave/policies/managed/ by hand.
             brave-bookmarks-policy = pkgs.writeText "bookmarks.json" (
               builtins.toJSON { ManagedBookmarks = import ./modules/brave/bookmarks.nix; }
@@ -176,11 +172,7 @@
             );
           }
           // lib.optionalAttrs (system == "x86_64-linux") {
-            # Hybrid BIOS/UEFI installer for onboarding a machine: boot it, then
-            # `clan machines install <name> --target-host root@<ip>`. Carries no
-            # machine's config, unlike the per-host
-            # `system.build.images.iso-installer`, which runs that host's
-            # services on the live image.
+            # Boot it, then `clan machines install <name> --target-host root@<ip>`.
             installer-iso =
               (inputs.nixpkgs.lib.nixosSystem {
                 modules = [

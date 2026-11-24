@@ -1,6 +1,4 @@
-# Both roles import this: servers derive the private half from it, clients read
-# `pub-key.value` at eval time. `deploy = false` keeps the private half off the
-# clients, which only ever need the public one.
+# `deploy = false` keeps the private half off the clients.
 instanceName: pkgs:
 let
   # Bump to rotate the key: the changed validation hash makes `clan vars

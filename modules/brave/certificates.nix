@@ -1,8 +1,5 @@
-# Chromium's `CACertificates` policy: base64 DER certificates trusted for
-# server authentication. Chromium on Linux reads trust anchors from its own
-# NSS database rather than the system bundle that ../pki fills, so the
-# UnMango Root CA G2 has to reach it this way. Shared with the
-# brave-certificates-policy package, which is how darter gets the same file.
+# Chromium's `CACertificates` policy: Chromium on Linux ignores the system
+# bundle ../pki fills. Shared with the brave-certificates-policy package.
 let
   pem = builtins.readFile ../pki/ca.pem;
   lines = builtins.filter (l: builtins.isString l && l != "" && builtins.substring 0 5 l != "-----") (

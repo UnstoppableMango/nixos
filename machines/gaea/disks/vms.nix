@@ -1,10 +1,5 @@
-# The VM disk, a WD SN7100 2 TB in a PCIe NVMe enclosure (#519).
-#
-# Each logical volume is one microVM's virtio disk, which the guest formats, so
-# nothing here mounts on the host. Sizes are GiB, leaving about 263 GiB free.
-#
-# Its own file so `disko` can format this disk alone without touching the
-# booted OS disk.
+# The VM disk, a WD SN7100 2 TB (#519). Each LV is a microVM's virtio disk,
+# formatted by the guest. Sizes are GiB, leaving about 263 GiB free.
 {
   disko.devices = {
     disk.vms = {

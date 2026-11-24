@@ -1,37 +1,23 @@
-# THECLUSTER's vanilla-Kubernetes cluster, "rosequartz": pik8s7-9 as an HA
-# control plane behind a keepalived VIP, pik8s4-5 as etcd-only members, and
-# agreus, pollux, castor, apollo, zeus, and gaea as workers.
-# Lowered by cairn's `cairn.clusters` option tree
-# (flakeModules/cluster/lower.nix) into the same per-service inventory
-# instances this used to be hand-wired as in clan.nix.
+# rosequartz: pik8s7-9 as an HA control plane behind a keepalived VIP, pik8s4-5
+# as etcd-only members, and the x86 machines as workers.
 let
-  # The 8 GiB pis. Everything a control-plane machine runs besides etcd is
-  # pinned here, since a 4 GiB pi cannot hold the apiserver.
+  # A 4 GiB pi cannot hold the apiserver.
   controlPlane = [
     "pik8s7"
     "pik8s8"
     "pik8s9"
   ];
 
-  # The 4 GiB pis left in the quorum. They run etcd and nothing else.
   etcdOnly = [
     "pik8s4"
     "pik8s5"
   ];
 
-  # Every Kubernetes node: every machine but the etcd-only ones, which run no
-  # kubelet and so are not nodes at all. Derived, so a new worker needs no
-  # entry here.
   nodes = builtins.filter (m: !builtins.elem m etcdOnly) (builtins.attrNames machines);
 
   machines = {
-    # The quorum stays at five: odd, and one more failure tolerated than three.
-    # Every apiserver machine is also an
-    # etcd member: HAProxy fronts only the apiserver port, so flannel reaching
-    # etcd through the raw VIP assumes whoever holds it runs etcd locally.
-    # `etcdOnly`. Their `control-plane` role only places them in etcd's
-    # default machine list; every other control-plane service is pinned to
-    # `controlPlane` under `services`.
+    # Every apiserver machine is also an etcd member: flannel reaches etcd through
+    # the raw VIP, which HAProxy does not front.
     pik8s4 = {
       role = "control-plane";
       ip = "10.0.69.104";
@@ -44,7 +30,6 @@ let
     pik8s7 = {
       role = "control-plane";
       ip = "10.0.69.107";
-      # Staggered so pik8s7 wins the VIP by default.
       keepalivedPriority = 100;
     };
     pik8s8 = {
@@ -73,10 +58,7 @@ let
       ip = "10.0.69.13";
     };
 
-    # The three x86 workers raise cairn's 110-pod default, which the pi
-    # nodes keep. Each is sized against its own CPU and memory rather than
-    # set uniformly; 250 is the ceiling either way, since each node gets a
-    # /24 podCIDR and a pod admitted past 254 would have no address.
+    # 250 is the ceiling: each node's /24 podCIDR has no address past 254.
     apollo = {
       role = "worker";
       ip = "10.0.69.12";
@@ -84,20 +66,15 @@ let
       # where `arcRunnerStore.enable` holds.
       nodeLabels = {
         "thecluster.lan/ci-runner" = "true";
-        # The GTX 1060. The nvidia-device-plugin chart's default affinity and
-        # the-cluster's nvidia RuntimeClass both select on this label, and the
-        # `nvidia` containerd handler exists only here
-        # (machines/apollo/configuration.nix).
+        # The GTX 1060. The `nvidia` containerd handler exists only here.
         "nvidia.com/gpu.present" = "true";
       };
-      # 32 threads, 32 GiB: the memory is what runs out first here.
       maxPods = 150;
     };
 
     zeus = {
       role = "worker";
       ip = "10.0.69.10";
-      # 32 threads, 125 GiB.
       maxPods = 200;
     };
 
@@ -107,8 +84,6 @@ let
       # The runner pods mount a node-local nix store, so they only run
       # where `arcRunnerStore.enable` holds.
       nodeLabels."thecluster.lan/ci-runner" = "true";
-      # 128 threads, 503 GiB. It sat at 109 pods against the 110 cap with
-      # under half its CPU and a third of its memory requested.
       maxPods = 250;
     };
   };
@@ -116,61 +91,39 @@ in
 {
   vip = "10.0.69.100";
 
-  # `clusterName` defaults to the attribute name ("rosequartz" in flake.nix),
-  # so it isn't set here.
 
-  # Two-machine-cluster-flake naming, kept stable rather than left to the
-  # (single-cluster) auto-detected default, so instance ids stay exactly
-  # `rosequartz-pki`, `rosequartz-etcd`, etc.
+  # Keeps instance ids at `rosequartz-pki`, `rosequartz-etcd`, etc.
   instancePrefix = "rosequartz-";
 
-  # Kubernetes and etcd come from kubepkgs.
-  # Bump one minor at a time, per cairn's docs/UPGRADES.md.
+  # One minor at a time, per cairn's docs/UPGRADES.md.
   versions.kubernetes = "1.37";
 
   inherit machines;
 
   services = {
     pki = {
-      # Reuse the existing rosequartz-* var generators (and the CA behind
-      # them) rather than minting a fresh set under cairn's default "cairn-"
-      # prefix.
+      # Cairn's "cairn" default would mint a parallel CA and take the cluster down.
       generatorPrefix = "rosequartz";
 
-      # The cluster CA (thecluster.io) is an intermediate. Without its root,
-      # OpenSSL-based clients in pods reject kube-root-ca.crt.
+      # The cluster CA is an intermediate, so OpenSSL clients need its root.
       caChain = [ (builtins.readFile ../certs/unmango-authority.crt) ];
     };
 
-    # The quorum formed long ago, so a member always joins it. With "new", a
-    # member starting on an empty data directory (after a reflash) bootstraps
-    # a cluster of its own instead, and the others reject it on cluster ID.
+    # With "new", a reflashed member bootstraps a cluster of its own.
     etcd.initialClusterState = "existing";
 
-    # Register a machine with no etcd data as a learner before its etcd
-    # starts, and promote it once caught up, rather than an `etcdctl member
-    # add` by hand. Machines already holding data are left alone.
     etcd.autoJoin = true;
 
-    # Members that have left the inventory, removed from etcd by whichever
-    # remaining member is deployed first. A name can go once every member has
-    # been deployed with it.
+    # Removed by whichever member deploys first. Drop a name once every member
+    # has been deployed with it.
     etcd.removedMembers = [ "pik8s6" ];
 
     etcd.extraModules = [
-      # etcd must never swap. Its latency budget is a raft heartbeat, and a
-      # member paged out to the zram from modules/memory-pressure misses them:
-      # the symptom is `took too long` on every apply, repeated pre-vote
-      # rounds, and finally a cluster with no leader while every member is
-      # nominally running. The apiserver on the same machine is what creates
-      # the memory pressure, so excluding etcd from the relief is the point.
+      # etcd must never swap: a member paged out to zram misses raft heartbeats,
+      # and the cluster ends up with no leader.
       { systemd.services.etcd.serviceConfig.MemorySwapMax = 0; }
     ];
 
-    # pik8s4-5 stay etcd members (the default, every `control-plane`
-    # machine) and run nothing else. The services that default to every
-    # control-plane machine are pinned to the 8 GiB pis, and the ones that
-    # default to every machine to the Kubernetes nodes.
     apiserver.machines = controlPlane;
     coredns.machines = controlPlane;
     kubelet.machines = nodes;
@@ -179,62 +132,31 @@ in
     inoculant.machines = nodes;
 
     apiserver.extraModules = [
-      # Service-account tokens move to a public issuer URL, so Entra can verify
-      # them for workload identity federation: the-cluster's external-secrets
-      # reads the UnstoppableMango/pki Key Vault that way, with no stored
-      # credential. The discovery documents behind the URL are static files in
-      # that repo, so a new rosequartz-sa key means copying
-      # `kubectl get --raw /openid/v1/jwks` over its oidc/rosequartz/openid/v1/jwks.
+      # The public issuer lets Entra verify tokens for workload identity. Its JWKS
+      # is a static file in UnstoppableMango/pki: copy `kubectl get --raw
+      # /openid/v1/jwks` over oidc/rosequartz/openid/v1/jwks on a key change.
       #
-      # The first --service-account-issuer signs; the rest are only accepted.
-      # Every apiserver has to accept the public issuer before any of them signs
-      # with it, or tokens minted by an upgraded server fail on one that is not
-      # yet. So this first step only adds it as accepted, and a second change,
-      # once all three servers run this one, makes it serviceAccountIssuer and
-      # keeps the old in-cluster issuer in extraOpts.
+      # Only the first --service-account-issuer signs. Every apiserver must accept
+      # the public issuer before any signs with it, so a later change makes it
+      # serviceAccountIssuer and keeps the old one in extraOpts.
       {
         services.kubernetes.apiserver.extraOpts = "--service-account-issuer=https://unmangocrl.blob.core.windows.net/oidc/rosequartz";
       }
 
-      # On the 4 GiB pis that used to run it, an apiserver reached 2.7 GiB and
-      # was still climbing when the machine stopped responding, which took the
-      # local etcd member with it; the quorum that would let the apiserver
-      # settle then could not form, and the machine that inherited the VIP did
-      # the same thing twenty minutes later. The 8 GiB pis have the room for
-      # it, but not without limit.
-      #
-      # Bounded, the apiserver is what dies instead of the machine: HAProxy
-      # takes it out of rotation on the `/readyz` check, the other members keep
-      # the quorum, and it comes back into a cluster that has a leader.
-      #
-      # `MemoryMax` alone, deliberately. A `MemoryHigh` below it throttles
-      # instead of killing: reclaim runs, the zram from
-      # modules/memory-pressure fills, and once it is full there is nowhere
-      # left to reclaim to, so the process stalls at the throttle instead of
-      # ever reaching `MemoryMax`. Measured on all three machines at once,
-      # pinned to the byte at a 1800M `MemoryHigh` with swap 1886/1886 MiB
-      # used, `NRestarts=0`, and an apiserver that had served nothing for
-      # hours. A stalled apiserver is worse than a killed one, because nothing
-      # restarts it and `/readyz` never answers for HAProxy to act on.
+      # Bounded, the apiserver dies instead of the machine and its etcd member.
+      # `MemoryMax` alone: a lower `MemoryHigh` stalls it once zram fills, and a
+      # stalled apiserver never fails `/readyz` or restarts.
       {
         systemd.services.kube-apiserver = {
-          # Leaves an 8 GiB pi about 3 GiB for etcd, the kubelet and the OS.
           serviceConfig.MemoryMax = "5G";
-          # Without this, systemd's default rate limit stops restarting the
-          # unit after five kills and leaves the machine with no apiserver at
-          # all, which is the outcome the ceiling exists to avoid.
+          # Otherwise systemd stops restarting the unit after five kills.
           unitConfig.StartLimitIntervalSec = 0;
         };
       }
 
-      # kubectl logs in through the thecluster Keycloak realm, configured by
-      # UnstoppableMango/iam. kubelogin uses the public `kubernetes` client,
-      # so the ID token's audience is that client id. Groups keep an `oidc:`
-      # prefix so no realm group can collide with a built-in one such as
-      # system:masters; the-cluster binds `oidc:cluster-admins` to
-      # cluster-admin. An unreachable issuer only disables OIDC logins: the
-      # apiserver retries discovery in the background and client certs keep
-      # working.
+      # kubelogin uses the public `kubernetes` client from UnstoppableMango/iam.
+      # The `oidc:` prefix keeps realm groups from colliding with built-ins such as
+      # system:masters. An unreachable issuer only disables OIDC logins.
       (
         { pkgs, ... }:
         let
@@ -269,26 +191,15 @@ in
       )
     ];
 
-    # `coredns.nodeNames` stays unset, so the pods run on the machines that
-    # bootstrap the manifests. The generated Deployment pulls
-    # `coredns:<store hash>` with `imagePullPolicy: Never`, and that image
-    # reaches a node only through its own kubelet's pre-start seeding, from the
-    # generation that node runs. Naming machines here that are not on the same
-    # generation as the bootstrapping ones leaves the pods on
-    # `ErrImageNeverPull`, so moving CoreDNS off the control plane needs the
-    # target nodes to match generations, not just to run kubelets.
+    # `coredns.nodeNames` stays unset: the image reaches a node only through its
+    # kubelet's pre-start seeding, so other nodes must run the same generation.
     kubelet.extraModules = [
-      # Containers inherit containerd's soft nofile limit, systemd's 1024 when
-      # unset. radosgw never raises its own, and at 1024 it stops accepting on
-      # :443 under an ncps burst. Drop this once the cairn input sets the same
-      # default (UnstoppableMango/cairn#93).
+      # radosgw never raises its 1024 soft nofile limit and stops accepting under
+      # an ncps burst. TODO: drop once cairn sets it (UnstoppableMango/cairn#93).
       { systemd.services.containerd.serviceConfig.LimitNOFILE = 1048576; }
 
-      # Handler for the nested-containers RuntimeClass in the-cluster. Pods in
-      # a user namespace that run their own container runtime (dind, podman,
-      # buildkitd) need a writable /sys/fs/cgroup, which runc then delegates to
-      # the namespace's root. Drop this once cairn can declare runtime handlers
-      # (UnstoppableMango/cairn#96).
+      # Handler for the-cluster's nested-containers RuntimeClass.
+      # TODO: drop once cairn can declare runtime handlers (UnstoppableMango/cairn#96).
       {
         virtualisation.containerd.settings.plugins."io.containerd.grpc.v1.cri".containerd.runtimes.runc-cgroup-writable =
           {
@@ -298,9 +209,7 @@ in
           };
       }
 
-      # node-exporter from the-cluster's kube-prometheus-stack, scraped on the
-      # host IP. Flannel runs without IP masquerade, so a scrape arrives from
-      # the Prometheus pod's IP as well as from a node's.
+      # Flannel runs without IP masquerade, so scrapes also arrive from pod IPs.
       (
         { config, ... }:
         {
@@ -315,8 +224,6 @@ in
     loadbalancer = {
       enable = true;
       machines = controlPlane;
-      # Every control-plane machine reaches VLAN 20 untagged on `end0`, so VRRP
-      # advertises on the right network everywhere.
       interface = "end0";
     };
 

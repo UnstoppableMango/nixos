@@ -1,9 +1,5 @@
-# Periodic store garbage collection, through `nh clean`.
-#
-# nh keeps the newest generations of each profile even when they are older than
-# `--keep-since`, so a machine that has not been redeployed in a while still has
-# something to roll back to. Plain `nix.gc --delete-older-than` would not.
-#
+# Store garbage collection through `nh clean`, which keeps the newest
+# generations even past `--keep-since`, unlike `nix.gc`.
 # The hercules-ci-agent service stops its agents while this runs.
 { lib, ... }:
 {

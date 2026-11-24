@@ -11,9 +11,8 @@ let
   subnet = "10.0.70.0/24";
   prefixLength = 24;
 
-  # multus reads NetworkAttachmentDefinitions with the kubelet's identity: the
-  # Node authorizer covers the pod reads and status updates, and the-cluster's
-  # infrastructure/controllers/multus grants system:nodes the NADs.
+  # multus reads NADs as the kubelet; the-cluster's
+  # infrastructure/controllers/multus grants system:nodes access.
   multusKubeconfig = k8s.lib.mkKubeConfig "multus" k8s.kubelet.kubeconfig;
 in
 {
@@ -55,10 +54,8 @@ in
       }
     ];
 
-    # The port carries no address. A macvlan parent cannot reach its own
-    # macvlan children, so the host's address lives on a bridge-mode sibling
-    # of the OSD interfaces instead. That keeps the pod network able to reach
-    # a local OSD's cluster address.
+    # A macvlan parent cannot reach its children, so the host's address lives on
+    # a bridge-mode sibling, which keeps local OSDs reachable from the pod network.
     systemd.network = {
       netdevs."30-ceph0" = {
         netdevConfig = {
@@ -89,9 +86,7 @@ in
       };
     };
 
-    # multus wraps flannel, so every pod still gets its flannel interface
-    # first. The delegate must match cairn's network service, which sets the
-    # same list at mkDefault.
+    # Must match cairn's network service, which sets the same list at mkDefault.
     services.kubernetes.kubelet.cni = {
       packages = [ pkgs.multus-cni ];
       config = [
@@ -119,10 +114,8 @@ in
       ];
     };
 
-    # The config behind the rook-ceph/ceph-cluster NetworkAttachmentDefinition,
-    # which has no spec.config of its own. host-local keeps its leases on tmpfs:
-    # an unclean reboot never releases them, and every OSD pod is recreated
-    # after a boot anyway.
+    # host-local keeps leases on tmpfs: an unclean reboot never releases them,
+    # and every OSD pod is recreated after boot anyway.
     environment.etc."cni/multus/net.d/ceph-cluster.conf".text = builtins.toJSON {
       cniVersion = "0.3.1";
       name = "ceph-cluster";
@@ -144,8 +137,7 @@ in
       };
     };
 
-    # /etc/cni/net.d is a symlink into the store, and containerd's watch on it
-    # does not see the link swapped. Running containers survive the restart.
+    # containerd's watch does not see the /etc/cni/net.d store link swapped.
     systemd.services.containerd.restartTriggers = [ config.environment.etc."cni/net.d".source ];
   };
 }

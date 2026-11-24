@@ -1,16 +1,6 @@
-# The nix store the rosequartz GitHub Actions runner pods share on this node.
-#
-# The pods mount this directory at /nix, so it holds every store path they
-# realise and nix's build directory, and it outlives any one pod: a second pod
-# on the same node finds the closure already there instead of refetching it
-# from ncps.
-#
-# It is deliberately not /nix. That is the booted system's store, owned by root
-# and shared with nothing.
-#
-# Declaring the directory here is what lets the runner pods drop their
-# privileged init container: kubelet creates a hostPath as root, and nothing in
-# the pod can chown it without one.
+# The nix store the rosequartz runner pods share on this node, so a second pod
+# finds its closure already there. Not /nix, the booted system's store.
+# Declared here so the pods need no privileged init container to chown it.
 { config, lib, ... }:
 let
   cfg = config.arcRunnerStore;
@@ -62,10 +52,8 @@ in
   config = mkIf cfg.enable {
     systemd.tmpfiles.rules = [
       "d ${cfg.path} 0755 ${toString cfg.uid} ${toString cfg.gid} -"
-      # nix removes a build directory when the build ends, but a nix killed
-      # with its pod leaves one behind, and the garbage collector walks the
-      # store rather than this path. `e` adjusts and cleans an existing
-      # directory without creating one.
+      # A nix killed with its pod leaves its build directory, which GC never walks.
+      # `e` cleans an existing directory without creating one.
       "e ${cfg.path}/var/nix/builds - - - ${cfg.buildsMaxAge}"
     ];
   };

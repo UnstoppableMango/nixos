@@ -1,15 +1,7 @@
-# Gatus, on a machine outside rosequartz, watching rosequartz and the LAN
-# services around it. Nothing inside the cluster can report the cluster
-# being down, so this runs where that failure does not reach.
-#
-# Checks are declared here rather than in a UI, so the config stays
-# read-only NixOS like everything else on the machine. The page is served on
-# `uptime.port`, open on the LAN. nginx fronts Gatus so pushes, which carry the
-# shared token, are accepted only over TLS on `uptime.pushPort`.
-#
-# Pages go to ntfy.sh on the topic in the `uptime-ntfy` var; subscribe with
-# `clan vars get pik8s3 uptime-ntfy/topic`. Anyone who knows a topic can read
-# it, so alert text must never carry a secret.
+# Gatus outside rosequartz, since nothing inside the cluster can report it down.
+# nginx fronts Gatus so pushes, which carry the shared token, arrive only over TLS.
+# Pages go to ntfy.sh (`clan vars get pik8s3 uptime-ntfy/topic`). Anyone who
+# knows the topic can read it, so alert text must never carry a secret.
 {
   config,
   lib,
@@ -180,8 +172,6 @@ in
       '';
     };
 
-    # The shared generator keeps the key off pushers, so copy it into one
-    # that deploys here.
     clan.core.vars.generators.uptime-tls-key = {
       dependencies = [ "uptime-tls" ];
       files.key.owner = "nginx";
@@ -283,7 +273,6 @@ in
           ++ lib.mapAttrsToList (n: a: {
             name = n;
             group = "hosts";
-            # The module grants CAP_NET_RAW, which ICMP needs.
             url = "icmp://${a}";
             interval = "1m";
             conditions = [ "[CONNECTED] == true" ];

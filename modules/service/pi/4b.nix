@@ -1,13 +1,8 @@
 { inputs, lib, ... }:
 let
-  # flashrom 1.8.0's cmocka suite fails on aarch64 (write_chip_bad_status_test,
-  # plus the leak check), and nixpkgs gates doCheck only on Darwin, so the
-  # failure blocks raspberrypi-eeprom and with it system-path. The tests cover
-  # flashrom's own chip drivers, not anything rpi-eeprom-update relies on.
-  #
-  # The override lands here rather than in nixpkgs.overlays because this module
-  # takes packages straight from legacyPackages, outside the NixOS pkgs fixpoint
-  # an overlay would reach.
+  # flashrom 1.8.0's tests fail on aarch64 and block raspberrypi-eeprom; they
+  # cover chip drivers rpi-eeprom-update does not use. Not an overlay: this
+  # module takes packages from legacyPackages, outside the pkgs fixpoint.
   pkgs = inputs.nixpkgs.legacyPackages.aarch64-linux.extend (
     _: prev: {
       flashrom = prev.flashrom.overrideAttrs { doCheck = false; };
@@ -20,25 +15,17 @@ in
     inputs.nixos-raspberrypi.nixosModules.raspberry-pi-4.base
   ];
 
-  # The board modules read the flake from this argument, which
-  # nixos-raspberrypi.lib.nixosSystem would otherwise pass in specialArgs.
+  # nixos-raspberrypi.lib.nixosSystem would otherwise pass this in specialArgs.
   _module.args.nixos-raspberrypi = inputs.nixos-raspberrypi;
 
-  # The GPU firmware loads the kernel straight from the firmware partition, so
-  # USB SSD boot needs nothing past the EEPROM bootloader. Older generations
-  # boot by pointing `os_prefix=` in config.txt at their directory under
-  # /boot/firmware/nixos.
+  # Older generations boot by pointing `os_prefix=` in config.txt at their
+  # directory under /boot/firmware/nixos.
   boot.loader.raspberry-pi.bootloader = "kernel";
 
-  # nixos-raspberrypi builds this kernel against its own pinned nixpkgs (26.05),
-  # whose binary cache carries it prebuilt. Our 26.11 NixOS reads two attributes
-  # that a 26.05 kernel derivation lacks: `target` (for
-  # `boot.loader.kernelFile`, and nixos-raspberrypi's own bootloader module)
-  # and `buildDTBs` (the `hardware.deviceTree.enable` default). They are added
-  # here, through `override` too, since NixOS re-overrides the kernel to apply
-  # `boot.kernelPatches`. The derivation is untouched, so the output path stays
-  # the one nixos-raspberrypi.cachix.org serves. Drop this once
-  # nixos-raspberrypi's main branch moves to 26.11.
+  # Adds the `target` and `buildDTBs` attributes our 26.11 NixOS reads and the
+  # 26.05 kernel lacks, through `override` so the output path stays the one
+  # nixos-raspberrypi.cachix.org serves.
+  # TODO: drop once nixos-raspberrypi's main branch moves to 26.11.
   boot.kernelPackages =
     let
       withAttrs =
@@ -56,13 +43,10 @@ in
 
   boot.zfs.forceImportRoot = false;
 
-  # The Raspberry Pi kernel ships with the memory cgroup controller disabled.
-  # Without it runc can't apply memory settings, so no container starts.
+  # Without the memory cgroup, runc can't apply memory settings.
   #
-  # The SSDs' Sabrent enclosures use a JMicron JMS578 bridge (152d:a578),
-  # which drops off the bus under UAS on the USB 3 ports. On a USB 2 port
-  # instead, etcd's fsyncs queue behind reads; plain usb-storage keeps the
-  # drive on USB 3.
+  # The Sabrent enclosures' JMicron JMS578 bridge (152d:a578) drops off the bus
+  # under UAS on USB 3, and USB 2 queues etcd's fsyncs behind reads.
   # https://forums.raspberrypi.com/viewtopic.php?f=28&t=245931
   boot.kernelParams = [
     "cgroup_enable=memory"
@@ -70,22 +54,16 @@ in
     "usb-storage.quirks=152d:a578:u"
   ];
 
-  # The PoE HAT uses the stock rpi-poe overlay. All of its fan-curve parameters
-  # are optional and the defaults are what we want.
   hardware.raspberry-pi.config.pi4.dt-overlays.rpi-poe = {
     enable = true;
     params = { };
   };
 
-  # nixos-raspberrypi's sd-image sizes the firmware partition (1024 MiB) for
-  # the kernels and initrds the `kernel` bootloader keeps there. Build with
-  # `make pik8sN-sd`.
+  # Build with `make pik8sN-sd`.
   image.modules.raspberry-pi = {
     imports = [ inputs.nixos-raspberrypi.nixosModules.sd-image ];
 
-    # The sd-image imports nixpkgs' profiles/base.nix, which turns on ZFS and
-    # so builds zfs-kernel against the Pi kernel. The installed system has no
-    # ZFS, so the image doesn't need it either.
+    # profiles/base.nix turns on ZFS, which the installed system does not have.
     boot.supportedFilesystems.zfs = lib.mkForce false;
   };
 

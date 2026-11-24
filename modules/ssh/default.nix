@@ -16,7 +16,6 @@ let
   PID_PIPE = "${RUN_DIR}/pid_pipe";
   LOCK_PATH = "${RUN_DIR}/lock";
 
-  # Prevent sleeping on active SSH
   sleep_script = pkgs.writeScript "infinite-sleep" ''
     #!/bin/sh
 
