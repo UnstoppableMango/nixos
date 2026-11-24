@@ -102,8 +102,6 @@
       inputs.flake-parts.follows = "flake-parts";
     };
 
-    # The VMs on gaea (modules/attic). Its spectrum input only builds the
-    # graphics hypervisor, which no VM here uses.
     microvm = {
       url = "github:microvm-nix/microvm.nix";
       inputs.nixpkgs.follows = "nixpkgs";

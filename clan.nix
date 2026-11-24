@@ -279,13 +279,13 @@ in
             "[BODY].needsDbUpgrade == false"
           ];
         };
-        # The API answers 401 without a token, which a Cloudflare error page
-        # does not.
         services.attic = {
           url = "http://${managed.gaea.ip}:8080/thecluster/nix-cache-info";
           conditions = [ "[STATUS] == 200" ];
           page = true;
         };
+        # The API answers 401 without a token, which a Cloudflare error page
+        # does not.
         services.hercules-ci = {
           url = "https://hercules-ci.com/api/v1/accounts/me";
           conditions = [ "[STATUS] == 401" ];

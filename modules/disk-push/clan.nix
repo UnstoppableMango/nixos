@@ -1,4 +1,4 @@
-# ./default.nix, authenticated with the shared vars Gatus also reads.
+# Authenticates the push with the vars Gatus shares.
 { config, lib, ... }:
 let
   inherit (config.clan.core.vars.generators) uptime-push uptime-tls;

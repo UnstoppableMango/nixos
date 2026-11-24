@@ -129,7 +129,8 @@ Other machines (agreus, pollux, castor, zeus, gaea, apollo, pik8s1–9) follow t
 - `dotfiles` - Personal dotfiles flake; hades takes its `overlays.default`.
 - `hercules-ci-agent` - Provides `nixosModules.multi-agent-service`, which the `hercules-ci-agent` clan service imports to run one agent per Hercules CI account on gaea.
   Its nixpkgs is not followed, so the agent package matches what upstream caches.
-- `microvm` - microvm.nix, for the VMs on gaea (`modules/attic`). Its `spectrum` input is only for the graphics hypervisor, so nothing fetches it.
+- `microvm` - microvm.nix, for the VMs on gaea (`modules/attic`).
+  Its `spectrum` input is only for the graphics hypervisor, so nothing fetches it.
 - `hosts` - Machine inventory (name, ip, arch, role) shared with dotfiles, which follows this input
 - `disko` - Declarative disk partitioning (each host has a `disk-config.nix`)
 - `nixos-hardware` - Hardware-specific module presets (hades)

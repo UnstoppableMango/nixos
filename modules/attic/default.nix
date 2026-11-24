@@ -13,13 +13,13 @@ let
   inherit (config.clan.core.vars.generators) attic-jwt attic-signing uptime-push;
   guest = config.microvm.vms.attic.config.config;
   lanAddress = (lib.head config.networking.interfaces.eno1.ipv4.addresses).address;
-  gatus = builtins.match "https://([0-9.]+):([0-9]+)" config.diskPush.url;
+  gatus = builtins.match "https://([0-9.]+):([0-9]+)" (toString config.diskPush.url);
   gatusIp = lib.elemAt gatus 0;
   gatusPort = lib.elemAt gatus 1;
 
   # cloud-hypervisor takes no credentials, so the secrets reach the guest as
   # a read-only disk holding a tar, which ./guest.nix unpacks into /run.
-  secrets = "/run/microvm-attic/secrets.tar";
+  secretsTar = "/run/microvm-attic/secrets.tar";
 
   stopVmFilter = ''
     iptables -w -t mangle -D PREROUTING -i ${net.tap} -j attic-vm 2>/dev/null || true
@@ -29,6 +29,13 @@ let
 in
 {
   imports = [ inputs.microvm.nixosModules.host ];
+
+  assertions = [
+    {
+      assertion = gatus != null;
+      message = "modules/attic: diskPush.url must be https://<ip>:<port>, which the VM's firewall rules read.";
+    }
+  ];
 
   # A token is a JWT signed with this key, so replacing it revokes every token.
   clan.core.vars.generators.attic-jwt = {
@@ -55,7 +62,8 @@ in
   # paths nor reconfigure the cache.
   clan.core.vars.generators.attic-push-token = {
     dependencies = [ "attic-jwt" ];
-    files.token.secret = true;
+    # Nothing on gaea uses it until the builder VM does.
+    files.token.deploy = false;
     runtimeInputs = [ pkgs.attic-server ];
     script = ''
       ATTIC_SERVER_TOKEN_RS256_SECRET_BASE64=$(<"$in/attic-jwt/key") \
@@ -69,7 +77,7 @@ in
   microvm.vms.attic.config = {
     imports = [ ./guest.nix ];
     attic = {
-      inherit secrets;
+      secrets = secretsTar;
       apiEndpoint = "http://${lanAddress}:${toString net.port}/";
       gatusUrl = config.diskPush.url;
       gatusPubkey = config.diskPush.pubkeyFile;
@@ -95,7 +103,7 @@ in
       printf 'ATTIC_SERVER_TOKEN_RS256_SECRET_BASE64=%s\n' "$(<${attic-jwt.files.key.path})" > staging/atticd.env
       cp ${attic-signing.files.key.path} staging/signing-key
       cp ${uptime-push.files.token.path} staging/uptime-push-token
-      tar --create --file ${secrets} --owner=0 --group=0 -C staging .
+      tar --create --file ${secretsTar} --owner=0 --group=0 -C staging .
       rm -r staging
       chown -R microvm:kvm "$RUNTIME_DIRECTORY"
     '';
@@ -104,8 +112,6 @@ in
   systemd.services."microvm@attic" = {
     requires = [ "dev-vms-attic.device" ];
     after = [ "dev-vms-attic.device" ];
-    # Inside the memory the kubelet reserves for CI (modules/ci-limits).
-    serviceConfig.Slice = "ci.slice";
   };
 
   services.udev.extraRules = ''
