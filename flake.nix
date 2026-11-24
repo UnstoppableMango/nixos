@@ -99,6 +99,11 @@
       inputs.flake-parts.follows = "flake-parts";
     };
 
+    microvm = {
+      url = "github:microvm-nix/microvm.nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     hosts = {
       url = "github:UnstoppableMango/hosts";
       inputs.nixpkgs.follows = "nixpkgs";

@@ -231,6 +231,9 @@ in
       imports = [ ./machines/agreus/configuration.nix ];
     };
 
+    # For the attic VM (modules/attic).
+    gaea.imports = [ inputs.microvm.nixosModules.host ];
+
     # From the inventory, so the checks follow machine and control-plane changes.
     pik8s3.uptime =
       let
@@ -255,6 +258,11 @@ in
             "[BODY].needsDbUpgrade == false"
           ];
         };
+        services.attic = {
+          url = "http://${managed.gaea.ip}:8080/thecluster/nix-cache-info";
+          conditions = [ "[STATUS] == 200" ];
+          page = true;
+        };
         # A 401 tells the API apart from a Cloudflare error page.
         services.hercules-ci = {
           url = "https://hercules-ci.com/api/v1/accounts/me";
@@ -266,7 +274,7 @@ in
           disk = builtins.mapAttrs (
             _: host: lib.optionalAttrs (builtins.elem "workstation" host.tags) { heartbeat = null; }
           ) managed;
-          # No heartbeat until the VMs push, or they would page from the start.
+          # No heartbeat until the builder VM pushes, or it would page from the start.
           builder =
             lib.genAttrs
               [
@@ -277,7 +285,7 @@ in
               (_: {
                 heartbeat = null;
               });
-          attic.disk.heartbeat = null;
+          attic.disk = { };
         };
       };
   };

@@ -79,7 +79,7 @@ The dashed VIP link is a keepalived advertisement rather than a cable.
 | 1 (native) | Personal | `192.168.1.0/24` | `192.168.1.1` | Workstation, wireless, consumer devices |
 | 20 | Homelab | `10.0.69.0/24` | `10.0.69.1` | rosequartz Kubernetes cluster |
 
-Neither subnet, nor the untagged Ceph cluster network `10.0.70.0/24`, overlaps the cluster's internal ranges.
+Neither subnet, nor the untagged Ceph cluster network `10.0.70.0/24`, nor gaea's VM links in `10.0.71.0/24`, overlaps the cluster's internal ranges.
 The rosequartz service CIDR is `10.0.0.0/24` and the pod CIDR is `10.1.0.0/16`, per the kube-apiserver and kube-controller-manager flags on the control-plane nodes.
 
 ## Hosts
@@ -153,6 +153,18 @@ The aggregator must have jumbo frames enabled, since every port and interface on
 
 `modules/ceph-cluster-network` puts the host address on `ceph0`, a macvlan shim on the SFP+ port, and runs multus as the host CNI plugin so OSD pods get a macvlan interface in the host's range.
 The Rook side, and why the host address sits on a shim rather than the port, is in the-cluster's `docs/storage.md`.
+
+## VM links on gaea
+
+Each microVM on gaea gets a tap with a `/30` from `10.0.71.0/24`, routed by gaea and reachable from nowhere else.
+
+| VM | Tap | gaea | VM |
+| --- | --- | --- | --- |
+| attic | `vm-attic` | `10.0.71.1` | `10.0.71.2` |
+
+The LAN reaches attic at `http://10.0.69.11:8080`, which gaea forwards to `10.0.71.2:8080`.
+attic itself can only answer connections and push to Gatus on pik8s3, masqueraded as gaea.
+`modules/attic` holds the rules.
 
 ## DNS and service addressing
 
