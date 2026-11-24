@@ -253,6 +253,9 @@ in
       imports = [ ./machines/agreus/configuration.nix ];
     };
 
+    # For the attic VM (modules/attic).
+    gaea.imports = [ inputs.microvm.nixosModules.host ];
+
     # Read from the inventory rather than listed in pik8s3's own config, so
     # the checks follow machines and control-plane changes.
     pik8s3.uptime =

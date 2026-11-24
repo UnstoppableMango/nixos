@@ -3,7 +3,6 @@
 # gaea's address.
 {
   config,
-  inputs,
   lib,
   pkgs,
   ...
@@ -28,8 +27,6 @@ let
   '';
 in
 {
-  imports = [ inputs.microvm.nixosModules.host ];
-
   assertions = [
     {
       assertion = gatus != null;
