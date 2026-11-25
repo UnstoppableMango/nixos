@@ -35,6 +35,12 @@ in
       description = "nix `cores` per build.";
     };
 
+    vmMemory = mkOption {
+      type = types.ints.unsigned;
+      default = 0;
+      description = "Memory of CI microVMs, which run outside the slice, in GiB.";
+    };
+
     reservedCpu = mkOption {
       type = types.ints.positive;
       description = "CPUs the kubelet reserves for the host.";
@@ -65,10 +71,10 @@ in
     };
 
     services.kubernetes.kubelet.extraConfig = {
-      # The CI slice ceiling plus about 4 GiB for the rest of the host.
+      # The CI slice ceiling and VMs, plus about 4 GiB for the rest of the host.
       systemReserved = {
         cpu = toString cfg.reservedCpu;
-        memory = "${toString (cfg.memoryMax + 4)}Gi";
+        memory = "${toString (cfg.memoryMax + cfg.vmMemory + 4)}Gi";
       };
       kubeReserved = {
         cpu = "1";

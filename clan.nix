@@ -253,8 +253,13 @@ in
       imports = [ ./machines/agreus/configuration.nix ];
     };
 
-    # For the attic VM (modules/attic).
-    gaea.imports = [ inputs.microvm.nixosModules.host ];
+    # For the attic and builder VMs (modules/attic, modules/builder).
+    gaea.imports = [
+      inputs.microvm.nixosModules.host
+      {
+        microvm.vms.builder.extraModules = [ inputs.hercules-ci-agent.nixosModules.multi-agent-service ];
+      }
+    ];
 
     # Read from the inventory rather than listed in pik8s3's own config, so
     # the checks follow machines and control-plane changes.
@@ -299,17 +304,12 @@ in
           disk = builtins.mapAttrs (
             _: host: lib.optionalAttrs (builtins.elem "workstation" host.tags) { heartbeat = null; }
           ) managed;
-          # No heartbeat until the builder VM pushes, or it would page from the start.
-          builder =
-            lib.genAttrs
-              [
-                "disk"
-                "gc"
-                "agents"
-              ]
-              (_: {
-                heartbeat = null;
-              });
+          builder = {
+            disk = { };
+            agents = { };
+            # No heartbeat until the builder GC pushes (#530), or it would page from the start.
+            gc.heartbeat = null;
+          };
           attic.disk = { };
         };
       };
