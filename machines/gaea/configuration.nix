@@ -46,6 +46,9 @@
   # ixgbe refuses the aggregator's non-Intel SFP+ modules otherwise.
   boot.extraModprobeConfig = "options ixgbe allow_unsupported_sfp=1";
 
+  # sg_ses needs /dev/sg* to blink the expander's bay LEDs.
+  boot.kernelModules = [ "sg" ];
+
   cephClusterNetwork = {
     enable = true;
     interface = "enp99s0f1";
