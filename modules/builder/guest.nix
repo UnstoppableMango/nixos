@@ -62,7 +62,8 @@ in
 
     fileSystems."/nix" = {
       device = "/dev/disk/by-id/virtio-builder";
-      fsType = "ext4";
+      fsType = "btrfs";
+      options = [ "compress=zstd" ];
       autoFormat = true;
       neededForBoot = true;
     };
