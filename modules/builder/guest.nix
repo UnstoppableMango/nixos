@@ -13,6 +13,7 @@ let
   secrets = "/run/builder-secrets";
   agentUnits = map (account: "hercules-ci-agent-${account}.service") cfg.accounts;
   gc = {
+    stopped = "/run/builder-gc-stopped";
     triggerPercent = 15;
     targetPercent = 35;
   };
@@ -222,7 +223,6 @@ in
       };
     };
 
-    # No roots are kept, and running tasks are interrupted rather than drained.
     systemd.services.builder-gc = {
       description = "Collect the store when /nix runs low";
       after = [ "network-online.target" ];
@@ -235,7 +235,13 @@ in
       serviceConfig = {
         Type = "oneshot";
         LoadCredential = "token:${secrets}/uptime-push-token";
-        ExecStopPost = "${config.systemd.package}/bin/systemctl start --no-block ${lib.escapeShellArgs agentUnits}";
+        # Runs however the script ends, but leaves agents stopped by hand alone.
+        ExecStopPost = pkgs.writeShellScript "builder-gc-restart" ''
+          if [[ -e ${gc.stopped} ]]; then
+            rm ${gc.stopped}
+            ${config.systemd.package}/bin/systemctl start --no-block ${lib.escapeShellArgs agentUnits}
+          fi
+        '';
       };
       script = ''
         measure() {
@@ -248,6 +254,7 @@ in
         measure
         success=true
         if below ${toString gc.triggerPercent}; then
+          touch ${gc.stopped}
           systemctl stop ${toString agentUnits}
           deficit() { echo $((size * ${toString gc.targetPercent} / 100 - avail)); }
           max=$(deficit)
@@ -257,7 +264,8 @@ in
             measure
             ((avail > before)) || break
             # --max counts uncompressed bytes, which zstd frees less of.
-            max=$(($(deficit) * (max * 100 / (avail - before)) / 100 + 1))
+            ratio=$((max * 100 / (avail - before)))
+            max=$(($(deficit) * (ratio > 100 ? ratio : 100) / 100 + 1))
           done
           if below ${toString gc.targetPercent}; then success=false; fi
           error="collected to $((avail * 100 / size))% free, target ${toString gc.targetPercent}%"

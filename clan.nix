@@ -283,7 +283,7 @@ in
           builder = {
             disk = { };
             agents = { };
-            # Pushed hourly.
+            # builder-gc's timer is 1h.
             gc.heartbeat = "2h";
           };
           attic.disk = { };

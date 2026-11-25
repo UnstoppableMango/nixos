@@ -20,7 +20,6 @@ The timer carries a 6h `RandomizedDelaySec`, so agent machines rarely collect at
 Other auto-GC (`nix.gc`, `min-free`) has no such hook and must stay off; the service asserts `nix.gc.automatic` is unset.
 
 `concurrentTasks = 0` keeps an agent's user, secrets and unit but never starts the unit, since the agent itself refuses 0.
-Rolling back is setting the count again.
 
 ## Deploying a nix update that upgrades the store schema
 
