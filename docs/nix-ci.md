@@ -289,7 +289,6 @@ Tickets for `unmango/ci` are filed in nixos until that repo exists, and the kube
 | Step | Ticket |
 | --- | --- |
 | 0 | [Take hades and zeus out of Hercules CI and rotate the harmonia key](https://github.com/UnstoppableMango/nixos/issues/518) |
-| 0 | [Remove the hercules-ci-agent chart](https://github.com/unmango/charts/issues/148) |
 | 0 | [Replace zeus's worn OS drive](https://github.com/UnstoppableMango/nixos/issues/522) |
 | 1 | [Fit the SN7100 and swap gaea's OS disk in one maintenance window](https://github.com/UnstoppableMango/nixos/issues/519) |
 | 2 | [Add the unmango/ci repository](https://github.com/unmango/scm/issues/373) |
