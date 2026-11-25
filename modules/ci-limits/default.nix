@@ -1,9 +1,5 @@
-# Resource limits for hosts that run Hercules CI builds next to rook-ceph OSDs
-# and other rosequartz pods, without swap. Unbounded, the builds and the pods
-# each assume the whole machine and the kernel OOM killer picks among OSDs.
-#
-# The CI stack shares one slice whose ceiling the kubelet reserves, so the
-# scheduler never hands that memory to pods.
+# Limits for hosts running Hercules CI builds next to OSDs without swap, so
+# the OOM killer does not pick among OSDs. The kubelet reserves the CI slice.
 { config, lib, ... }:
 let
   cfg = config.ciLimits;

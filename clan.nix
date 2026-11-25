@@ -10,9 +10,8 @@ let
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMsFkHA8jLd9sHV5a/zcMsaxo/o+ZnEB95CBSRnu3YfD erik@darter"
   ];
 
-  # Which machines this clan manages. Tags and addresses come from the `hosts`
-  # flake, which covers the whole network, so narrow it to these names; comment
-  # an entry out to drop the machine from the inventory.
+  # Tags and addresses come from the `hosts` flake. Comment an entry out to drop
+  # the machine.
   clanMachines = {
     hades = { };
     agreus = { };
@@ -32,8 +31,7 @@ let
     pik8s9 = { };
   };
 
-  # intersectAttrs drops unmatched names silently, so a typo above would quietly
-  # remove a machine from the clan rather than fail. Check first.
+  # intersectAttrs drops unmatched names silently, so a typo would remove a machine.
   unknown = builtins.attrNames (builtins.removeAttrs clanMachines (builtins.attrNames hosts));
 
   managed =
@@ -70,10 +68,7 @@ in
   inventory.machines = machines;
 
   inventory.instances = {
-    # Plain NixOS modules every machine carries (listed in
-    # ./modules/service/base).
-    # Attaching them here, rather than in each machines/*/configuration.nix,
-    # means a new machine inherits them by joining the inventory.
+    # Attached here so a new machine inherits them by joining the inventory.
     base = {
       module.name = "@UnstoppableMango/base";
       module.input = "self";
@@ -86,7 +81,6 @@ in
       module.name = "users";
 
       roles.default = {
-        # Add to all machines
         tags.all = { };
 
         settings = {
@@ -133,16 +127,14 @@ in
       module.name = "sshd";
       module.input = "clan-core";
 
-      # Every machine runs sshd with a CA-signed host cert for
-      # <machine>.thecluster.io, and trusts that CA in return, so connecting
-      # never falls back to TOFU.
+      # CA-signed host certs, so connecting never falls back to TOFU.
       roles.server.tags.all = { };
       roles.server.settings.authorizedKeys = sshKeys;
       roles.client.tags.all = { };
     };
 
-    # The Pis build on gaea. Built on a Pi, a closure can only substitute from
-    # the caches that Pi already trusts, and compiles everything else there.
+    # The Pis build on gaea: a Pi can only substitute from caches it already
+    # trusts, and compiles everything else itself.
     build-host = {
       module.name = "@UnstoppableMango/build-host";
       module.input = "self";
@@ -157,27 +149,21 @@ in
       module.input = "clan-core";
 
       roles.default = {
-        # cache.clan.lol and nix-community.cachix.org, trusted everywhere.
         tags.all = { };
 
-        # The service only marks caches as trusted. ./modules/cache carries the
-        # substituters the daemon actually pulls from, shared by every machine.
+        # This only marks caches trusted; ./modules/cache sets the substituters.
         extraModules = [ ./modules/cache ];
       };
     };
 
-    # Serves each server's own store to the clan. Complements ./modules/cache,
-    # whose entries are all hosted or pull-through caches: nothing there offers
-    # a path that only ever existed on one of these machines.
+    # Serves each server's store, which no hosted cache in ./modules/cache offers.
     harmonia = {
       module.name = "@UnstoppableMango/harmonia";
       module.input = "self";
 
-      # Addresses come from the hosts flake rather than <machine>.thecluster.io,
-      # so reaching a server does not depend on LAN DNS.
-      #
-      # A server must stay up: the Hercules agents fail their startup check
-      # when a substituter is unreachable.
+      # By address, so reaching a server does not depend on LAN DNS.
+      # A server must stay up: the Hercules agents fail their startup check when a
+      # substituter is unreachable.
       roles.server.machines = {
         apollo.settings.address = managed.apollo.ip;
         gaea.settings.address = managed.gaea.ip;
@@ -187,8 +173,7 @@ in
       roles.client.tags.all = { };
     };
 
-    # Host agents for both Hercules CI accounts. These are the only agents:
-    # Hercules CI runs on physical machines, not in rosequartz.
+    # The only Hercules agents; none run in rosequartz.
     hercules-ci-unmango = {
       module.name = "@UnstoppableMango/hercules-ci-agent";
       module.input = "self";
@@ -222,28 +207,21 @@ in
       roles.server.tags.server = { };
     };
 
-    # THECLUSTER's vanilla-Kubernetes cluster, "rosequartz", is defined via
-    # cairn's `cairn.clusters.rosequartz` option tree in flake.nix (spec at
-    # ./clan/rosequartz-cluster.nix), which lowers to the per-service
-    # `rosequartz-*` inventory instances that used to be hand-written here.
+    # rosequartz is defined through cairn's `cairn.clusters.rosequartz` in flake.nix,
+    # from ./clan/rosequartz-cluster.nix.
   };
 
   machines = {
     hades = {
       clan.core.deployment.requireExplicitUpdate = true;
 
-      # clan-core's recommended defaults set networking.domain from meta.domain
-      # above, which makes targetHost default to root@hades.thecluster.io. That
-      # name does not exist in DNS, so use the address like the `internet`
-      # instance does.
+      # The default root@hades.thecluster.io does not resolve.
       clan.core.networking.targetHost = "root@${managed.hades.ip}";
 
       imports = with inputs; [
         nixos-hardware.nixosModules.asus-rog-strix-x570e
         nixos-hardware.nixosModules.common-pc-ssd
-        # erik's home is a standalone Home Manager install, so the only thing
-        # taken from dotfiles here is the overlay (nix-direnv and friends, which
-        # the system half also pulls from).
+        # erik's home is a standalone Home Manager install, so only the overlay is taken.
         { nixpkgs.overlays = [ dotfiles.overlays.default ]; }
         ./machines/hades/configuration.nix
       ];
@@ -256,8 +234,7 @@ in
     # For the attic VM (modules/attic).
     gaea.imports = [ inputs.microvm.nixosModules.host ];
 
-    # Read from the inventory rather than listed in pik8s3's own config, so
-    # the checks follow machines and control-plane changes.
+    # From the inventory, so the checks follow machine and control-plane changes.
     pik8s3.uptime =
       let
         inherit (inputs.nixpkgs) lib;
@@ -270,9 +247,8 @@ in
         inherit (rosequartz) vip;
         apiservers = lib.genAttrs rosequartz.services.apiserver.machines ipOf;
         etcd = lib.genAttrs etcdMembers ipOf;
-        # status.php answers without a login, and reports maintenance mode,
-        # which a stuck `occ upgrade` leaves on, and a pending upgrade, which
-        # a new image that never ran it leaves behind.
+        # status.php answers without a login and reports maintenance mode and pending
+        # upgrades.
         services.nextcloud = {
           url = "https://cloud.thecluster.io/status.php";
           conditions = [
@@ -287,8 +263,7 @@ in
           conditions = [ "[STATUS] == 200" ];
           page = true;
         };
-        # The API answers 401 without a token, which a Cloudflare error page
-        # does not.
+        # A 401 tells the API apart from a Cloudflare error page.
         services.hercules-ci = {
           url = "https://hercules-ci.com/api/v1/accounts/me";
           conditions = [ "[STATUS] == 401" ];

@@ -237,8 +237,7 @@ Decided in [Decide how we know CI meets the Destination](https://github.com/Unst
 - Every clan machine (through the `base` instance) and the builder and attic VMs push disk status to Gatus external endpoints on a timer.
   The builder's GC and agent liveness push the same way.
   A missed push is a failure.
-- **Pages** go to ntfy.sh on a long random topic kept as a clan var, to Erik only, with no secrets in the text:
-  any OS disk under 10% free, a builder GC that misses its target, the builder VM or its agents down, attic down or under 15% free, a Hercules outage, and a `main` red for more than 24 hours.
+- **Pages** go to ntfy.sh on a long random topic kept as a clan var, to Erik only, with no secrets in the text: any OS disk under 10% free, a builder GC that misses its target, the builder VM or its agents down, attic down or under 15% free, a Hercules outage, and a `main` red for more than 24 hours.
 - **`ci-health.yml`** in `unmango/ci` is a reusable workflow each Nix repo calls from its own `ci-health` job, daily and on push to `main`.
   It keeps a pinned "CI health" issue labelled `ci-health` in the calling repo, written with that repo's `GITHUB_TOKEN`: its `main`, open `renovate:needs-human` PRs, and p50 and p90 of the `required` run's duration on `main`, flagging a p50 over 5 minutes.
   A red `main` carries the `ci-health:red` label, and the body records when the streak started.
@@ -275,10 +274,11 @@ Each step is a build ticket in the repo that owns it, and each ticket names its 
 2. **Shared pieces**, in parallel with 1, 3 and 4: `unmango/ci`, `flakeModules.ci`, the workflows, the presets, the Apps, the ruleset defaults, alerting.
 3. **attic VM**, empty.
 4. **Builder VM** with GC; gaea's bare-metal agents drop to 0 tasks but stay defined.
-5. **7-day proof:** every task in the VM, warm no-op under 5 minutes on tdl, no VM-caused failures, every GC reaches its target. Then the bare-metal agents go.
-6. **Clan substituter switch**, gaea first: attic in, ncps and harmonia out of the clan. The ncps deployment itself stays until ARC stops running Nix jobs.
-7. **Repo waves**, each repo in three merges (add the gate, switch the ruleset once Hercules is green on `main`, drop the hosted Linux check), with ruleset switches batched per wave:
-   wave 1 nix and nixos; wave 2 tdl, the-cluster, vcs, control-plane, renovate-config; wave 3 scm, charts, and the collections.
+5. **7-day proof:** every task in the VM, warm no-op under 5 minutes on tdl, no VM-caused failures, every GC reaches its target.
+   Then the bare-metal agents go.
+6. **Clan substituter switch**, gaea first: attic in, ncps and harmonia out of the clan.
+   The ncps deployment itself stays until ARC stops running Nix jobs.
+7. **Repo waves**, each repo in three merges (add the gate, switch the ruleset once Hercules is green on `main`, drop the hosted Linux check), with ruleset switches batched per wave: wave 1 nix and nixos; wave 2 tdl, the-cluster, vcs, control-plane, renovate-config; wave 3 scm, charts, and the collections.
 8. **Cleanup:** ncps, ARC scale sets for Nix jobs and the runner store module, then the old Cachix caches 30 days after wave 3.
 
 ### Build tickets

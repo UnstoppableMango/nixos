@@ -1,6 +1,5 @@
-# Pi-hole on the host, outside rosequartz, so the LAN keeps a filtering
-# resolver while the cluster is down. Mirrors the-cluster's
-# apps/pihole/base/helm-release-pihole.yml, which this is meant to replace.
+# Pi-hole outside rosequartz, so the LAN keeps a filtering resolver while the
+# cluster is down. Meant to replace the-cluster's apps/pihole.
 {
   config,
   lib,
@@ -34,7 +33,6 @@ in
   };
 
   config = lib.mkIf cfg.enable {
-    # One password for every Pi-hole, so the web UI login is the same on each.
     clan.core.vars.generators.pihole-admin = {
       share = true;
       prompts.password = {
@@ -44,10 +42,8 @@ in
       files.env.secret = true;
       runtimeInputs = [ pkgs.gnused ];
       script = ''
-        # FTL reads any setting from an FTLCONF_<path> variable, and takes
-        # `webserver.api.password` in plain text, hashing it itself. Quoted
-        # and escaped so systemd's EnvironmentFile parsing passes every
-        # character through.
+        # FTL hashes a plain-text `webserver.api.password` itself. Quoted so
+        # EnvironmentFile parsing passes every character through.
         value=$(sed -e 's/[\\"$`]/\\&/g' "$prompts/password")
         printf '%s="%s"\n' FTLCONF_webserver_api_password "$value" > "$out/env"
       '';
@@ -78,30 +74,21 @@ in
           ];
           domain.name = "thecluster.lan";
           interface = cfg.interface;
-          # LOCAL, the default, refuses queries from subnets the host has no
-          # interface on, and hades and the rest of VLAN 1 reach this one
-          # through pfSense. Binding per address also keeps FTL off the
-          # wildcard address, which systemd-resolved's stub on 127.0.0.53:53
-          # would otherwise collide with.
-          # NONE writes no listening config, so the two lines below supply it.
-          # FTL's BIND mode is `bind-interfaces`, which binds only the
-          # addresses the interface has when FTL starts and never retries, and
-          # pik8s2 and pik8s6 came up listening on nothing. `bind-dynamic`
-          # binds addresses as they appear.
+          # LOCAL refuses VLAN 1, which reaches this through pfSense, and the wildcard
+          # address collides with systemd-resolved's stub on 127.0.0.53:53.
+          # NONE writes no listening config, so the lines below supply it.
+          # `bind-dynamic`, since FTL's `bind-interfaces` never retries, and
+          # pik8s2 and pik8s6 came up listening on nothing.
           listeningMode = "NONE";
         };
 
         misc.dnsmasq_lines = [
           "interface=${cfg.interface}"
           "bind-dynamic"
-          # Every name in the zone is an HTTPRoute behind the rosequartz
-          # gateway. The in-cluster piholes get these one at a time from
-          # external-dns, which needs a writable pihole.toml; NixOS keeps this
-          # one read-only, so the zone is a wildcard instead.
+          # pihole.toml is read-only here, so external-dns cannot write single records.
           "address=/thecluster.lan/${cfg.gatewayAddress}"
         ];
 
-        # timesyncd keeps the clock; FTL's NTP client and server would fight it.
         ntp = {
           ipv4.active = false;
           ipv6.active = false;
@@ -116,8 +103,7 @@ in
 
     services.pihole-web = {
       enable = true;
-      # The default, pi.hole, which FTL answers with its own address. A name
-      # in thecluster.lan would hit the wildcard and land on the gateway.
+      # A thecluster.lan name would hit the wildcard and land on the gateway.
       ports = [ "80" ];
     };
 

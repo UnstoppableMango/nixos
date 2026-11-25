@@ -15,11 +15,9 @@
 
   arcRunnerStore.enable = true;
 
-  # EPYC (Zen 2) has AVX2. Advertised so the Hercules agents here take the
-  # derivations that require it (nixpkgs' bun), which zeus cannot run (#416).
+  # Lets the agents here take derivations that need AVX2, which zeus lacks (#416).
   nix.settings.extra-system-features = [ "gccarch-x86-64-v3" ];
 
-  # 128 threads, 503 GB, shared with OSDs and the Actions runner pods.
   ciLimits = {
     memoryMax = 128;
     agentMemoryMax = 16;
@@ -28,8 +26,6 @@
     reservedCpu = 16;
   };
 
-  # EPYC 7502 rack box whose firmware is in UEFI mode, so it takes
-  # systemd-boot rather than zeus's legacy-BIOS grub.
   boot.loader = {
     efi.canTouchEfiVariables = true;
     systemd-boot = {
@@ -46,8 +42,7 @@
     AllowSuspendThenHibernate = "no";
   };
 
-  # enp99s0f1 is the X520-2 port cabled to the aggregator. ixgbe refuses SFP+
-  # modules and DACs that are not Intel-coded, and the aggregator's are not.
+  # ixgbe refuses the aggregator's non-Intel SFP+ modules otherwise.
   boot.extraModprobeConfig = "options ixgbe allow_unsupported_sfp=1";
 
   cephClusterNetwork = {
@@ -58,8 +53,7 @@
     rangeEnd = "10.0.70.127";
   };
 
-  # eno1 is the port cabled to GS724Tv4 `g1`. eno2 stays unconfigured; it
-  # carried the previous cluster's 10.69.0.0/16 network on a VLAN 69 subinterface.
+  # eno1 is cabled to GS724Tv4 `g1`.
   networking = {
     hostName = "gaea";
     useDHCP = false;

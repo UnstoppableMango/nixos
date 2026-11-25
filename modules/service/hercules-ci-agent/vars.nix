@@ -1,6 +1,5 @@
-# Shared so each account is prompted once and every machine deploys the same
-# token. Both files belong to the agent's user, which the upstream module
-# names `hci-<account>`.
+# Shared so each account is prompted once. The upstream module names the
+# agent's user `hci-<account>`.
 account:
 let
   user = "hci-${account}";

@@ -1,7 +1,5 @@
-# Chromium `ManagedBookmarks` policy value, shared by ./default.nix (which
-# installs it on hades) and flake.nix's `brave-bookmarks-policy` package (which
-# renders the same JSON for hosts outside this clan).
-#
+# Chromium `ManagedBookmarks` policy, shared with flake.nix's
+# `brave-bookmarks-policy` package for hosts outside this clan.
 # https://chromeenterprise.google/policies/#ManagedBookmarks
 [
   { toplevel_name = "thecluster"; }

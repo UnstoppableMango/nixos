@@ -3,19 +3,15 @@ let
   primaryUser = "erik";
 in
 {
-  # Shared caches come from ../../modules/cache via the clan-cache instance.
   nix.settings = {
-    # dotfiles' modules/zed sets this too, but only in erik's nix.conf, which
-    # the daemon does not read. It stays here so `nixos-rebuild` as root also
-    # pulls Zed from cache. Keep the key in step with that module.
+    # dotfiles' modules/zed sets this only in erik's nix.conf, which the daemon
+    # ignores. Keep the key in step with that module.
     extra-substituters = [ "https://zed.cachix.org" ];
     extra-trusted-public-keys = [
       "zed.cachix.org-1:/pHQ6dpMsAZk2DiP4WCL0p9YDNKWj2Q5FL20bNmw1cU="
     ];
 
-    # gccarch-x86-64-v3 marks AVX2 for Hercules scheduling: derivations
-    # that need it (nixpkgs' bun) require the feature, so they skip zeus,
-    # whose Sandy Bridge Xeon lacks AVX2 (#416).
+    # Marks AVX2 so derivations that need it (nixpkgs' bun) skip zeus (#416).
     system-features = [
       "kvm"
       "gccarch-x86-64-v3"
@@ -98,7 +94,6 @@ in
     "amdgpu"
   ];
 
-  # Bootloader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
   # https://github.com/NixOS/nixpkgs/issues/23926#issuecomment-3298421104
@@ -111,15 +106,13 @@ in
     "iptable_nat"
   ];
 
-  # Language servers watch entire module caches, so a handful of concurrent
-  # editor and agent sessions exhaust systemd's 524288 default.
+  # Language servers watching module caches exhaust systemd's 524288 default.
   boot.kernel.sysctl."fs.inotify.max_user_watches" = 1048576;
 
   networking = {
     hostName = "hades";
-    # enp6s0 (RTL8125 2.5GbE, PCI 06:00.0) and enp7s0 (Intel I211 1GbE, PCI 07:00.0)
-    # share the same MAC address. DHCP is unreliable with duplicate MACs so both
-    # wired interfaces use static IPs; NM is left to manage wlp5s0.
+    # enp6s0 and enp7s0 share a MAC address, which breaks DHCP, so both wired
+    # interfaces are static and NM manages only wlp5s0.
     networkmanager = {
       enable = true;
       unmanaged = [
@@ -148,13 +141,10 @@ in
       address = "192.168.1.1";
       interface = "enp6s0";
     };
-    # Resolvers, and the resolvconf ordering that keeps them ahead of the ones
-    # NetworkManager picks up from wlp5s0's DHCP lease, come from
-    # ../../modules/dns.
+    # Resolvers come from ../../modules/dns.
   };
 
-  # hades is a workstation, so keep the HTML manual and nixos-help that the
-  # recommended defaults drop from servers.
+  # A workstation keeps the manual the server defaults drop.
   documentation.doc.enable = true;
 
   time.timeZone = "America/Chicago";
@@ -172,9 +162,8 @@ in
     LC_TIME = "en_US.UTF-8";
   };
 
-  # Disable ibus — it intercepts keyboard input on Wayland but can't deliver it
-  # back into bwrap sandboxes, making text fields in apps like Omnissa Horizon
-  # Client non-interactive. A plain xkb US layout needs no input method daemon.
+  # No ibus: on Wayland it cannot deliver input into bwrap sandboxes, so text
+  # fields in apps like Omnissa Horizon Client stop working.
   i18n.inputMethod = {
     enable = true;
     # type = null; # Disables IBus and other input method frameworks
@@ -195,23 +184,20 @@ in
     podman = {
       enable = true;
 
-      # Required for containers under podman-compose to be able to talk to each other.
+      # podman-compose containers need this to reach each other.
       defaultNetwork.settings.dns_enabled = true;
     };
   };
 
-  # Enable KVM virtualization support
   programs.virt-manager.enable = true;
   users.groups.libvirtd.members = [ primaryUser ];
   users.groups.libvirt.members = [ primaryUser ];
   virtualisation.libvirtd.enable = true;
   virtualisation.spiceUSBRedirection.enable = true;
 
-  # Enable the X11 windowing system.
   services.xserver.enable = true;
   services.xserver.videoDrivers = [ "amdgpu" ];
 
-  # Configure keymap in X11
   services.xserver.xkb = {
     layout = "us";
     variant = "";
@@ -226,10 +212,8 @@ in
     ];
   };
 
-  # Enable CUPS to print documents.
   services.printing.enable = true;
 
-  # Enable sound with pipewire.
   services.pulseaudio.enable = false;
   security.rtkit.enable = true;
   services.pipewire = {
@@ -237,12 +221,6 @@ in
     alsa.enable = true;
     alsa.support32Bit = true;
     pulse.enable = true;
-    # If you want to use JACK applications, uncomment this
-    #jack.enable = true;
-
-    # use the example session manager (no others are packaged yet so this is enabled by default,
-    # no need to redefine it in your config for now)
-    #media-session.enable = true;
   };
 
   services.btrfs.autoScrub = {
@@ -270,19 +248,13 @@ in
   host.gnome.enable = true;
   ssh.inhibitSleepOnSsh.enable = true;
 
-  # erik's home environment is a standalone Home Manager install switched with
-  # `make home` from the dotfiles repo, not a NixOS module here. This file owns
-  # the machine and erik's system account; everything under his home directory,
-  # including the rosequartz kubeconfig and its admin identity, is that repo's.
+  # erik's home is a standalone Home Manager install from the dotfiles repo.
   users.users.${primaryUser} = {
     shell = pkgs.zsh;
     description = "Erik Rasmussen";
 
-    # Start erik's systemd user manager at boot and keep it after logout, so
-    # `claude-remote-control.service` is up whenever the machine is. Plain
-    # `claude remote-control` reattaches to the sessions the previous server
-    # was serving, but only for about four hours after it stopped, and without
-    # lingering that clock runs while nobody is logged in.
+    # Lingering keeps claude-remote-control.service up, which can reattach to
+    # sessions only for about four hours after the previous server stopped.
     linger = true;
 
     extraGroups = [
@@ -293,30 +265,23 @@ in
     ];
   };
 
-  # tz's account comes from the `tz` users instance in clan.nix. Like erik's,
-  # tz's home is a standalone Home Manager install from the dotfiles repo; this
-  # only supplies the CLI to bootstrap it.
+  # tz's home is a standalone Home Manager install from the dotfiles repo.
   users.users.tz = {
     packages = [ pkgs.home-manager ];
-    # dotfiles' tz@hades configures zsh, not bash.
     shell = pkgs.zsh;
   };
 
-  # tz is the work account. The 1Password app's browser integration, system
-  # unlock and setgid `op` need the NixOS modules; Home Manager cannot set
-  # them up. tz@hades in dotfiles points SSH and git signing at its agent.
+  # 1Password's browser integration, system unlock and setgid `op` need the
+  # NixOS modules.
   programs._1password.enable = true;
   programs._1password-gui = {
     enable = true;
     polkitPolicyOwners = [ "tz" ];
   };
 
-  # Joins hades to the work tailnet. tz runs `tailscale up`/`down` without
-  # sudo, and with no auth key nothing connects until tz does.
-  # Shields up refuses every inbound tailnet connection: the firewall is off
-  # and sshd and the rest listen on all interfaces, and tz only
-  # needs to reach out. `tailscale logout` clears both prefs; tailscaled-set
-  # reapplies them on the next `systemctl restart tailscaled`.
+  # Shields up refuses inbound tailnet connections, since the firewall is off.
+  # `tailscale logout` clears both prefs; tailscaled-set reapplies them on the
+  # next `systemctl restart tailscaled`.
   services.tailscale = {
     enable = true;
     extraSetFlags = [
@@ -325,14 +290,12 @@ in
     ];
   };
 
-  # Enable automatic login for the user.
   services.displayManager.autoLogin.enable = true;
   services.displayManager.autoLogin.user = primaryUser;
   # GDM otherwise autologs into whichever session was picked last.
   services.displayManager.defaultSession = "gnome";
 
-  # The i3 session from dotfiles' modules/i3, picked from GDM's gear menu.
-  # NixOS' GDM Xsession wrapper `eval`s Exec, so $HOME expands at login.
+  # GDM's Xsession wrapper `eval`s Exec, so $HOME expands at login.
   services.displayManager.sessionPackages = [
     (
       pkgs.writeTextDir "share/xsessions/i3-hm.desktop" ''
@@ -348,13 +311,10 @@ in
     )
   ];
 
-  # The Hyprland session from dotfiles' modules/hyprland, picked from GDM's gear
-  # menu. This supplies the compositor, the session entry and
-  # xdg-desktop-portal-hyprland; the home config sets its package to null so
-  # this one is the only Hyprland on the machine. No uwsm: Home Manager's
-  # hyprland-session.target does the systemd integration, and the two conflict.
+  # The only Hyprland on the machine: the home config sets its package to null.
+  # No uwsm: it conflicts with Home Manager's hyprland-session.target.
   programs.hyprland.enable = true;
-  # hyprlock authenticates through PAM; programs.hyprland does not add its service.
+  # programs.hyprland does not add hyprlock's PAM service.
   security.pam.services.hyprlock = { };
 
   # https://github.com/NixOS/nixpkgs/issues/240444#issuecomment-1977617644
@@ -389,8 +349,6 @@ in
   programs.firefox.enable = false; # Only blue fox
   programs.steam.enable = true;
 
-  # List packages installed in system profile. To search, run:
-  # $ nix search wget
   environment.systemPackages = with pkgs; [
     archipelago
     gcc
@@ -455,35 +413,20 @@ in
     ubuntu-classic
   ];
 
-  # gpg-agent comes from dotfiles' modules/gnupg (signing only). SSH goes
-  # through GNOME's gcr-ssh-agent, which dotfiles points SSH_AUTH_SOCK at.
-
-  # The system half of dotfiles' modules/yubikey: scdaemon, ykman, and Yubico
-  # Authenticator reach the key through pcscd, and the udev rules grant the
-  # logged-in user access to the device.
+  # The system half of dotfiles' modules/yubikey.
   services.pcscd.enable = true;
   services.udev.packages = [ pkgs.yubikey-personalization ];
 
   services.lldpd.enable = true;
 
-  # Provide /bin/bash (and other FHS paths) so tools that hardcode /bin/bash work.
-  # Workaround for GitHub Copilot CLI's bash tool on NixOS.
+  # GitHub Copilot CLI's bash tool hardcodes /bin/bash.
   # https://github.com/github/copilot-cli/issues/3392
   services.envfs.enable = true;
 
   dotfiles.unifi.enable = true;
 
-  # Open ports in the firewall.
-  # networking.firewall.allowedTCPPorts = [ ... ];
-  # networking.firewall.allowedUDPPorts = [ ... ];
-  # Or disable the firewall altogether.
   networking.firewall.enable = false;
 
-  # This value determines the NixOS release from which the default
-  # settings for stateful data, like file locations and database versions
-  # on your system were taken. It's perfectly fine and recommended to leave
-  # this value at the release version of the first install of this system.
-  # Before changing this value read the documentation for this option
-  # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
-  system.stateVersion = "25.05"; # Did you read the comment?
+  # The release of the first install. Do not change it.
+  system.stateVersion = "25.05";
 }

@@ -4,7 +4,8 @@ Reference: https://clan.lol/docs/25.11/guides/services/community/
 
 ## What is a Clan Service
 
-A clan service is a Nix module with `_class = "clan.service"` that deploys coordinated NixOS configuration across multiple machines. Unlike plain NixOS modules (under `modules/`), clan services integrate with the clan inventory system for role-based, multi-machine deployment.
+A clan service is a Nix module with `_class = "clan.service"` that deploys coordinated NixOS configuration across multiple machines.
+Unlike plain NixOS modules (under `modules/`), clan services integrate with the clan inventory system for role-based, multi-machine deployment.
 
 Services in this repo live under `modules/service/<name>/` and are registered in `clan.nix`.
 
@@ -35,15 +36,16 @@ Optional manifest fields: `manifest.description`, `manifest.readme` (use `builti
 
 ## Roles
 
-Roles categorize machines by their function within a service. Two common patterns:
+Roles categorize machines by their function within a service.
+Two common patterns:
 
-- **peer** — equivalent machines; can communicate directly (e.g., VPN nodes)
-- **client-server** — hierarchical; clients unlikely to communicate with each other
+- **peer**: equivalent machines; can communicate directly (e.g., VPN nodes)
+- **client-server**: hierarchical; clients unlikely to communicate with each other
 
 Each role has:
-- `description` — explains what the role does
-- `interface.options` — configurable settings exposed to inventory
-- `perInstance` — NixOS config applied per-instance-per-machine
+- `description`: explains what the role does
+- `interface.options`: configurable settings exposed to inventory
+- `perInstance`: NixOS config applied per-instance-per-machine
 
 ```nix
 roles.server = {
@@ -97,7 +99,8 @@ perInstance.nixosModule = ./role.nix;
 }
 ```
 
-`module.input` defaults to `"clan-core"` if omitted. For local modules, always set `module.input = "self"`.
+`module.input` defaults to `"clan-core"` if omitted.
+For local modules, always set `module.input = "self"`.
 
 ## Tags
 
@@ -152,7 +155,8 @@ perInstance = { extendSettings, ... }: {
 
 ## Vars (Secrets & Generated Config)
 
-Vars live in `clan.core.vars.generators.<name>` inside a NixOS module. They generate secrets/files on demand.
+Vars live in `clan.core.vars.generators.<name>` inside a NixOS module.
+They generate secrets/files on demand.
 
 ```nix
 # In a nixosModule:
@@ -177,11 +181,13 @@ Vars live in `clan.core.vars.generators.<name>` inside a NixOS module. They gene
 }
 ```
 
-Run `clan vars generate` to execute generators. Secret files deploy to `/run/secrets/`, public files go to the nix store.
+Run `clan vars generate` to execute generators.
+Secret files deploy to `/run/secrets/`, public files go to the nix store.
 
 ## Exports (Cross-Machine Data Sharing)
 
-Exports share structured data between machines/instances. Experimental but available.
+Exports share structured data between machines/instances.
+Experimental but available.
 
 ```nix
 { clanLib, ... }: {

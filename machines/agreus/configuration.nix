@@ -17,16 +17,13 @@
   boot.loader = {
     efi.canTouchEfiVariables = true;
     systemd-boot = {
-      # A generation costs roughly 37M of kernel plus initrd, so 8 fit in the
-      # 500M ESP with room to spare. 25 overflows it and blocks rebuilds, since
-      # systemd-boot writes the new entry before pruning the old ones.
+      # More overflows the 500M ESP: systemd-boot writes a new entry before pruning.
       enable = true;
       configurationLimit = 8;
     };
   };
 
-  # Kubelet refuses to start w/ swap on. Disko still makes swapfile on
-  # disk, just don't activate it.
+  # Kubelet refuses to start with swap on. Disko still makes the swapfile.
   swapDevices = lib.mkForce [ ];
 
   # https://nixos.wiki/wiki/Power_Management#systemd_sleep
@@ -74,15 +71,6 @@
   #   };
   # };
 
-  # Enable automatic login
-  # services.displayManager.autoLogin.enable = true;
-  # services.displayManager.autoLogin.user = "office";
-
-  # This value determines the NixOS release from which the default
-  # settings for stateful data, like file locations and database versions
-  # on your system were taken. It‘s perfectly fine and recommended to leave
-  # this value at the release version of the first install of this system.
-  # Before changing this value read the documentation for this option
-  # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
-  system.stateVersion = "25.05"; # Did you read the comment?
+  # The release of the first install. Do not change it.
+  system.stateVersion = "25.05";
 }
