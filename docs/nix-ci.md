@@ -258,7 +258,6 @@ Decided in [Decide how we know CI meets the Destination](https://github.com/Unst
 | Piece | Why |
 | --- | --- |
 | Bare-metal Hercules agents (hades, zeus, gaea) | A sandbox escape gets root on the host |
-| `hercules-ci-agent` chart in unmango/charts | A container agent shares the node's kernel |
 | ARC scale sets for Nix jobs, and `modules/arc-runner-store` | Shared kernel, and every job starts with an empty store |
 | ncps | Runners have a warm store; attic replaces it |
 | harmonia on every host | It signs whatever is in the host store, PR output included |
@@ -271,7 +270,7 @@ Decided in [Decide how we know CI meets the Destination](https://github.com/Unst
 The order is from [#510](https://github.com/UnstoppableMango/nixos/issues/510).
 Each step is a build ticket in the repo that owns it, and each ticket names its blockers.
 
-0. **Wave 0:** hades and zeus leave Hercules and harmonia, the harmonia key is rotated, the chart is removed, zeus's OS drive is swapped.
+0. **Wave 0:** hades and zeus leave Hercules and harmonia, the harmonia key is rotated, zeus's OS drive is swapped.
 1. **gaea maintenance window:** the SN7100 and the new OS disk go in together.
 2. **Shared pieces**, in parallel with 1, 3 and 4: `unmango/ci`, `flakeModules.ci`, the workflows, the presets, the Apps, the ruleset defaults, alerting.
 3. **attic VM**, empty.
@@ -290,7 +289,6 @@ Tickets for `unmango/ci` are filed in nixos until that repo exists, and the kube
 | Step | Ticket |
 | --- | --- |
 | 0 | [Take hades and zeus out of Hercules CI and rotate the harmonia key](https://github.com/UnstoppableMango/nixos/issues/518) |
-| 0 | [Remove the hercules-ci-agent chart](https://github.com/unmango/charts/issues/148) |
 | 0 | [Replace zeus's worn OS drive](https://github.com/UnstoppableMango/nixos/issues/522) |
 | 1 | [Fit the SN7100 and swap gaea's OS disk in one maintenance window](https://github.com/UnstoppableMango/nixos/issues/519) |
 | 2 | [Add the unmango/ci repository](https://github.com/unmango/scm/issues/373) |
