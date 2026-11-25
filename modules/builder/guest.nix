@@ -118,7 +118,7 @@ in
     # database, or fetched again where a valid path refers to them.
     systemd.services.nix-store-verify = {
       description = "Drop or repair store paths the last system closure took along";
-      requiredBy = [ "nix-daemon.service" ];
+      wantedBy = [ "nix-daemon.service" ];
       before = [ "nix-daemon.service" ];
       after = [ "network-online.target" ];
       wants = [ "network-online.target" ];
@@ -133,6 +133,8 @@ in
     services.hercules-ci-agents = lib.genAttrs cfg.accounts (account: {
       settings = {
         concurrentTasks = config.microvm.vcpu / 8;
+        # Off the tmpfs root.
+        baseDirectory = lib.mkForce "/nix/var/lib/hercules-ci-agent-${account}";
         labels = {
           inherit account;
           host = config.networking.hostName;

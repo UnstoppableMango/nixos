@@ -1,6 +1,4 @@
-# The builder microVM: its own nix-daemon and a Hercules CI agent per account,
-# with its store on the `vms/builder` logical volume. Of the LAN it reaches
-# only attic and Gatus' push port; the internet through NAT.
+# The builder microVM. Of the LAN it reaches only attic and Gatus' push port.
 { config, lib, ... }:
 let
   accounts = [
@@ -37,8 +35,7 @@ in
         "-d ${attic.guest} -p tcp --dport ${toString attic.port} -j RETURN"
         "-d ${gatus.ip} -p tcp --dport ${gatus.port} -j RETURN"
       ]
-      # Every private, shared, link-local, multicast and reserved range: the
-      # host, the clan machines, rosequartz and the management network.
+      # Nothing else on the LAN, the host or the cluster.
       ++ map (range: "-d ${range} -j DROP") [
         "0.0.0.0/8"
         "10.0.0.0/8"

@@ -95,7 +95,7 @@ Other machines (agreus, pollux, castor, zeus, gaea, apollo, pik8s1–9) follow t
   - `builder/` - The builder microVM on gaea: its own nix-daemon and one Hercules CI agent per account, with `/nix` on the `vms/builder` logical volume.
     The store is an overlay over the system closure with a persistent database, so each boot runs `nix-store --verify --repair` to drop or refetch paths an earlier closure carried.
     It holds attic's push token, given to effects only on a default branch as the `attic` secret, and no signing key; `clan.nix` imports the upstream agent module into it.
-    It pushes agent liveness to `builder_agents` and free space on `/nix` to `builder_disk`. Nix's own GC is off; store GC is #530.
+    It pushes agent liveness to `builder_agents` and free space on `/nix` to `builder_disk`.
   - `vm-host/` - What gaea does for each microVM: a tap with its `/30`, the logical volume's ownership, a mangle filter on what the VM may open (`vmHost.vms.<name>.filter`), and its secrets, which cloud-hypervisor cannot take as credentials, built into an erofs image attached as a read-only disk.
   - `pihole/` - Pi-hole on pik8s1, pik8s2 and pik8s6, outside rosequartz, so the LAN keeps a filtering resolver while the cluster is down.
     Its config is read-only NixOS, so external-dns cannot write `thecluster.lan` records into it the way it does for the in-cluster piholes; the whole zone is a wildcard to the rosequartz gateway (`pihole.gatewayAddress`) instead.
