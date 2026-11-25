@@ -161,10 +161,13 @@ Each microVM on gaea gets a tap with a `/30` from `10.0.71.0/24`, routed by gaea
 | VM | Tap | gaea | VM |
 | --- | --- | --- | --- |
 | attic | `vm-attic` | `10.0.71.1` | `10.0.71.2` |
+| builder | `vm-builder` | `10.0.71.5` | `10.0.71.6` |
 
 The LAN reaches attic at `http://10.0.69.11:8080`, which gaea forwards to `10.0.71.2:8080`.
 attic itself can only answer connections and push to Gatus on pik8s3, masqueraded as gaea.
-`modules/attic` holds the rules.
+The builder reaches attic at `10.0.71.2:8080`, Gatus' push port, and the internet NATed as gaea, resolving through `9.9.9.9` and `1.1.1.1`.
+Every other private, shared, link-local and multicast range is dropped, so it reaches neither gaea, the clan machines, rosequartz nor the management network.
+`modules/vm-host` applies each VM's filter, and `modules/attic` and `modules/builder` hold the rules.
 
 ## DNS and service addressing
 
