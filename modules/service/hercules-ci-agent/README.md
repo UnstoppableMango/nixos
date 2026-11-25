@@ -19,6 +19,8 @@ Tasks in flight when the agents stop are interrupted.
 The timer carries a 6h `RandomizedDelaySec`, so agent machines rarely collect at the same time.
 Other auto-GC (`nix.gc`, `min-free`) has no such hook and must stay off; the service asserts `nix.gc.automatic` is unset.
 
+`concurrentTasks = 0` keeps an agent's user, secrets and unit but never starts the unit, since the agent itself refuses 0.
+
 ## Deploying a nix update that upgrades the store schema
 
 Each agent keeps a nix-daemon connection open for as long as it runs, and the daemon worker behind it holds a shared lock on `/nix/var/nix/db/big-lock`.

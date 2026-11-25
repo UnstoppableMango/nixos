@@ -22,9 +22,12 @@
       };
 
       concurrentTasks = lib.mkOption {
-        type = lib.types.either lib.types.ints.positive (lib.types.enum [ "auto" ]);
+        type = lib.types.either lib.types.ints.unsigned (lib.types.enum [ "auto" ]);
         default = "auto";
-        description = "Number of tasks the agent runs at once. `auto` uses the core count.";
+        description = ''
+          Number of tasks the agent runs at once. `auto` uses the core count.
+          0 keeps the agent, its user and its secrets defined but never starts it.
+        '';
       };
 
       labels = lib.mkOption {

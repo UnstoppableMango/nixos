@@ -44,7 +44,8 @@ let
 
   # An agent on a kubelet node also needs modules/ci-limits.
   herculesAgents = {
-    gaea.settings.concurrentTasks = 8;
+    # Tasks run in the builder VM; 8 rolls back.
+    gaea.settings.concurrentTasks = 0;
   };
 
 in
@@ -282,8 +283,8 @@ in
           builder = {
             disk = { };
             agents = { };
-            # No heartbeat until the builder GC pushes (#530), or it would page from the start.
-            gc.heartbeat = null;
+            # builder-gc's timer is 1h.
+            gc.heartbeat = "2h";
           };
           attic.disk = { };
         };

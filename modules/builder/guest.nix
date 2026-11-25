@@ -12,6 +12,21 @@ let
   attic = import ../attic/net.nix;
   secrets = "/run/builder-secrets";
   agentUnits = map (account: "hercules-ci-agent-${account}.service") cfg.accounts;
+  gc = {
+    stopped = "/run/builder-gc-stopped";
+    triggerPercent = 15;
+    targetPercent = 35;
+  };
+  # Same request as disk-push, reporting `$success` and `$error`.
+  push = endpoint: ''
+    printf 'header = "Authorization: Bearer %s"\n' "$(<"$CREDENTIALS_DIRECTORY/token")" |
+      curl --config - --fail --silent --show-error --max-time 30 --retry 3 \
+      --insecure --pinnedpubkey ${lib.escapeShellArg cfg.gatusPubkey} \
+      -G -X POST \
+      --data-urlencode "success=$success" \
+      --data-urlencode "error=$error" \
+      ${lib.escapeShellArg "${cfg.gatusUrl}/api/v1/endpoints/${endpoint}/external"}
+  '';
 in
 {
   options.builder = {
@@ -185,19 +200,18 @@ in
         LoadCredential = "token:${secrets}/uptime-push-token";
       };
       script = ''
-        success=true down=
-        for unit in ${toString agentUnits}; do
-          if ! systemctl is-active --quiet "$unit"; then success=false down+=" $unit"; fi
-        done
+        success=true error=
+        # builder-gc stops the agents on purpose and pages for itself.
+        if systemctl is-active --quiet builder-gc.service; then
+          error="stopped for builder-gc"
+        else
+          for unit in ${toString agentUnits}; do
+            if ! systemctl is-active --quiet "$unit"; then success=false error+=" $unit"; fi
+          done
+          error="not active:$error"
+        fi
 
-        # Same request as disk-push.
-        printf 'header = "Authorization: Bearer %s"\n' "$(<"$CREDENTIALS_DIRECTORY/token")" |
-          curl --config - --fail --silent --show-error --max-time 30 --retry 3 \
-          --insecure --pinnedpubkey ${lib.escapeShellArg cfg.gatusPubkey} \
-          -G -X POST \
-          --data-urlencode "success=$success" \
-          --data-urlencode "error=not active:$down" \
-          ${lib.escapeShellArg "${cfg.gatusUrl}/api/v1/endpoints/builder_agents/external"}
+        ${push "builder_agents"}
       '';
     };
 
@@ -206,6 +220,68 @@ in
       timerConfig = {
         OnBootSec = "5min";
         OnUnitActiveSec = "5min";
+      };
+    };
+
+    systemd.services.builder-gc = {
+      description = "Collect the store when /nix runs low";
+      after = [ "network-online.target" ];
+      wants = [ "network-online.target" ];
+      path = [
+        pkgs.coreutils
+        pkgs.curl
+        config.nix.package
+      ];
+      serviceConfig = {
+        Type = "oneshot";
+        LoadCredential = "token:${secrets}/uptime-push-token";
+        # Runs however the script ends, but leaves agents stopped by hand alone.
+        ExecStopPost = pkgs.writeShellScript "builder-gc-restart" ''
+          if [[ -e ${gc.stopped} ]]; then
+            rm ${gc.stopped}
+            ${config.systemd.package}/bin/systemctl start --no-block ${lib.escapeShellArgs agentUnits}
+          fi
+        '';
+      };
+      script = ''
+        measure() {
+          # btrfs frees extents when the transaction commits.
+          sync -f /nix
+          read -r size avail < <(df --block-size=1 --output=size,avail /nix | tail -n 1)
+        }
+        below() { ((avail * 100 < size * $1)); }
+
+        measure
+        success=true
+        if below ${toString gc.triggerPercent}; then
+          touch ${gc.stopped}
+          systemctl stop ${toString agentUnits}
+          deficit() { echo $((size * ${toString gc.targetPercent} / 100 - avail)); }
+          max=$(deficit)
+          while below ${toString gc.targetPercent}; do
+            before=$avail
+            nix --extra-experimental-features nix-command store gc --max "$max" || break
+            measure
+            ((avail > before)) || break
+            # --max counts uncompressed bytes, which zstd frees less of.
+            ratio=$((max * 100 / (avail - before)))
+            max=$(($(deficit) * (ratio > 100 ? ratio : 100) / 100 + 1))
+          done
+          if below ${toString gc.targetPercent}; then success=false; fi
+          error="collected to $((avail * 100 / size))% free, target ${toString gc.targetPercent}%"
+        else
+          error="$((avail * 100 / size))% free, nothing to collect"
+        fi
+
+        ${push "builder_gc"}
+      '';
+    };
+
+    systemd.timers.builder-gc = {
+      wantedBy = [ "timers.target" ];
+      timerConfig = {
+        OnBootSec = "15min";
+        OnUnitActiveSec = "1h";
       };
     };
 
