@@ -2,6 +2,8 @@
 
 Runs a [Hercules CI](https://hercules-ci.com) agent on each machine in the `agent` role, using the upstream `hercules-ci-agent` flake's `multi-agent-service` NixOS module.
 
+No instance has a machine: every agent runs in gaea's builder VM (`modules/builder`), which imports `vars.nix` for their secrets.
+
 One instance is one account.
 Instances for different accounts can share machines: each becomes its own `services.hercules-ci-agents.<account>` entry, running as `hci-<account>` from `/var/lib/hercules-ci-agent-<account>`.
 The upstream module makes each agent user a Nix trusted user and sets `narinfo-cache-negative-ttl = 0` on the daemon.

@@ -309,7 +309,7 @@ Tickets for `unmango/ci` are filed in nixos until that repo exists, and the kube
 | 3 | [Run attic in a cache microVM on gaea](https://github.com/UnstoppableMango/nixos/issues/524) |
 | 4 | [Run the builder microVM on gaea with a Hercules agent per account](https://github.com/UnstoppableMango/nixos/issues/529) |
 | 4 | [Add builder store GC and move gaea's CI into the VM](https://github.com/UnstoppableMango/nixos/issues/530) |
-| 5 | [Remove gaea's bare-metal Hercules agents after the 7-day proof](https://github.com/UnstoppableMango/nixos/issues/531) |
+| 5 | [Remove gaea's bare-metal Hercules agents after the proof](https://github.com/UnstoppableMango/nixos/issues/531) |
 | 6 | [Switch the clan's substituters to attic and remove harmonia and ncps](https://github.com/UnstoppableMango/nixos/issues/532) |
 | 7, wave 1 | [Move nix onto the required gate](https://github.com/UnstoppableMango/nix/issues/153) |
 | 7, wave 1 | [Move nixos onto the required gate](https://github.com/UnstoppableMango/nixos/issues/533) |

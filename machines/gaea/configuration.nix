@@ -34,10 +34,14 @@ in
     CPUWeight = 50;
     IOWeight = 50;
   };
+  nix.settings = {
+    max-jobs = 4;
+    cores = 8;
+  };
   systemd.services.harmonia.serviceConfig.MemoryMax = "${toString harmoniaMemory}G";
 
   services.kubernetes.kubelet.extraConfig = {
-    # The VMs and capped services, plus about 4 GiB for the rest of the host.
+    # About 4 GiB for the rest of the host.
     systemReserved = {
       cpu = "16";
       memory = "${toString (vmMemory + nixDaemonMemory + harmoniaMemory + 4)}Gi";
