@@ -274,7 +274,7 @@ Each step is a build ticket in the repo that owns it, and each ticket names its 
 2. **Shared pieces**, in parallel with 1, 3 and 4: `unmango/ci`, `flakeModules.ci`, the workflows, the presets, the Apps, the ruleset defaults, alerting.
 3. **attic VM**, empty.
 4. **Builder VM** with GC; gaea's bare-metal agents drop to 0 tasks but stay defined.
-5. **7-day proof:** every task in the VM, warm no-op under 5 minutes on tdl, no VM-caused failures, every GC reaches its target.
+5. **Proof:** every task in the VM, warm no-op under 5 minutes on tdl, no VM-caused failures, every GC reaches its target.
    Then the bare-metal agents go.
 6. **Clan substituter switch**, gaea first: attic in, ncps and harmonia out of the clan.
    The ncps deployment itself stays until ARC stops running Nix jobs.
@@ -309,7 +309,7 @@ Tickets for `unmango/ci` are filed in nixos until that repo exists, and the kube
 | 3 | [Run attic in a cache microVM on gaea](https://github.com/UnstoppableMango/nixos/issues/524) |
 | 4 | [Run the builder microVM on gaea with a Hercules agent per account](https://github.com/UnstoppableMango/nixos/issues/529) |
 | 4 | [Add builder store GC and move gaea's CI into the VM](https://github.com/UnstoppableMango/nixos/issues/530) |
-| 5 | [Remove gaea's bare-metal Hercules agents after the 7-day proof](https://github.com/UnstoppableMango/nixos/issues/531) |
+| 5 | [Remove gaea's bare-metal Hercules agents after the proof](https://github.com/UnstoppableMango/nixos/issues/531) |
 | 6 | [Switch the clan's substituters to attic and remove harmonia and ncps](https://github.com/UnstoppableMango/nixos/issues/532) |
 | 7, wave 1 | [Move nix onto the required gate](https://github.com/UnstoppableMango/nix/issues/153) |
 | 7, wave 1 | [Move nixos onto the required gate](https://github.com/UnstoppableMango/nixos/issues/533) |

@@ -5,7 +5,6 @@ let
     "unmango"
     "unstoppablemango"
   ];
-  guest = config.microvm.vms.builder.config.config;
   net = import ./net.nix;
   attic = import ../attic/net.nix;
   inherit (config.vmHost) gatus;
@@ -14,9 +13,9 @@ let
 in
 {
   imports = [
-    ../ci-limits
     ../vm-host
-  ];
+  ]
+  ++ map (import ../service/hercules-ci-agent/vars.nix) accounts;
 
   config = {
     vmHost.vms.builder = {
@@ -60,8 +59,6 @@ in
         gatusPubkey = config.diskPush.pubkeyFile;
       };
     };
-
-    ciLimits.vmMemory = guest.microvm.mem / 1024;
 
     systemd.services."microvm@builder".serviceConfig = {
       CPUWeight = 50;

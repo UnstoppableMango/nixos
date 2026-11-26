@@ -16,8 +16,7 @@
 
   arcRunnerStore.enable = true;
 
-  # No ciLimits or Hercules agents: eight OSD memory requests leave no room for a
-  # CI slice. These reservations replace the ones ci-limits supplied.
+  # No CI here: eight OSD memory requests leave no room for it.
   services.kubernetes.kubelet.extraConfig = {
     systemReserved = {
       cpu = "2";

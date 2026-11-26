@@ -1,4 +1,16 @@
-{ pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
+let
+  vmMemory = lib.foldl' (sum: vm: sum + vm.config.config.microvm.mem / 1024) 0 (
+    lib.attrValues config.microvm.vms
+  );
+  nixDaemonMemory = 16;
+  harmoniaMemory = 2;
+in
 {
   imports = [
     ../../modules/arc-runner-store
@@ -6,7 +18,6 @@
     ../../modules/builder
     ../../modules/ceph
     ../../modules/ceph-cluster-network
-    ../../modules/ci-limits
     ../../modules/dns
     ../../modules/nix
     ./disk-config.nix
@@ -16,15 +27,30 @@
 
   arcRunnerStore.enable = true;
 
-  # Lets the agents here take derivations that need AVX2, which zeus lacks (#416).
-  nix.settings.extra-system-features = [ "gccarch-x86-64-v3" ];
-
-  ciLimits = {
-    memoryMax = 128;
-    agentMemoryMax = 16;
-    maxJobs = 16;
+  # No swap, so capping the host's builds keeps the OOM killer off the OSDs.
+  # Half the default weights, so kubelet and the OSDs win contention.
+  systemd.services.nix-daemon.serviceConfig = {
+    MemoryMax = "${toString nixDaemonMemory}G";
+    CPUWeight = 50;
+    IOWeight = 50;
+  };
+  nix.settings = {
+    max-jobs = 4;
     cores = 8;
-    reservedCpu = 16;
+  };
+  systemd.services.harmonia.serviceConfig.MemoryMax = "${toString harmoniaMemory}G";
+
+  services.kubernetes.kubelet.extraConfig = {
+    # About 4 GiB for the rest of the host.
+    systemReserved = {
+      cpu = "16";
+      memory = "${toString (vmMemory + nixDaemonMemory + harmoniaMemory + 4)}Gi";
+    };
+    kubeReserved = {
+      cpu = "1";
+      memory = "2Gi";
+    };
+    evictionHard."memory.available" = "2Gi";
   };
 
   boot.loader = {
