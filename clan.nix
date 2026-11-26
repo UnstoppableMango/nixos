@@ -41,13 +41,6 @@ let
       throw "clan.nix: not in the hosts flake: ${builtins.concatStringsSep ", " unknown}";
 
   machines = builtins.mapAttrs (_: host: { inherit (host) tags; }) managed;
-
-  # An agent on a kubelet node also needs modules/ci-limits.
-  herculesAgents = {
-    # Tasks run in the builder VM; 8 rolls back.
-    gaea.settings.concurrentTasks = 0;
-  };
-
 in
 {
   meta = {
@@ -172,21 +165,6 @@ in
       };
 
       roles.client.tags.all = { };
-    };
-
-    # The only Hercules agents; none run in rosequartz.
-    hercules-ci-unmango = {
-      module.name = "@UnstoppableMango/hercules-ci-agent";
-      module.input = "self";
-      roles.agent.settings.account = "unmango";
-      roles.agent.machines = herculesAgents;
-    };
-
-    hercules-ci-unstoppablemango = {
-      module.name = "@UnstoppableMango/hercules-ci-agent";
-      module.input = "self";
-      roles.agent.settings.account = "unstoppablemango";
-      roles.agent.machines = herculesAgents;
     };
 
     internet = {

@@ -73,11 +73,8 @@ Other machines (agreus, pollux, castor, zeus, gaea, apollo, pik8s1–9) follow t
   - `ceph-cluster-network/` - Ceph's cluster network on the SFP+ aggregator (`cephClusterNetwork.*`): a macvlan shim holding the host's `10.0.70.0/24` address, and multus as the host CNI plugin wrapping flannel, so Rook's OSD pods get a macvlan interface from the host's `host-local` range.
     multus runs from NixOS rather than its DaemonSet because the kubelet module relinks `/opt/cni/bin` on every start and `/etc/cni/net.d` is a store path.
     Addresses per host are in `NETWORK.md`.
-  - `ci-limits/` - Memory and CPU limits for hosts running Hercules CI builds alongside rook-ceph pods (gaea).
-    Puts nix-daemon, the Hercules agents and harmonia in a capped `ci.slice`, sets nix `max-jobs`/`cores`, and reserves the slice ceiling from the kubelet.
-    Each host sizes it through `ciLimits.*` in its `configuration.nix`; per-agent `concurrentTasks` is set in `herculesAgents` in `clan.nix`, which both hercules-ci instances share.
   - `gc/` - Weekly `nh clean` (keeps the last 5 generations and anything under 14 days), attached to every machine by the `base` instance.
-    On gaea, the agent machine, the `hercules-ci-agent` service stops the agents while it runs, since a collection mid-task can delete paths the task still needs.
+    On a bare-metal Hercules agent machine, the `hercules-ci-agent` service stops the agents while it runs, since a collection mid-task can delete paths the task still needs.
   - `desktops/` - Desktop environment modules (currently GNOME only)
   - `hardware/` - Hardware-specific modules (currently NVIDIA config)
   - `htpc/` - Kodi under the cage kiosk compositor on agreus, always running, usually with the TV off.
@@ -105,7 +102,8 @@ Other machines (agreus, pollux, castor, zeus, gaea, apollo, pik8s1–9) follow t
     It holds attic's push token, given to effects only on a default branch as the `attic` secret, and no signing key; `clan.nix` imports the upstream agent module into it.
     It pushes agent liveness to `builder_agents` and free space on `/nix` to `builder_disk`.
     An hourly `builder-gc` stops both agents below 15% free on `/nix`, collects until 35% is free with nothing rooted, starts them again, and pushes to `builder_gc`, failing when it falls short.
-    gaea's bare-metal agents are kept at `concurrentTasks = 0`, so every task runs in the VM.
+    No host runs a Hercules agent outside it; gaea keeps the agents' vars and hands them to the VM.
+    On the host, nix-daemon and harmonia are capped, and the kubelet reserves their ceilings and the VMs' memory, since gaea has no swap.
   - `vm-host/` - What gaea does for each microVM: a tap with its `/30`, the logical volume's ownership, a mangle filter on what the VM may open (`vmHost.vms.<name>.filter`), and its secrets, which cloud-hypervisor cannot take as credentials, built into an erofs image attached as a read-only disk.
   - `pihole/` - Pi-hole on pik8s1, pik8s2 and pik8s6, outside rosequartz, so the LAN keeps a filtering resolver while the cluster is down.
     Its config is read-only NixOS, so external-dns cannot write `thecluster.lan` records into it the way it does for the in-cluster piholes; the whole zone is a wildcard to the rosequartz gateway (`pihole.gatewayAddress`) instead.
@@ -143,7 +141,7 @@ Other machines (agreus, pollux, castor, zeus, gaea, apollo, pik8s1–9) follow t
 - `flake-parts` - Modular flake framework
 - `home-manager` - Not imported by any machine; it exists so `dotfiles` can follow it.
 - `dotfiles` - Personal dotfiles flake; hades takes its `overlays.default`.
-- `hercules-ci-agent` - Provides `nixosModules.multi-agent-service`, which the `hercules-ci-agent` clan service imports to run one agent per Hercules CI account on gaea.
+- `hercules-ci-agent` - Provides `nixosModules.multi-agent-service`, which `clan.nix` imports into the builder VM on gaea to run one agent per Hercules CI account.
   Its nixpkgs is not followed, so the agent package matches what upstream caches.
 - `microvm` - microvm.nix, for the VMs on gaea (`modules/attic`).
   Its `spectrum` input is only for the graphics hypervisor, so nothing fetches it.

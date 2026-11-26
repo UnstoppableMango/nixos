@@ -274,7 +274,7 @@ Each step is a build ticket in the repo that owns it, and each ticket names its 
 2. **Shared pieces**, in parallel with 1, 3 and 4: `unmango/ci`, `flakeModules.ci`, the workflows, the presets, the Apps, the ruleset defaults, alerting.
 3. **attic VM**, empty.
 4. **Builder VM** with GC; gaea's bare-metal agents drop to 0 tasks but stay defined.
-5. **7-day proof:** every task in the VM, warm no-op under 5 minutes on tdl, no VM-caused failures, every GC reaches its target.
+5. **Proof:** every task in the VM, warm no-op under 5 minutes on tdl, no VM-caused failures, every GC reaches its target.
    Then the bare-metal agents go.
 6. **Clan substituter switch**, gaea first: attic in, ncps and harmonia out of the clan.
    The ncps deployment itself stays until ARC stops running Nix jobs.

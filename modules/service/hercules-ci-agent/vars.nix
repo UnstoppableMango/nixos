@@ -1,17 +1,5 @@
-# Shared so each account is prompted once. The upstream module names the
-# agent's user `hci-<account>`.
-account:
-let
-  user = "hci-${account}";
-  unit = "hercules-ci-agent-${account}.service";
-  secret = {
-    secret = true;
-    owner = user;
-    group = user;
-    restartUnits = [ unit ];
-  };
-in
-{
+# Shared so each account is prompted once.
+account: {
   clan.core.vars.generators."hercules-ci-agent-${account}" = {
     share = true;
 
@@ -27,8 +15,8 @@ in
       type = "multiline-hidden";
     };
 
-    files."cluster-join-token.key" = secret;
-    files."binary-caches.json" = secret;
+    files."cluster-join-token.key".secret = true;
+    files."binary-caches.json".secret = true;
 
     script = ''
       cp "$prompts/cluster-join-token" "$out/cluster-join-token.key"
