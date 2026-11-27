@@ -102,7 +102,7 @@ Other machines (agreus, pollux, castor, zeus, gaea, apollo, pik8s1–9) follow t
     It pushes agent liveness to `builder_agents` and free space on `/nix` to `builder_disk`.
     An hourly `builder-gc` stops both agents below 15% free on `/nix`, collects until 35% is free with nothing rooted, starts them again, and pushes to `builder_gc`, failing when it falls short.
     No host runs a Hercules agent outside it; gaea keeps the agents' vars and hands them to the VM.
-    On the host, nix-daemon and harmonia are capped, and the kubelet reserves their ceilings and the VMs' memory, since gaea has no swap.
+    On the host, nix-daemon is capped, and the kubelet reserves its ceiling and the VMs' memory, since gaea has no swap.
   - `vm-host/` - What gaea does for each microVM: a tap with its `/30`, the logical volume's ownership, a mangle filter on what the VM may open (`vmHost.vms.<name>.filter`), and its secrets, which cloud-hypervisor cannot take as credentials, built into an erofs image attached as a read-only disk.
   - `pihole/` - Pi-hole on pik8s1, pik8s2 and pik8s6, outside rosequartz, so the LAN keeps a filtering resolver while the cluster is down.
     Its config is read-only NixOS, so external-dns cannot write `thecluster.lan` records into it the way it does for the in-cluster piholes; the whole zone is a wildcard to the rosequartz gateway (`pihole.gatewayAddress`) instead.
@@ -111,7 +111,7 @@ Other machines (agreus, pollux, castor, zeus, gaea, apollo, pik8s1–9) follow t
   - `ssh/` - System-level SSH behavior (currently just `ssh.inhibitSleepOnSsh`, a PAM hook that blocks suspend while an SSH session is open).
     SSH *client* config for erik lives in the dotfiles repo's `modules/ssh`.
   - `unifi/` - UniFi network module
-  - `service/` - Clan service modules (`base`, `build-host`, `harmonia`, `hercules-ci-agent`, `k3s`, `pi`, `trouble`); the rosequartz cluster's services come from the `cairn` input.
+  - `service/` - Clan service modules (`base`, `build-host`, `hercules-ci-agent`, `k3s`, `pi`, `trouble`); the rosequartz cluster's services come from the `cairn` input.
     The `build-host` service makes the Pis build on gaea (aarch64 under binfmt), with a gaea root key the Pis trust, so `clan machines update pik8sN` never compiles on a Pi.
     Deploy gaea before the Pis whenever its substituters or binfmt change.
     The `pi` service also trims the Pis to a minimal OS (`modules/service/pi/minimal.nix`): no linux-firmware, installer tools or docs, plus a debugging toolset for erik.
@@ -148,7 +148,7 @@ Other machines (agreus, pollux, castor, zeus, gaea, apollo, pik8s1–9) follow t
 - `disko` - Declarative disk partitioning (each host has a `disk-config.nix`)
 - `nixos-hardware` - Hardware-specific module presets (hades)
 - `nixos-raspberrypi` - Raspberry Pi kernel, firmware, `config.txt` and the `kernel` bootloader for pik8s1-9, via `modules/service/pi/4b.nix`.
-  It keeps its own pinned nixpkgs rather than following ours, so the kernel comes prebuilt from nixos-raspberrypi.cachix.org (a substituter on every machine via `modules/cache`); `4b.nix` adds the two kernel attributes our 26.11 NixOS reads that its 26.05 kernel lacks.
+  It keeps its own pinned nixpkgs rather than following ours, so the kernel comes prebuilt from nixos-raspberrypi.cachix.org (a substituter on gaea and the Pis via `modules/cache/raspberrypi.nix`); `4b.nix` adds the two kernel attributes our 26.11 NixOS reads that its 26.05 kernel lacks.
 - `clan-core` (26.05) - Clan cluster management framework; manages all machines via `clan.nix`
 - `sops-nix` - SOPS secrets management; followed by both `clan-core` and `dotfiles`
 - `nixos-facter` - Hardware detection for facter-based configs

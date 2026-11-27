@@ -1,8 +1,7 @@
 # Only 10.0.69.201 and .202 carry thecluster.lan; the pfSense gateways answer
-# NXDOMAIN, so ncps.thecluster.lan would silently fall through to public
-# caches. Both front the in-cluster piholes, so each gateway is a second
-# resolver for public names only (the-cluster#4458). See NETWORK.md, "DNS and
-# service addressing".
+# NXDOMAIN for it. Both front the in-cluster piholes, so each gateway is a
+# second resolver for public names only (the-cluster#4458). See NETWORK.md,
+# "DNS and service addressing".
 { config, lib, ... }:
 let
   gateway = config.networking.defaultGateway;

@@ -23,8 +23,6 @@
     evictionHard."memory.available" = "2Gi";
   };
 
-  systemd.services.harmonia.serviceConfig.MemoryMax = "2G";
-
   # Legacy BIOS only: the firmware's UEFI path crashes on a fallback BOOTX64.EFI.
   boot.loader.grub.enable = true;
 
