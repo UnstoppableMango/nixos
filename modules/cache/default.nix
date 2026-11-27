@@ -7,7 +7,7 @@ in
 {
   nix.settings = {
     extra-substituters = [
-      "http://${address}:${toString attic.port}/${attic.cache}"
+      "http://${address}:${toString attic.port}/${attic.cache}?priority=30"
       "https://nix-community.cachix.org"
     ];
     extra-trusted-public-keys = [ pubkey ];
