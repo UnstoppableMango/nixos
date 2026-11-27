@@ -12,6 +12,7 @@
   roles.pi4b = {
     description = "Raspberry Pi 4B";
     perInstance.nixosModule.imports = [
+      ../../cache/raspberrypi.nix
       ./4b.nix
       ./minimal.nix
     ];

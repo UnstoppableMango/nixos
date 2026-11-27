@@ -173,7 +173,7 @@ Every other private, shared, link-local and multicast range is dropped, so it re
 
 Every machine points its `nameservers` at `10.0.69.201` and `10.0.69.202`, set once in `modules/dns` and imported by each `machines/*/configuration.nix`.
 Both are full recursors, and they are the only resolvers that carry the `thecluster.lan` zone.
-The pfSense gateways (`192.168.1.1` on VLAN 1, `10.0.69.1` on VLAN 20) resolve public names and the rest of the LAN, but answer NXDOMAIN inside `thecluster.lan`, so a machine pointed at its gateway cannot reach the `ncps.thecluster.lan` substituter in `modules/cache`.
+The pfSense gateways (`192.168.1.1` on VLAN 1, `10.0.69.1` on VLAN 20) resolve public names and the rest of the LAN, but answer NXDOMAIN inside `thecluster.lan`, so a machine pointed at its gateway cannot reach any `thecluster.lan` service.
 
 The resolvers sit on VLAN 20, on-link for every machine there and reachable over `enp7s0` from hades.
 Both are the pihole deployment in rosequartz (the-cluster `apps/pihole/rosequartz`), exposed on two load-balancer addresses, so they are one failure domain.

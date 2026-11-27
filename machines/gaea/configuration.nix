@@ -9,13 +9,13 @@ let
     lib.attrValues config.microvm.vms
   );
   nixDaemonMemory = 16;
-  harmoniaMemory = 2;
 in
 {
   imports = [
     ../../modules/arc-runner-store
     ../../modules/attic
     ../../modules/builder
+    ../../modules/cache/raspberrypi.nix
     ../../modules/ceph
     ../../modules/ceph-cluster-network
     ../../modules/dns
@@ -38,13 +38,12 @@ in
     max-jobs = 4;
     cores = 8;
   };
-  systemd.services.harmonia.serviceConfig.MemoryMax = "${toString harmoniaMemory}G";
 
   services.kubernetes.kubelet.extraConfig = {
     # About 4 GiB for the rest of the host.
     systemReserved = {
       cpu = "16";
-      memory = "${toString (vmMemory + nixDaemonMemory + harmoniaMemory + 4)}Gi";
+      memory = "${toString (vmMemory + nixDaemonMemory + 4)}Gi";
     };
     kubeReserved = {
       cpu = "1";

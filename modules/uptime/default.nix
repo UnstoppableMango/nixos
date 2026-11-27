@@ -36,7 +36,7 @@ let
     interval = "30s";
     dns = {
       # A thecluster.lan name, so a resolver that lost the zone fails too.
-      query-name = "ncps.thecluster.lan";
+      query-name = "gitea.thecluster.lan";
       query-type = "A";
     };
     # NOERROR alone also passes an empty answer, so require an address.

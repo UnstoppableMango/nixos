@@ -51,7 +51,6 @@ in
 
   modules."@UnstoppableMango/base" = import ./modules/service/base;
   modules."@UnstoppableMango/build-host" = import ./modules/service/build-host;
-  modules."@UnstoppableMango/harmonia" = import ./modules/service/harmonia;
   modules."@UnstoppableMango/hercules-ci-agent" =
     inputs.nixpkgs.lib.modules.importApply ./modules/service/hercules-ci-agent
       { inherit inputs; };
@@ -146,25 +145,18 @@ in
         tags.all = { };
 
         # This only marks caches trusted; ./modules/cache sets the substituters.
-        extraModules = [ ./modules/cache ];
+        extraModules = [
+          (inputs.nixpkgs.lib.modules.importApply ./modules/cache {
+            address = managed.gaea.ip;
+            pubkey = inputs.clan-core.clanLib.getPublicValue {
+              flake = ./.;
+              machine = "gaea";
+              generator = "attic-signing";
+              file = "pubkey";
+            };
+          })
+        ];
       };
-    };
-
-    # Serves each server's store, which no hosted cache in ./modules/cache offers.
-    harmonia = {
-      module.name = "@UnstoppableMango/harmonia";
-      module.input = "self";
-
-      # By address, so reaching a server does not depend on LAN DNS.
-      # A server must stay up: the Hercules agents fail their startup check when a
-      # substituter is unreachable.
-      roles.server.machines = {
-        apollo.settings.address = managed.apollo.ip;
-        gaea.settings.address = managed.gaea.ip;
-        zeus.settings.address = managed.zeus.ip;
-      };
-
-      roles.client.tags.all = { };
     };
 
     internet = {

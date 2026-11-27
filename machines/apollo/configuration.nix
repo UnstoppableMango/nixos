@@ -29,8 +29,6 @@
     evictionHard."memory.available" = "1Gi";
   };
 
-  systemd.services.harmonia.serviceConfig.MemoryMax = "2G";
-
   # Firmware mode unverified, so castor's dual-mode grub.
   boot.loader.grub = {
     enable = true;
