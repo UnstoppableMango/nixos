@@ -15,7 +15,7 @@ This file provides guidance to AI agents when working with code in this reposito
 - `make sd-images` / `make pik8sN-sd` - Build Pi images (nixos-raspberrypi's sd-image, 1024 MiB firmware partition)
 - `make pik8sN-flash` - Write a Pi image to `$DISK` (default `/dev/sdi`).
   The Pis boot from a USB SSD with no SD card, so `$DISK` is the SSD attached to the workstation.
-- `nix flake check --all-systems` - What CI runs (checks all systems)
+- `nix flake check --all-systems` - Checks every system, where CI checks only x86_64-linux
 
 ## Architecture
 
@@ -154,7 +154,7 @@ Other machines (agreus, pollux, castor, zeus, gaea, apollo, pik8s1–9) follow t
 - `nixos-facter` - Hardware detection for facter-based configs
 - `nixos-anywhere` - Remote NixOS deployment
 - `nixvim` - Neovim configuration (also pulled through `dotfiles`)
-- `mynix` - Personal Nix utilities flake
+- `mynix` - Personal Nix utilities flake ([UnstoppableMango/nix](https://github.com/UnstoppableMango/nix)); its `flakeModules.ci` sets `herculesCI`
 - `gomod2nix` - Go module packaging (used by `mynix`)
 - `cairn` (26.05 clan-core, followed) - Kubernetes distribution on Nix and clan; provides every clan service the `rosequartz` cluster runs on.
   Pulls `a2b` (renders Flux manifests via the real `flux` CLI) and `inoculant` (addon-manifest bootstrap) in as its own inputs.
@@ -194,7 +194,10 @@ Read additional AGENTS.md files when working in these areas:
 
 ## CI
 
-`.github/workflows/ci.yml` runs one job, `build`, on push/PR to `main`, with Cachix caching (`unstoppablemango`): `nix flake check` + `nix build .#nixosConfigurations.hades...toplevel` on the `thecluster` runner.
+Hercules CI builds `herculesCI` from `mynix.flakeModules.ci` (`flake.nix`): `onPush.default` builds the checks and packages of `x86_64-linux`, where each machine's toplevel is the package `<machine>-toplevel`, and `ci.nightly.packages` moves `installer-iso` to the 04:00 UTC nightly job.
+The Pis' toplevels are `aarch64-linux` packages, which Hercules does not build.
+`.github/workflows/ci.yml` calls `unmango/ci`'s `nix-ci.yml`, whose gate waits for Hercules, and its `required` job needs that call.
+Its `build` job, `nix flake check` and hades's toplevel on the `thecluster` runner, stays until the ruleset requires `required` (UnstoppableMango/vcs#160).
 
 ## Agent skills
 

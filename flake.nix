@@ -140,7 +140,11 @@
         treefmt-nix.flakeModule
         disko.flakeModules.default
         cairn.flakeModules.default
+        mynix.flakeModules.ci
       ];
+
+      # Rebuilt whenever nixpkgs moves, so it gates nothing.
+      ci.nightly.packages = [ "installer-iso" ];
 
       clan = {
         imports = [ (import ./clan.nix { inherit inputs; }) ];
@@ -189,7 +193,16 @@
                   }
                 ];
               }).config.system.build.isoImage;
-          };
+          }
+          # Hercules builds packages, so each machine of this system is one.
+          //
+            lib.mapAttrs'
+              (name: machine: lib.nameValuePair "${name}-toplevel" machine.config.system.build.toplevel)
+              (
+                lib.filterAttrs (
+                  _: machine: machine.config.nixpkgs.hostPlatform.system == system
+                ) inputs.self.nixosConfigurations
+              );
 
           devShells = {
             inherit (inputs'.dotfiles.devShells) default;
