@@ -62,6 +62,7 @@ Decided in [#503](https://github.com/UnstoppableMango/nixos/issues/503) and [Cho
   The only LAN destination it can reach is the attic VM; not the host, the clan machines, rosequartz or the management network.
 - Substituters: attic, cache.nixos.org and nix-community, with `fallback = true`.
 - It holds attic's push-only token and no signing key.
+- ARC runner pods never schedule on a builder host, so the VM's CPU share holds under load while kubelet and the OSDs still win contention ([Decide how the builder VM keeps CPU on a shared rosequartz worker](https://github.com/UnstoppableMango/nixos/issues/575)).
 - Nix's own auto-GC (`nix.gc`, `min-free`, `max-free`) is off inside it, because the agent holds no GC roots for running tasks (see [Builder store GC](#builder-store-gc)).
 
 ### Builder store GC
@@ -143,6 +144,7 @@ Every template in `UnstoppableMango/nix` imports the module and ships a `ci.yml`
 `unmango/actions` keeps composite actions such as `setup-nix`.
 
 - `nix-ci.yml`: the hosted jobs and the `required` gate, with switches for `darwin`, `aarch64-linux`, `linux` (private repos) and `cachix-push` (on `main` only, with a per-repo `CACHIX_AUTH_TOKEN`), plus the [`renovate-resume`](#resuming-after-a-red-main) job.
+  The gate waits 60 minutes for Hercules by default, so a stuck job turns it red rather than hanging ([#575](https://github.com/UnstoppableMango/nixos/issues/575)).
 - `renovate-fixup.yml`: see [Renovate fixup](#renovate-fixup).
 - `collection-ci.yml` and `package-updates.yml`: see [Package collections](#package-collections).
 - `ci-health.yml`: see [Observability](#observability).
@@ -306,6 +308,8 @@ Tickets for `unmango/ci` are filed in nixos until that repo exists, and the kube
 | 2 | [Add the CI health aggregator workflow](https://github.com/UnstoppableMango/nix/issues/158) |
 | 2 | [unmango/ci: add collection-ci.yml with drv-diff builds](https://github.com/unmango/ci/issues/3) |
 | 2 | [unmango/ci: add package-updates.yml](https://github.com/unmango/ci/issues/4) |
+| 2 | [Keep ARC runner pods off gaea](https://github.com/UnstoppableMango/the-cluster/issues/5050) |
+| 2 | [nix-ci.yml: lower the default Hercules wait to 60 minutes](https://github.com/unmango/ci/issues/35) |
 | 3 | [Run attic in a cache microVM on gaea](https://github.com/UnstoppableMango/nixos/issues/524) |
 | 4 | [Run the builder microVM on gaea with a Hercules agent per account](https://github.com/UnstoppableMango/nixos/issues/529) |
 | 4 | [Add builder store GC and move gaea's CI into the VM](https://github.com/UnstoppableMango/nixos/issues/530) |
