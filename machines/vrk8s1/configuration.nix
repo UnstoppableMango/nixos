@@ -28,6 +28,9 @@
 
   hardware.facter.detected.dhcp.enable = false;
 
+  # Wi-Fi is unused, and rtw89 is a suspect in its kernel panics.
+  boot.blacklistedKernelModules = [ "rtw89_8852ce" ];
+
   # The living room's switch is unmanaged, so vrk8s1 tags VLAN 20 itself and the
   # managed port feeding that switch carries it tagged. The NIC takes no address
   # of its own. Type keeps the match off the VLAN, which shares the NIC's MAC.
