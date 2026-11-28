@@ -1,14 +1,10 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
-}:
+{ pkgs, ... }:
 {
   imports = [
     ../../modules/arc-runner-store
     ../../modules/ceph
     ../../modules/ceph-cluster-network
+    ../../modules/gpu-worker
     ./disk-config.nix
   ];
 
@@ -36,45 +32,11 @@
     efiInstallAsRemovable = true;
   };
 
-  # nouveau leaves the only VGA device on a black console ("Cannot find any crtc
-  # or sizes"). The nvidia module blacklists it too; this survives dropping the GPU.
-  boot.blacklistedKernelModules = [ "nouveau" ];
-
-  # Nothing loads the module eagerly without an X server, so it is listed here.
-  services.xserver.videoDrivers = [ "nvidia" ];
-  boot.kernelModules = [ "nvidia" ];
+  # 590 dropped Pascal. CUDA 13 does not target it either, so pods need CUDA 12.
   hardware.nvidia = {
-    # 590 dropped Pascal. CUDA 13 does not target it either, so pods need CUDA 12.
     branch = "legacy_580";
     open = false;
-    # Otherwise every pod start reinitialises the driver.
-    nvidiaPersistenced = true;
-    nvidiaSettings = false;
   };
-
-  nixpkgs.config.allowUnfreePredicate =
-    pkg:
-    builtins.elem (lib.getName pkg) [
-      "nvidia-x11"
-      "nvidia-persistenced"
-      "nvidia-kernel-modules"
-    ];
-
-  # The runtime looks NVIDIA_VISIBLE_DEVICES up as `nvidia.com/gpu=<UUID>`.
-  hardware.nvidia-container-toolkit = {
-    enable = true;
-    device-name-strategy = "uuid";
-  };
-
-  # Handler for the-cluster's nvidia RuntimeClass.
-  virtualisation.containerd.settings.plugins."io.containerd.grpc.v1.cri".containerd.runtimes.nvidia =
-    {
-      runtime_type = "io.containerd.runc.v2";
-      options = {
-        BinaryName = "${lib.getOutput "tools" config.hardware.nvidia-container-toolkit.package}/bin/nvidia-container-runtime.cdi";
-        SystemdCgroup = true;
-      };
-    };
 
   # https://nixos.wiki/wiki/Power_Management#systemd_sleep
   systemd.sleep.settings.Sleep = {

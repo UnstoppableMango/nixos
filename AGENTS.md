@@ -20,7 +20,7 @@ This file provides guidance to AI agents when working with code in this reposito
 ## Architecture
 
 This is a NixOS configuration flake using **flake-parts** and **clan-core** for modular organization.
-All machines (hades, agreus, pollux, castor, zeus, gaea, apollo, pik8s1–9) are clan-managed and configured via `clan.nix`, which holds the inventory (machine tags, service instances) and per-machine `imports`/overrides.
+All machines (hades, agreus, pollux, castor, zeus, gaea, apollo, vrk8s1, pik8s1–9) are clan-managed and configured via `clan.nix`, which holds the inventory (machine tags, service instances) and per-machine `imports`/overrides.
 Each machine's NixOS config lives under `machines/<name>/configuration.nix`.
 
 ### Module System
@@ -56,12 +56,12 @@ hades = {
 ```
 `machines/hades/configuration.nix` itself imports `../../modules/desktops`, `../../modules/ssh`, and `../../modules/unifi`.
 
-Other machines (agreus, pollux, castor, zeus, gaea, apollo, pik8s1–9) follow the same pattern with a thinner `imports` list, since they don't need desktop/hardware-preset modules.
+Other machines (agreus, pollux, castor, zeus, gaea, apollo, vrk8s1, pik8s1–9) follow the same pattern with a thinner `imports` list, since they don't need desktop/hardware-preset modules.
 
 ### Directory Layout
 
 - `flake.nix` - Entry point; imports flake-parts modules; clan config via `./clan.nix`
-- `machines/` - Per-machine `configuration.nix` for every host (hades, agreus, pollux, castor, zeus, gaea, apollo, pik8s1–9)
+- `machines/` - Per-machine `configuration.nix` for every host (hades, agreus, pollux, castor, zeus, gaea, apollo, vrk8s1, pik8s1–9)
 - `modules/` - Shared NixOS modules imported by machine configs:
   - `brave/` - Brave enterprise policy at `/etc/brave/policies/managed/`, currently just the `thecluster` managed-bookmarks folder.
     Brave itself is installed by the dotfiles repo's home-manager configuration; policy lives in `/etc`, which home-manager cannot write, so it is supplied here.
@@ -70,6 +70,8 @@ Other machines (agreus, pollux, castor, zeus, gaea, apollo, pik8s1–9) follow t
   - `pki/` - Trusts the UnMango Root CA G2 from [pki](https://github.com/UnstoppableMango/pki) system-wide; `ca.pem` is a copy of that repo's `certs/ca.pem`.
     Every `*.thecluster.lan` cert chains to it through UnMango Private CA 01.
     `thecluster-lan-nginx-ca.pem` is the pre-ceremony CA, trusted on every machine alongside it until the-cluster's gateway serves the new chain.
+  - `gpu-worker/` - An NVIDIA GPU for rosequartz pods (apollo, vrk8s1): the driver with persistenced, the container toolkit's CDI devices, and the `nvidia` containerd handler behind the-cluster's RuntimeClass.
+    It defaults to the open kernel module, which needs Turing or newer, so apollo's Pascal card overrides it to the proprietary 580 branch.
   - `ceph-cluster-network/` - Ceph's cluster network on the SFP+ aggregator (`cephClusterNetwork.*`): a macvlan shim holding the host's `10.0.70.0/24` address, and multus as the host CNI plugin wrapping flannel, so Rook's OSD pods get a macvlan interface from the host's `host-local` range.
     multus runs from NixOS rather than its DaemonSet because the kubelet module relinks `/opt/cni/bin` on every start and `/etc/cni/net.d` is a store path.
     Addresses per host are in `NETWORK.md`.
@@ -182,6 +184,7 @@ Other machines (agreus, pollux, castor, zeus, gaea, apollo, pik8s1–9) follow t
 | zeus          | Dual Xeon E5-2670 tower, legacy BIOS | Basement tower; clan-managed; rosequartz worker; BIOS-only grub, since its firmware's UEFI boot path crashes |
 | gaea          | EPYC 7502 rack box, UEFI | Basement rack server; clan-managed; rosequartz worker; systemd-boot |
 | apollo        | ASUS board, firmware mode unverified | Basement server; clan-managed; rosequartz worker; takes castor's dual-mode grub |
+| vrk8s1        | GIGABYTE B550I AORUS PRO AX, Ryzen 7 5700G, RTX 2080 Ti | Living-room tower; clan-managed; rosequartz GPU worker; systemd-boot |
 | pik8s1–9      | Raspberry Pi 4B       | k8s cluster nodes; clan-managed; aarch64; pik8s7–9 (8GB) are the rosequartz control plane and pik8s4–5 (4GB) are etcd-only members (five etcd members in all); pik8s3 has left rosequartz and runs the Gatus uptime checker (`modules/uptime`), shown on its display; pik8s1, pik8s2 and pik8s6 have left rosequartz and run Pi-hole (`modules/pihole`) |
 
 ## Sub-Agent Guidance
