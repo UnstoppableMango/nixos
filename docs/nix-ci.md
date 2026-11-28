@@ -278,8 +278,11 @@ Each step is a build ticket in the repo that owns it, and each ticket names its 
    Then the bare-metal agents go.
 6. **Clan substituter switch**, gaea first: attic in, ncps and harmonia out of the clan.
    The ncps deployment itself stays until ARC stops running Nix jobs.
-7. **Repo waves**, each repo in three merges (add the gate, switch the ruleset once Hercules is green on `main`, drop the hosted Linux check), with ruleset switches batched per wave: wave 1 nix and nixos; wave 2 tdl, the-cluster, vcs, control-plane, renovate-config; wave 3 scm, charts, and the collections.
-8. **Cleanup:** ncps, ARC scale sets for Nix jobs and the runner store module, then the old Cachix caches 30 days after wave 3.
+7. **Repo waves**, each repo in three merges (add the gate, switch the ruleset once Hercules is green on `main`, drop the hosted Linux check), with ruleset switches batched per wave: wave 1 nix and nixos; wave 2 tdl, the-cluster, vcs, control-plane, renovate-config; wave 3 scm, charts, and the collections; wave 4 the repos whose CI still runs on the `thecluster` ARC runners (thecluster-operator, dotfiles, johnston-dems-mailer, iam, thecluster.lan, lang, architecture, go, go-fp, tfpkgs and enclave); wave 5 every other Nix repo.
+   Wave 4 runs alongside wave 3, since it is what lets step 8 retire ARC for Nix jobs.
+   In waves 4 and 5 a public repo's job that runs through `nix develop` becomes a flake check where it can, so Hercules builds it, and one that needs a container runtime moves to a hosted runner.
+   A job that must reach the LAN, such as iam's Pulumi run against in-cluster Keycloak, stays on ARC without Nix.
+8. **Cleanup:** ncps, ARC scale sets for Nix jobs and the runner store module after wave 4, then the old Cachix caches 30 days after wave 5, since wave 5 repos still substitute from `mangopkgs`.
 
 ### Build tickets
 
@@ -326,6 +329,25 @@ Tickets for `unmango/ci` are filed in nixos until that repo exists, and the kube
 | 7, wave 3 | [Move pulumipkgs onto collection CI and weekly package updates](https://github.com/unmango/pulumipkgs/issues/129) |
 | 7, wave 3 | [kubepkgs: move onto collection CI and weekly package updates](https://github.com/UnstoppableMango/nixos/issues/534) |
 | 7, wave 3 | [Switch wave 3 rulesets to the required gate](https://github.com/unmango/scm/issues/376) |
+| 7, wave 4 | [Move thecluster-operator onto the shared CI pieces and the required gate](https://github.com/unmango/thecluster-operator/issues/177) |
+| 7, wave 4 | [Move dotfiles onto the shared CI pieces and the required gate](https://github.com/UnstoppableMango/dotfiles/issues/242) |
+| 7, wave 4 | [Move johnston-dems-mailer onto the shared CI pieces, hosted-only](https://github.com/UnstoppableMango/johnston-dems-mailer/issues/409) |
+| 7, wave 4 | [Move iam onto the shared CI pieces, hosted-only](https://github.com/UnstoppableMango/iam/issues/13) |
+| 7, wave 4 | [Move thecluster.lan onto the shared CI pieces and the required gate](https://github.com/UnstoppableMango/thecluster.lan/issues/64) |
+| 7, wave 4 | [Move lang onto the shared CI pieces and the required gate](https://github.com/UnstoppableMango/lang/issues/176) |
+| 7, wave 4 | [Move architecture onto the shared CI pieces, hosted-only](https://github.com/unmango/architecture/issues/73) |
+| 7, wave 4 | [Move go onto the shared CI pieces and the required gate](https://github.com/unmango/go/issues/210) |
+| 7, wave 4 | [Move go-fp onto the shared CI pieces and the required gate](https://github.com/unmango/go-fp/issues/14) |
+| 7, wave 4 | [Move tfpkgs onto collection CI](https://github.com/unmango/tfpkgs/issues/24) |
+| 7, wave 4 | [Move enclave onto the shared CI pieces and the required gate](https://github.com/unmango/enclave/issues/34) |
+| 7, wave 4 | [Switch wave 4 rulesets to the required gate (vcs)](https://github.com/UnstoppableMango/vcs/issues/175) |
+| 7, wave 4 | [Switch wave 4 rulesets to the required gate (scm)](https://github.com/unmango/scm/issues/397) |
+| 7, wave 5 | [Move pki onto the shared CI pieces, hosted-only](https://github.com/UnstoppableMango/pki/issues/336) |
+| 7, wave 5 | [Move azure onto the shared CI pieces, hosted-only](https://github.com/UnstoppableMango/azure/issues/20) |
+| 7, wave 5 | [Move pfsense onto the shared CI pieces, hosted-only](https://github.com/UnstoppableMango/pfsense/issues/15) |
+| 7, wave 5 | [Move the remaining public Nix repos onto the shared CI pieces](https://github.com/UnstoppableMango/nixos/issues/576) |
+| 7, wave 5 | [Switch wave 5 rulesets to the required gate (vcs)](https://github.com/UnstoppableMango/vcs/issues/176) |
+| 7, wave 5 | [Switch wave 5 rulesets to the required gate (scm)](https://github.com/unmango/scm/issues/398) |
 | 8 | [Remove ncps and the ARC runners that only served Nix jobs](https://github.com/UnstoppableMango/the-cluster/issues/4954) |
 | 8 | [Remove the ARC runner store module](https://github.com/UnstoppableMango/nixos/issues/535) |
 | 8 | [Delete the mangopkgs and unmango Cachix caches](https://github.com/UnstoppableMango/nixos/issues/536) |
