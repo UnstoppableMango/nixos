@@ -196,8 +196,8 @@ Read additional AGENTS.md files when working in these areas:
 
 Hercules CI builds `herculesCI` from `mynix.flakeModules.ci` (`flake.nix`): `onPush.default` builds the checks and packages of `x86_64-linux`, where each machine's toplevel is the package `<machine>-toplevel`, and `ci.nightly.packages` moves `installer-iso` to the 04:00 UTC nightly job.
 The Pis' toplevels are `aarch64-linux` packages, which Hercules does not build.
-`.github/workflows/ci.yml` calls `unmango/ci`'s `nix-ci.yml`, whose gate waits for Hercules, and its `required` job needs that call.
-Its `build` job, `nix flake check` and hades's toplevel on the `thecluster` runner, stays until the ruleset requires `required` (UnstoppableMango/vcs#160).
+`.github/workflows/ci.yml` calls `unmango/ci`'s `nix-ci.yml`, whose gate waits for Hercules, and its `required` job, the only check `main` requires, needs that call.
+No job runs on the `thecluster` ARC runners.
 
 ## Agent skills
 
