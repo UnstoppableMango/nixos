@@ -184,7 +184,7 @@ Other machines (agreus, pollux, castor, zeus, gaea, apollo, vrk8s1, pik8s1–9) 
 | zeus          | Dual Xeon E5-2670 tower, legacy BIOS | Basement tower; clan-managed; rosequartz worker; BIOS-only grub, since its firmware's UEFI boot path crashes |
 | gaea          | EPYC 7502 rack box, UEFI | Basement rack server; clan-managed; rosequartz worker; systemd-boot |
 | apollo        | ASUS board, firmware mode unverified | Basement server; clan-managed; rosequartz worker; takes castor's dual-mode grub |
-| vrk8s1        | GIGABYTE B550I AORUS PRO AX, Ryzen 7 5800X, RTX 2080 Ti | Living-room tower; clan-managed; rosequartz GPU worker; systemd-boot |
+| vrk8s1        | GIGABYTE B550I AORUS PRO AX, Ryzen 7 5700G, RTX 2080 Ti | Living-room tower; clan-managed; rosequartz GPU worker; systemd-boot |
 | pik8s1–9      | Raspberry Pi 4B       | k8s cluster nodes; clan-managed; aarch64; pik8s7–9 (8GB) are the rosequartz control plane and pik8s4–5 (4GB) are etcd-only members (five etcd members in all); pik8s3 has left rosequartz and runs the Gatus uptime checker (`modules/uptime`), shown on its display; pik8s1, pik8s2 and pik8s6 have left rosequartz and run Pi-hole (`modules/pihole`) |
 
 ## Sub-Agent Guidance
