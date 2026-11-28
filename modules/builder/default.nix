@@ -49,9 +49,6 @@ in
 
     networking.nat.internalIPs = [ "${net.guest}/32" ];
 
-    # The VM reports ready once booted, which waits on `nix-store --verify --repair`.
-    microvm.host.startupTimeout = 30 * 60;
-
     microvm.vms.builder.config = {
       imports = [ ./guest.nix ];
       builder = {
@@ -64,6 +61,8 @@ in
     };
 
     systemd.services."microvm@builder".serviceConfig = {
+      # The VM reports ready once booted, which waits on `nix-store --verify --repair`.
+      TimeoutStartSec = 30 * 60;
       CPUWeight = 50;
       IOWeight = 50;
     };
