@@ -91,7 +91,7 @@ The rosequartz service CIDR is `10.0.0.0/24` and the pod CIDR is `10.1.0.0/16`, 
 | zeus | `10.0.69.10` | 20 | GS724Tv4 | `g18` | rosequartz worker |
 | gaea | `10.0.69.11` | 20 | GS724Tv4 | `g1` | rosequartz worker |
 | apollo | `10.0.69.12` | 20 | GS724Tv4 | `g10` | rosequartz worker |
-| vrk8s1 | `10.0.69.16` | 20 | unknown | unknown | rosequartz worker, living room; its port must be a VLAN 20 access port |
+| vrk8s1 | `10.0.69.16` | 20, tagged by the host | unmanaged living-room switch | unknown | rosequartz worker; the managed port feeding that switch must carry VLAN 20 tagged |
 | pik8s1 | `10.0.69.101` | 20 | UniFi 24p | `22` | not in rosequartz; Pi-hole (`modules/pihole`), not yet a LAN resolver |
 | pik8s2 | `10.0.69.102` | 20 | UniFi 24p | `20` | not in rosequartz; Pi-hole (`modules/pihole`), not yet a LAN resolver |
 | pik8s3 | `10.0.69.103` | 20 | UniFi 24p | Unverified | not in rosequartz; Gatus uptime checker (`modules/uptime`) on port 8080, shown on its display |
