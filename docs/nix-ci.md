@@ -152,6 +152,7 @@ Every template in `UnstoppableMango/nix` imports the module and ships a `ci.yml`
 A new repo starts from a template, or adds the input and module, adds `ci.yml` with its `ci-health` job, extends `renovate-config:nix-ci` (and `deploys` if its `main` deploys), adds its ruleset entry in scm or vcs, and sets `CACHIX_AUTH_TOKEN`.
 The checklist lives in the `UnstoppableMango/nix` README.
 Private repos, repos in other accounts and repos without a flake join hosted-only with `linux: true`.
+Hosted runners bill minutes on private repos, so a private repo's gate runs on `pull_request` only, skipping docs-only changes, and nothing hosted runs on pushes to `main` except its deploys.
 
 ## Renovate
 
