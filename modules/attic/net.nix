@@ -6,6 +6,7 @@
   host = "10.0.71.1";
   guest = "10.0.71.2";
   prefixLength = 30;
+  cid = 3;
   port = 8080;
   cache = "thecluster";
 }

@@ -47,6 +47,7 @@ in
 
     microvm = {
       hypervisor = "cloud-hypervisor";
+      vsock.cid = net.cid;
       vcpu = 32;
       mem = 64 * 1024;
       writableStoreOverlay = "/nix/.rw-store";
