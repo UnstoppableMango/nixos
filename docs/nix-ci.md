@@ -154,6 +154,7 @@ The checklist lives in the `UnstoppableMango/nix` README.
 Private repos, repos in other accounts and repos without a flake join hosted-only with `linux: true`.
 Hosted runners bill minutes on private repos, so a private repo's gate runs on `pull_request` only, skipping docs-only changes, and nothing hosted runs on pushes to `main` except its deploys.
 A private repo never pushes to Cachix: `unstoppablemango` is public, so it calls `nix-ci.yml` with `cachix-push: false` and gets no `CACHIX_AUTH_TOKEN`.
+It also sets `ci.hercules.enable = false`: Hercules builds any repo its GitHub App can see, and a flake without a `herculesCI` output still gets a default job, so the option keeps the output with an empty `onPush`.
 
 ## Renovate
 
