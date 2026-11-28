@@ -66,10 +66,17 @@ let
       # where `arcRunnerStore.enable` holds.
       nodeLabels = {
         "thecluster.lan/ci-runner" = "true";
-        # The GTX 1060. The `nvidia` containerd handler exists only here.
+        # The GTX 1060. The `nvidia` containerd handler exists only on GPU workers.
         "nvidia.com/gpu.present" = "true";
       };
       maxPods = 150;
+    };
+
+    vrk8s1 = {
+      role = "worker";
+      ip = "10.0.69.16";
+      # The RTX 2080 Ti, through modules/gpu-worker.
+      nodeLabels."nvidia.com/gpu.present" = "true";
     };
 
     zeus = {

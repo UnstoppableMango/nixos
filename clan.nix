@@ -20,6 +20,7 @@ let
     gaea = { };
     pollux = { };
     zeus = { };
+    vrk8s1 = { };
     pik8s1 = { };
     pik8s2 = { };
     pik8s3 = { };
