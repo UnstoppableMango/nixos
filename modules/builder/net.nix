@@ -6,4 +6,5 @@
   host = "10.0.71.5";
   guest = "10.0.71.6";
   prefixLength = 30;
+  cid = 4;
 }

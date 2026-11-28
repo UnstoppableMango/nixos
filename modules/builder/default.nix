@@ -61,6 +61,8 @@ in
     };
 
     systemd.services."microvm@builder".serviceConfig = {
+      # The VM reports ready once booted, which waits on `nix-store --verify --repair`.
+      TimeoutStartSec = 30 * 60;
       CPUWeight = 50;
       IOWeight = 50;
     };

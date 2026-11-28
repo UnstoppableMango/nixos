@@ -52,6 +52,7 @@ in
 
     microvm = {
       hypervisor = "cloud-hypervisor";
+      vsock.cid = net.cid;
       vcpu = 2;
       mem = 2048;
       registerClosure = false;
